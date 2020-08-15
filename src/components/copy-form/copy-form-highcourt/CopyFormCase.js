@@ -26,30 +26,23 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, Chip } from "react-native-paper";
+import { TextInput, Chip, FAB } from "react-native-paper";
 import {
   addForm,
   login,
   register,
-  checkSignedIn,
   logout,
 } from "../../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Header from "../child-components/header";
+import Header from "../../header/Header";
+import AsyncStorage from "@react-native-community/async-storage";
 import ModalPicker from "react-native-modal-picker";
 import { NavigationActions } from "react-navigation";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    { key: index++, section: true, label: "Districts" },
-    { key: index++, label: "Lahore" },
-    { key: index++, label: "Faisalabad" },
-    { key: index++, label: "Sheikhupura" },
-  ];
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [datePucca, setDatePucca] = useState(new Date());
@@ -58,17 +51,25 @@ export default function CopyFormCase(props) {
   const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [caseNo, setcaseNo] = useState("");
-  const [isModalVisible, setISModalVisible] = useState(false);
-  const [district, setDistrict] = useState(undefined);
+  const [judges, setJudges] = useState([{ key: 1, value: '' }]);
+  const [isVisibleFab, setIsVisibleFab] = useState(true);
   useEffect(() => {
     return () => {};
   }, []);
-  const onChangeDistrict = (value) => {
-    setDistrict(val);
+  const addJudge = () => {
+    if (judges.length < 2) {
+      // Deep Copy of documents
+      var tempJudges = Array.from(judges);
+      tempJudges.push({ key: judges.length + 1 });
+      setJudges(tempJudges);
+    } else {
+      var tempJudges = Array.from(judges);
+      tempJudges.push({ key: judges.length + 1 });
+      setJudges(tempJudges);
+      setIsVisibleFab(false);
+    }
   };
-  const toggleModal = () => setISModalVisible(!isModalVisible);
-  var kucchaDate = date.toDateString().toString();
-  var puccaDate = datePucca.toDateString().toString();
+  var decisionDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
@@ -86,10 +87,36 @@ export default function CopyFormCase(props) {
     { title: "Case", title2: "" },
     { title: "Docs", title2: "" },
   ];
+  const goNext = async () => {
+    const details = {
+      caseNo: caseNo,
+      decisionDate: decisionDate,
+      judges: []
+    }
+    judges.map(judge => details.judges.push(judge.value))
+    try {
+        const jsonValue = JSON.stringify(details);
+        await AsyncStorage.setItem("@caseDetails", jsonValue);
+      } catch (e) {
+        console.log(e);
+      }
+    props.navigation.navigate("CopyFormDocs");
+  };
+  const getUpdatedDictionaryOnchange = (key, value) => {
+    let tempDict = Array.from(judges);
+    const index = tempDict.findIndex(temp => temp.key == key)
+    console.log(index)
+    tempDict[index].value = value
+    return tempDict
+  }
+  // Function to open drawer
+  const openDrawerFn = () => {
+    props.navigation.toggleDrawer();
+  };
   return (
-    <SafeAreaView behaviour="padding" style={styles.container}>
-      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
-      <View style={styles.stepsContainer}>
+    <KeyboardAwareScrollView>
+      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
+      {/* <View style={styles.stepsContainer}>
         <Steps size="small" current={0} direction="horizontal">
           {applicationSteps.map((item, index) => (
             <Step
@@ -104,12 +131,13 @@ export default function CopyFormCase(props) {
             />
           ))}
         </Steps>
-      </View>
-      <ScrollView scrollEnabled={scroll} contentOffset={{x:0, y:40}}>
+      </View> */}
+      <ScrollView scrollEnabled={scroll}>
         <View
           style={{
             alignItems: "center",
             opacity: containerOpacity,
+            marginTop: 15,
           }}
         >
           <View style={styles.sectionContainer}>
@@ -117,6 +145,9 @@ export default function CopyFormCase(props) {
               <Text style={styles.sctionTitle}>Case Information</Text>
             </View>
             <View style={styles.infoContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>کیس نمبر</Text>
+              </View>
               <View style={styles.valueContainer}>
                 <TextInput
                   label="Case No"
@@ -124,7 +155,7 @@ export default function CopyFormCase(props) {
                   underlineColor={PrimaryText}
                   placeholder="XX-XXX-XX"
                   value={caseNo}
-                  onChange={(e) => setcaseNo(e.target.value)}
+                  onChange={(e) => setcaseNo(e.nativeEvent.text)}
                   keyboardType="numeric"
                 />
               </View>
@@ -132,6 +163,7 @@ export default function CopyFormCase(props) {
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>Date of decision</Text>
+                <Text style={styles.label}>تاریخ فیصلہ</Text>
               </View>
               <View style={styles.valueContainer}>
                 <Chip
@@ -145,7 +177,7 @@ export default function CopyFormCase(props) {
                     fontSize: 16,
                   }}
                 >
-                  {kucchaDate}
+                  {decisionDate}
                 </Chip>
                 {show && (
                   <DateTimePicker
@@ -153,6 +185,7 @@ export default function CopyFormCase(props) {
                     mode="date"
                     display="default"
                     onChange={onChange}
+                    
                   />
                 )}
               </View>
@@ -160,36 +193,41 @@ export default function CopyFormCase(props) {
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>Judges</Text>
+                <Text style={styles.label}>ججز</Text>
               </View>
-              <View style={styles.valueContainer}>
-                <TextInput
-                  label="Mr. Justice"
-                  selectionColor={Primary}
-                  underlineColor={PrimaryText}
-                />
-              </View>
+              {judges.map((judge) => {
+                return (
+                  <View key={judge.key} style={styles.valueContainer}>
+                    <TextInput
+                      label="Mr. Justice"
+                      selectionColor={Primary}
+                      underlineColor={PrimaryText}
+                      onChange={(e) =>
+                        setJudges(
+                          getUpdatedDictionaryOnchange(
+                            judge.key,
+                            e.nativeEvent.text
+                          )
+                        )
+                      }
+                    />
+                  </View>
+                );
+              })}
             </View>
-            <View style={styles.infoContainer}>
-              <View style={styles.valueContainer}>
-                <TextInput
-                  label="Mr. Justice"
-                  selectionColor={Primary}
-                  underlineColor={PrimaryText}
-                />
-              </View>
-            </View>
-            <View style={styles.infoContainer}>
-              <View style={styles.valueContainer}>
-                <TextInput
-                  label="Mr. Justice"
-                  selectionColor={Primary}
-                  underlineColor={PrimaryText}
-                />
-              </View>
-            </View>
-            <View style={styles.infoContainer}>
-              <View style={styles.valueContainer}></View>
-            </View>
+
+            <View style={{ width: "100%", height: 55 }} />
+            {isVisibleFab ? (
+              <FAB
+                style={styles.fab}
+                small
+                icon="plus"
+                onPress={addJudge}
+                color={"white"}
+              />
+            ) : (
+              <View />
+            )}
             {/* <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>District</Text>
@@ -234,18 +272,11 @@ export default function CopyFormCase(props) {
               width: "90%",
             }}
           >
-            <Button
-              style={styles.next}
-              type="primary"
-              onPress={() => {
-                props.navigation.navigate("CopyFormDocs");
-              }}
-            >
+            <Button style={styles.next} type="primary" onPress={goNext}>
               Next
             </Button>
           </View>
         </View>
-        <View style={{ width: "100%", height: 200 }} />
       </ScrollView>
       <ActivityIndicator
         animating={showLoading}
@@ -253,7 +284,7 @@ export default function CopyFormCase(props) {
         size="large"
         text="Submitting..."
       />
-    </SafeAreaView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -292,26 +323,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 2,
   },
-  inputLabel: {
-    width: 100,
-  },
-  vs: {
-    textAlign: "center",
-    marginTop: 25,
-  },
-  inputContainer: {
-    marginTop: 20,
-  },
-  listItem: {
-    height: 80,
-  },
-  itemContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  labelText: {
-    fontSize: 18,
-  },
   next: {
     width: "40%",
     height: 50,
@@ -322,5 +333,13 @@ const styles = StyleSheet.create({
     width: "120%",
     alignItems: "center",
     marginTop: 20,
+  },
+  fab: {
+    position: "absolute",
+    backgroundColor: Secondary,
+    marginRight: 16,
+    marginTop: 30,
+    right: 0,
+    bottom: 0,
   },
 });

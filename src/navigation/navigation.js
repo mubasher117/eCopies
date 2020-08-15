@@ -1,15 +1,17 @@
 import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
-import  Drawer  from "./drawer";
-const Stack = createStackNavigator(
+import { createSwitchNavigator } from "react-navigation";
+import Drawer from "./drawer";
+import Auth from "./auth";
+
+const Switch = createSwitchNavigator(
   {
-    main: { screen: Drawer },
+    auth: Auth,
+    main: Drawer,
   },
   {
-    initialRouteName: "main",
+    initialRouteName: 'auth',
     header: null,
     headerMode: "none",
   }
 );
-const MyComponent = createAppContainer(Stack);
-export default MyComponent;
+export default createAppContainer(Switch);

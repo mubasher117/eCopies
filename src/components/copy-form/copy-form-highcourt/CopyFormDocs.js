@@ -11,6 +11,7 @@ import {
   Keyboard,
   Picker,
   List,
+  Modal,
 } from "react-native";
 import {
   InputItem,
@@ -19,6 +20,7 @@ import {
   ActivityIndicator,
   Steps,
 } from "@ant-design/react-native";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Primary,
   Secondary,
@@ -27,7 +29,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, FAB } from "react-native-paper";
+import { TextInput, FAB, Switch, Checkbox } from "react-native-paper";
 import {
   addForm,
   login,
@@ -35,15 +37,15 @@ import {
   checkSignedIn,
   logout,
 } from "../../../api/firebase/authenication";
+import AsyncStorage from "@react-native-community/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
-import ModalPicker from "react-native-modal-picker";
-import { NavigationActions } from "react-navigation";
-import { ImagePropTypes } from "react-native";
-import Modal, { ModalContent } from "react-native-modals";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { database } from "../../../api/firebase/authenication";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 
+import store from "../../../redux/store";
 const DocumentDetails = (props) => {
   return (
     <View style={styles.infoContainer}>
@@ -52,6 +54,7 @@ const DocumentDetails = (props) => {
           label={"Document " + props.labelValue.toString()}
           selectionColor={Primary}
           underlineColor={PrimaryText}
+          onChange={props.onChange}
         />
       </View>
     </View>
@@ -71,65 +74,209 @@ export default function CopyFormDocs(props) {
   const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [documemnts, setdocumemnts] = useState([
-    { key: 1 },
-    { key: 2 },
-    { key: 3 },
-  ]);
-
+  const [isVisibleFab, setIsVisibleFab] = useState(true);
+  const [switchMode, setSwitchMode] = useState(false);
+  const [documemnts, setdocumemnts] = useState([{ key: 1, value: "" }]);
+  const [isDocumemnt, setDocumemnt] = useState(false);
+  const [isPetition, setPetition] = useState(false);
+  const [isOrderDated, setOrderDated] = useState(false);
+  const [isSOW, setSOW] = useState(false);
+  const [paymentObject, setpaymentObject] = useState()
   useEffect(() => {
-    //console.log("re-render");
-  }, []);
-  const addFormCallBack = (error) => {
+    database.ref("prices/copyForm").once("value", (snapshot) => {
+      setpaymentObject(snapshot.val())
+    });
+  }, [paymentObject]);
+  // Callback function after adding order
+  const addFormCallBack = async (error) => {
     if (error) {
       setshowLoading(false);
       setScroll(true);
-      setcontainerOpacity(1);
       alert("adding failed");
+      showModal();
     } else {
       setshowLoading(false);
       setScroll(true);
-      setcontainerOpacity(1);
-      setIsModalVisible(true)
-      props.navigation.navigate("Payments");
+      showModal();
+      await AsyncStorage.removeItem("@caseDetails");
     }
   };
+  // Returns random number between 70000000 and 99999999
+  function getRandomArbitrary(min, max) {
+    return parseInt(Math.random() * (max - min) + min);
+  }
 
-  const onSubmit = () => {
+
+  // Verify unique order number
+  const getUniqueOrderNumber = async () => {
+    var num = getRandomArbitrary();
+    var isSame;
+    database
+      .ref("/testForm")
+      .orderByChild("orderNo")
+      .equalTo("60167234")
+      .once("value", (snapshot) => {
+        console.log("Snapshot", snapshot.val());
+        if (snapshot.val()) {
+          const userData = snapshot.val();
+          console.log("exists!", userData);
+          isSame = true;
+        } else {
+          isSame = false;
+        }
+      });
+    if (!isSame) {
+      console.log("ORDER NUMBER:   ", num);
+      return num.toString();
+    } else {
+      console.log("GOT SAME:    ", num);
+      //getUniqueOrderNumber()
+      return "47444";
+    }
+  };
+  // Submits details to firebase
+  const onSubmit = async () => {
     setshowLoading(true);
     setScroll(false);
     setcontainerOpacity(0.3);
-    addForm({ name: "Mubasher", "document number": "12565" }, addFormCallBack);
+    //Geerates an order no ranging between the parameters
+    var orderNo = getRandomArbitrary(1000000, 9999999);
+    let caseDetails;
+    try {
+      // Retrieving case and personal details from storage
+      const caseDetailsJson = await AsyncStorage.getItem("@caseDetails");
+      caseDetailsJson != null
+        ? (caseDetails = JSON.parse(caseDetailsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
+    // Array to store order details to be saved in db
+    var documentDetails = [];
+    // Adding checked documents in array
+    if (isDocumemnt) {
+      documentDetails.push("Document");
+    }
+    if (isPetition) {
+      documentDetails.push("Petition");
+    }
+    if (isSOW) {
+      documentDetails.push("Statement of witness");
+    }
+    if (isOrderDated) {
+      documentDetails.push("Order Dated");
+    }
+    var totalPayment = 0;
+    if (switchMode){
+      totalPayment = paymentObject.urgentFee;
+    }
+    else{
+      totalPayment = paymentObject.normalFee;
+    }
+    // Adding document details in array
+    // documemnts.map((doc) => documentDetails.push(doc.value));
+
+
+    // retrieving user data
+    let state = store.getState();
+    let user = state.userReducer.user;
+    let storedUser = await AsyncStorage.getItem("@loggedUser");
+    try {
+      storedUser = JSON.parse(storedUser);
+    } catch (error) {
+      console.log("Error in parsing userId ");
+    }
+    let storedUserId = storedUser.user.uid;
+    // Final details ready to be posted
+    let orderDetails = {
+      name: user.name,
+      cellNo: user.cellNo,
+      address: user.address,
+      ...caseDetails,
+      documentDetails,
+      isUrgent: switchMode,
+      status: "Pending",
+      progress: {
+        pending: new Date().toDateString(),
+      },
+      customerId: storedUserId,
+      createdOn: new Date().toDateString(),
+      orderNo: orderNo,
+      totalAmount: totalPayment,
+    };
+    addForm(orderDetails, addFormCallBack);
   };
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase");
   };
   const addDoc = () => {
-    // Deep Copy of documents
-    var tempDocs = Array.from(documemnts);
-    tempDocs.push({ key: documemnts.length + 1 });
-    setdocumemnts(tempDocs);
+    if (documemnts.length < 3) {
+      // Deep Copy of documents
+      var tempDocs = Array.from(documemnts);
+      tempDocs.push({ key: documemnts.length + 1 });
+      setdocumemnts(tempDocs);
+    } else {
+      setIsVisibleFab(false);
+      var tempDocs = Array.from(documemnts);
+      tempDocs.push({ key: documemnts.length + 1 });
+      setdocumemnts(tempDocs);
+    }
+  };
+  const showModal = () => {
+    setIsModalVisible(true);
+    setcontainerOpacity(0.05);
+    console.log(isModalVisible);
+  };
+  const hideModal = () => {
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
+    props.navigation.navigate("Payments", { isUrgent: switchMode });
   };
   const applicationSteps = [
     { title: "Personal", title2: "" },
     { title: "Case", title2: "" },
     { title: "Docs", title2: "" },
   ];
+
+  const getUpdatedDictionaryOnchange = (key, value) => {
+    console.log("IN UPDATE");
+    let tempDict = Array.from(documemnts);
+    const index = tempDict.findIndex((temp) => temp.key == key);
+    console.log(index);
+    tempDict[index].value = value;
+    console.log(tempDict);
+    return tempDict;
+  };
+  const toggleSwitch = () => {
+    setSwitchMode(!switchMode);
+  };
   return (
-    <SafeAreaView behaviour="padding" style={styles.container}>
+    <KeyboardAwareScrollView>
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
       <Modal
+        animationType="slide"
+        transparent={true}
         visible={isModalVisible}
-        onTouchOutside={() => {
-          setIsModalVisible(false);
+        onRequestClose={() => {
+          alert("Modal has been closed.");
         }}
-        useNativeDriver={true}
       >
-        <ModalContent>
-          <Text>Your details has been submitted.</Text>
-        </ModalContent>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              Your details have been submitted.
+            </Text>
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
+          </View>
+        </View>
       </Modal>
-      <View style={styles.stepsContainer}>
+      {/* <View style={styles.stepsContainer}>
         <Steps size="small" current={1} direction="horizontal">
           {applicationSteps.map((item, index) => (
             <Step
@@ -144,7 +291,7 @@ export default function CopyFormDocs(props) {
             />
           ))}
         </Steps>
-      </View>
+      </View> */}
       {/* <Button
         onPress={() => {
           login();
@@ -179,6 +326,7 @@ export default function CopyFormDocs(props) {
           style={{
             alignItems: "center",
             opacity: containerOpacity,
+            marginTop: 15,
           }}
         >
           <View style={styles.sectionContainer}>
@@ -186,18 +334,119 @@ export default function CopyFormDocs(props) {
               <Text style={styles.sctionTitle}>Document Details</Text>
             </View>
 
-            {documemnts.map((doc) => {
-              return <DocumentDetails key={doc.key} labelValue={doc.key} />;
-            })}
-            <View style={{ width: "100%", height: 55 }} />
+            <View style={styles.infoContainer}>
+              <View
+                style={[
+                  styles.labelContainer,
+                  { flexDirection: "row", justifyContent: "space-between" },
+                ]}
+              >
+                <Text style={styles.label}>Documents</Text>
+                <Text style={styles.label}>کاغزات</Text>
+              </View>
+            </View>
+            {/* {documemnts.map((doc) => {
+              return (
+                <DocumentDetails
+                  key={doc.key}
+                  labelValue={doc.key}
+                  onChange={(e) =>
+                    setdocumemnts(
+                      getUpdatedDictionaryOnchange(doc.key, e.nativeEvent.text)
+                    )
+                  }
+                />
+              );
+            })} */}
 
-            <FAB
-              style={styles.fab}
-              small
-              icon="plus"
-              onPress={addDoc}
-              color={"white"}
-            />
+            <View style={styles.checkboxContainer}>
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isDocumemnt ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setDocumemnt(!isDocumemnt);
+                  }}
+                  color={Secondary}
+                />
+                <Text>Document</Text>
+              </View>
+
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isPetition ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setPetition(!isPetition);
+                  }}
+                  color={Secondary}
+                />
+                <Text>Petition</Text>
+              </View>
+
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isSOW ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setSOW(!isSOW);
+                  }}
+                  color={Secondary}
+                />
+                <Text>Statement of Witness</Text>
+              </View>
+
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isOrderDated ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setOrderDated(!isOrderDated);
+                  }}
+                  color={Secondary}
+                />
+                <Text>Order Dated</Text>
+              </View>
+            </View>
+
+            {/* {isVisibleFab ? (
+              <FAB
+                style={styles.fab}
+                small
+                icon="plus"
+                onPress={addDoc}
+                color={"white"}
+              />
+            ) : (
+              <View />
+            )} */}
+
+            <View style={styles.infoContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>فوری طور پر درکار</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.label}>Urgently Required</Text>
+                  <Switch
+                    value={switchMode}
+                    onChange={toggleSwitch}
+                    color={Secondary}
+                    style={{ marginTop: 0 }}
+                  />
+                </View>
+                {switchMode ? (
+                  <View style={styles.urgentMessageContainer}>
+                    <Text style={styles.urgentMessage}>
+                      * Your document will be delivered within 24 hours with
+                      additional charges.
+                    </Text>
+                  </View>
+                ) : (
+                  <View />
+                )}
+              </View>
+            </View>
           </View>
 
           <View style={styles.submitContainer}>
@@ -206,7 +455,6 @@ export default function CopyFormDocs(props) {
             </Button>
           </View>
         </View>
-        <View style={{ width: "100%", height: 200 }} />
       </ScrollView>
       <ActivityIndicator
         animating={showLoading}
@@ -214,7 +462,7 @@ export default function CopyFormDocs(props) {
         size="large"
         text="Submitting..."
       />
-    </SafeAreaView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -299,5 +547,59 @@ const styles = StyleSheet.create({
     width: "120%",
     alignItems: "center",
     marginTop: 20,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    width: "90%",
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 35,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 15,
+  },
+  modalTextBold: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  modalAccNo: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  buttonModalClose: {
+    width: "30%",
+    height: 45,
+    backgroundColor: Secondary,
+    borderWidth: 0,
+    alignSelf: "flex-end",
+  },
+  urgentMessage: {
+    color: "red",
+    fontSize: 11,
+  },
+  documemntsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxContainer: {
+    marginTop: 10,
   },
 });

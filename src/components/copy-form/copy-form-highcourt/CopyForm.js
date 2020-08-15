@@ -1,15 +1,15 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
   Platform,
   Dimensions,
-  ScrollView,
-  SafeAreaView,
   Keyboard,
   Picker,
+  ScrollView,
+  KeyboardAvoidingView,
 } from "react-native";
 import {
   InputItem,
@@ -27,14 +27,16 @@ import {
   PrimaryText,
 } from "../../../constants/colors";
 import { TextInput, Chip } from "react-native-paper";
-import Header from "../child-components/header";
+import AsyncStorage from "@react-native-community/async-storage";
+import Header from "../../header/Header";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 export default function CopyForm(props) {
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [cellNo, setCellNo] = useState("");
   let index = 0;
-  useEffect(() => {
-    return () => {};
-  }, []);
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
@@ -44,8 +46,25 @@ export default function CopyForm(props) {
     { title: "Case", title2: "" },
     { title: "Docs", title2: "" },
   ];
+  const goNext = async () => {
+    const details = {
+      name: name,
+      address: address,
+      cellNo: cellNo,
+    };
+    const jsonValue = JSON.stringify(details);
+    try {
+      await AsyncStorage.setItem("@personalDetails", jsonValue);
+    } catch (e) {
+      console.log(e);
+    }
+    props.navigation.navigate("CopyFormCase");
+  };
+  let myScroller = useRef();
+
   return (
-    <SafeAreaView behaviour="padding" style={styles.container}>
+    <KeyboardAwareScrollView>
+      <View style={styles.container}>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       {/* Application Steps */}
       <View style={styles.stepsContainer}>
@@ -64,7 +83,6 @@ export default function CopyForm(props) {
           ))}
         </Steps>
       </View>
-      <ScrollView>
         <View
           style={{
             alignItems: "center",
@@ -75,30 +93,35 @@ export default function CopyForm(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Personal Information</Text>
             </View>
-            <View style={styles.infoContainer}>
-              <View style={styles.valueContainer}>
-                <TextInput
-                  label="Applicant's Name"
-                  selectionColor={Primary}
-                  underlineColor={PrimaryText}
-                />
+            <KeyboardAwareScrollView>
+              <View style={styles.infoContainer}>
+                <View style={styles.valueContainer}>
+                  <TextInput
+                    label="Applicant's Name"
+                    selectionColor={Primary}
+                    underlineColor={PrimaryText}
+                    onChange={(e) => setName(e.nativeEvent.text)}
+                  />
+                </View>
               </View>
-            </View>
+            </KeyboardAwareScrollView>
             <View style={styles.infoContainer}>
               <View style={styles.valueContainer}>
                 <TextInput
                   label="Address"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
+                  onChange={(e) => setAddress(e.nativeEvent.text)}
                 />
               </View>
             </View>
             <View style={styles.infoContainer}>
-              <View style={styles.valueContainer}>
+              <View style={[styles.valueContainer]}>
                 <TextInput
                   label="Cell No"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
+                  onChange={(e) => setCellNo(e.nativeEvent.text)}
                 />
               </View>
             </View>
@@ -113,20 +136,13 @@ export default function CopyForm(props) {
               width: "90%",
             }}
           >
-            <Button
-              style={styles.next}
-              type="primary"
-              onPress={() => {
-                props.navigation.navigate("CopyFormCase");
-              }}
-            >
+            <Button style={styles.next} type="primary" onPress={goNext}>
               Next
             </Button>
           </View>
         </View>
-        <View style={{ width: "100%", height: 200 }} />
-      </ScrollView>
-    </SafeAreaView>
+        </View>
+    </KeyboardAwareScrollView>
   );
 }
 

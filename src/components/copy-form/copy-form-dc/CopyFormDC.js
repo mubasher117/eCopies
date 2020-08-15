@@ -28,7 +28,7 @@ import {
 import { TextInput, Chip, Modal, Portal, Provider } from "react-native-paper";
 import { addForm } from "../../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Header from "../child-components/header";
+import Header from "../../header/Header";
 const { height, width } = Dimensions.get("window");
 import ModalPicker from "react-native-modal-picker";
 export default function CopyFormDC(props) {

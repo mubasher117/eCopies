@@ -11,8 +11,8 @@ import {
   Keyboard,
   Picker,
   Image,
-  TouchableHighlight,
-  Modal
+  TouchableOpacity,
+  Modal,
 } from "react-native";
 import {
   InputItem,
@@ -59,7 +59,7 @@ export default function PaymentMethod(props) {
     props.onPressMethod();
   };
   return (
-    <TouchableHighlight
+    <TouchableOpacity
       elevation={10}
       style={[
         Platform.OS == "ios" ? styles.containerIOS : styles.container,
@@ -67,7 +67,7 @@ export default function PaymentMethod(props) {
       ]}
       onPress={containerPress}
     >
-      <View style={{ width: "100%" , flexDirection:'row'}}>
+      <View style={{ width: "100%", flexDirection: "row" }}>
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={props.source} />
         </View>
@@ -83,7 +83,7 @@ export default function PaymentMethod(props) {
           <Icon name={"arrow-right"} />
         </View>
       </View>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 }
 
@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     height: 70,
     justifyContent: "center",
+    flex:1,
   },
   image: {
     width: 50,
@@ -132,12 +133,17 @@ const styles = StyleSheet.create({
   descriptionContainer: {
     marginLeft: 10,
     flexWrap: "wrap",
+    flex:3,
+    justifyContent:'center'
   },
+  methodNameContainer:{width: '100%'},
   methodName: {
     fontWeight: "bold",
     fontSize: 16,
+    width:'100%'
   },
   buttonContainer: {
+    flex:0.5,
     margin: 15,
   },
   accountNoContainer: {

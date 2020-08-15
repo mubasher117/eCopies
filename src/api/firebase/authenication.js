@@ -50,7 +50,7 @@ export const getNotifications = async () => {
         for (var key of keys) {
           objArray.push({ ...data[key] });
         }
-        store.dispatch({ type: "setNotifications", payload: objArray });
+        store.dispatch({ type: "setNotifications", payload: objArray.reverse() });
       }
     });
   })

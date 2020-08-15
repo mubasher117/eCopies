@@ -31,6 +31,7 @@ import Header from "../../header/Header";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 
+// Displays the balance of the user
 export default function TotalCard(props) {
   let index = 0;
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function TotalCard(props) {
       ]}
     >
       <View style={styles.totalLabelContainer}>
-        <Text style={styles.totalLabel}>Total Payment</Text>
+        <Text style={styles.totalLabel}>Pending Payment</Text>
       </View>
       <View style={styles.totalAmountContainer}>
         <Text style={styles.totalAmount}>Rs. {props.total}</Text>

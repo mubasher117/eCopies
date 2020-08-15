@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
-import { Primary, Secondary, PrimaryText } from "../constants/colors";
+import {
+  Primary,
+  Secondary,
+  PrimaryText,
+  SecondaryLight,
+} from "../constants/colors";
 import { createAppContainer } from "react-navigation";
 import CopyForm from "../components/copy-form/copy-form-highcourt/CopyForm";
 import CopyFormDC from "../components/copy-form/copy-form-dc/CopyFormDC";
@@ -39,10 +44,12 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
+            <View style={styles.pageLogoContainer}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/user.png")}
             />
+            </View>
             <Text
               style={
                 isActive === "profile" ? styles.activeLabel : styles.pageLabel
@@ -65,10 +72,12 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
+            <View style={styles.pageLogoContainer}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/home-icon.png")}
             />
+            </View>
             <Text
               style={
                 isActive === "home" ? styles.activeLabel : styles.pageLabel
@@ -93,10 +102,12 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
+            <View style={styles.pageLogoContainer}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/form-icon.png")}
             />
+            </View>
             <Text
               style={
                 isActive === "orders" ? styles.activeLabel : styles.pageLabel
@@ -146,10 +157,12 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
+            <View style={styles.pageLogoContainer}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/payment-icon.png")}
             />
+            </View>
             <Text
               style={
                 isActive === "payments" ? styles.activeLabel : styles.pageLabel
@@ -174,10 +187,12 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
+            <View style={styles.pageLogoContainer}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/notification-icon.png")}
             />
+            </View>
             <Text
               style={
                 isActive === "notifications"
@@ -334,12 +349,20 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginTop: 20,
   },
+  pageLogoContainer: {
+    backgroundColor: SecondaryLight,
+    borderRadius: 50,
+    height: 33,
+    width: 33,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   pageLogo: {
     height: 30,
     width: 30,
   },
   pageLabel: {
-    fontSize: 16,
+    fontSize: 14,
     marginLeft: "10%",
     fontWeight: "bold",
   },
@@ -379,7 +402,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   pageLowerLabel: {
-    fontSize: 16,
+    fontSize: 14,
     marginLeft: "5%",
     fontWeight: "bold",
   },
@@ -387,16 +410,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingLeft: 0,
-    marginTop:10,
-    marginBottom:-10,
+    marginTop: 10,
+    marginBottom: -10,
     paddingTop: 10,
-    paddingBottom:10,
+    paddingBottom: 10,
     backgroundColor: "#EEEEEE",
   },
   pageLowerActiveLabel: {
     fontSize: 16,
     marginLeft: "5%",
     fontWeight: "bold",
-    color:Secondary
+    color: Secondary,
   },
 });

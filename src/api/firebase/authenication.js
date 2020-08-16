@@ -2,7 +2,8 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 import "firebase/database";
-import { Notifications } from "expo";
+import { Notifications} from "expo";
+import * as Permissions from "expo-permissions";
 import store from "../../redux/store";
 import AsyncStorage from "@react-native-community/async-storage";
 const firebaseConfig = {
@@ -86,6 +87,7 @@ export const login = async (email, password, isDirect, callBackFn) => {
       //   console.log("logged in after registration");
       //   callBackFn("success", user.user.uid);
       // }
+      registerForPushNotificationsAsync(user.user.uid);
       callBackFn("success", user.user.uid);
     })
     .catch(function (error) {
@@ -205,19 +207,50 @@ const registerUserInDb = async (userDetails, callBackFn) => {
     }
   );
 };
-const registerPushNotifications = async (user) => {
-  console.log(user.user.uid);
-  let token = await Notifications.getExpoPushTokenAsync();
-  console.log(token);
-  var updates = {};
-  updates["/ExpoToken"] = token;
-  database
-    .ref("userData/")
-    .child(user.user.uid)
-    .update(updates, (data) => {
-      console.log(data);
-    });
-};
+
+
+    const registerForPushNotificationsAsync = async (userID) => {
+        const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        let finalStatus = existingStatus;
+
+        // only ask if permissions have not already been determined, because
+        // iOS won't necessarily prompt the user a second time.
+        if (existingStatus !== 'granted') {
+            // Android remote notification permissions are granted during the app
+            // install, so this will only ask on iOS
+            const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+            finalStatus = status;
+        }
+
+        // Stop here if the user did not grant permissions
+        if (finalStatus !== 'granted') {
+            return;
+        }
+        console.log('Permission ', finalStatus)
+
+        // Get the token that uniquely identifies this device
+        let token = await Notifications.getExpoPushTokenAsync();
+
+        // POST the token to our backend so we can use it to send pushes from there
+        var updates = {}
+        updates['/expoToken'] = token
+        await firebase.database().ref('/userData/' + userID).update(updates)
+        //call the push notification 
+    }
+
+// const registerPushNotifications = async (user) => {
+//   console.log(user.user.uid);
+//   let token = await Notifications.getExpoPushTokenAsync();
+//   console.log(token);
+//   var updates = {};
+//   updates["/ExpoToken"] = token;
+//   database
+//     .ref("userData/")
+//     .child(user.user.uid)
+//     .update(updates, (data) => {
+//       console.log(data);
+//     });
+// };
 // Generates universally unique id
 function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {

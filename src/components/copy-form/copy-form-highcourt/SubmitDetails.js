@@ -46,22 +46,8 @@ const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 
 import store from "../../../redux/store";
-const DocumentDetails = (props) => {
-  return (
-    <View style={styles.infoContainer}>
-      <View style={styles.valueContainer}>
-        <TextInput
-          label={"Document " + props.labelValue.toString()}
-          selectionColor={Primary}
-          underlineColor={PrimaryText}
-          onChange={props.onChange}
-        />
-      </View>
-    </View>
-  );
-};
 
-export default function CopyFormDocs(props) {
+export default function SubmitDetails(props) {
   var val = "";
   let index = 0;
   const districts = [
@@ -99,6 +85,8 @@ export default function CopyFormDocs(props) {
       setScroll(true);
       showModal();
       await AsyncStorage.removeItem("@caseDetails");
+      await AsyncStorage.removeItem("@caseDetails2");
+      await AsyncStorage.removeItem("@forms");
     }
   };
   // Returns random number between 70000000 and 99999999
@@ -133,10 +121,23 @@ export default function CopyFormDocs(props) {
       return "47444";
     }
   };
-
-  const saveDetails = async() => {
-    setIsModalVisible(false);
-    setcontainerOpacity(1);
+  // Submits details to firebase
+  const onSubmit = async () => {
+    setshowLoading(true);
+    setScroll(false);
+    setcontainerOpacity(0.3);
+    //Geerates an order no ranging between the parameters
+    var orderNo = getRandomArbitrary(1000000, 9999999);
+    // Retrieving forms from storage
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
     // Array to store order details to be saved in db
     var documentDetails = [];
     // Adding checked documents in array
@@ -152,57 +153,49 @@ export default function CopyFormDocs(props) {
     if (isOrderDated) {
       documentDetails.push("Order Dated");
     }
-    let caseDetails;
-    try {
-      // Retrieving case details from storage
-      const caseDetailsJson = await AsyncStorage.getItem("@caseDetails");
-      caseDetailsJson != null
-        ? (caseDetails = JSON.parse(caseDetailsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
+    var totalPayment = 0;
+    if (switchMode) {
+      totalPayment = paymentObject.urgentFee * forms.length;
+    } else {
+      totalPayment = paymentObject.normalFee * forms.lenght;
     }
-    // Retrieving case details 2
-    let caseDetails2;
+    // Adding document details in array
+    // documemnts.map((doc) => documentDetails.push(doc.value));
+
+    // retrieving user data
+    let state = store.getState();
+    let user = state.userReducer.user;
+    let storedUser = await AsyncStorage.getItem("@loggedUser");
     try {
-      // Retrieving case and personal details from storage
-      const caseDetails2Json = await AsyncStorage.getItem("@caseDetails2");
-      caseDetails2Json != null
-        ? (caseDetails2 = JSON.parse(caseDetails2Json))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
+      storedUser = JSON.parse(storedUser);
+    } catch (error) {
+      console.log("Error in parsing userId ");
     }
-    let copyFormDetails = {
-      ...caseDetails,
-      ...caseDetails2,
-      documentDetails,
+    let storedUserId = storedUser.user.uid;
+    // Final details ready to be posted
+    let orderDetails = {
+      applicantName: user.name,
+      cellNo: user.cellNo,
+      address: user.address,
+      forms: forms,
+      isUrgent: switchMode,
+      status: "Pending",
+      progress: {
+        pending: new Date().toString(),
+      },
+      customerId: storedUserId,
+      createdOn: new Date().toString(),
+      orderNo: orderNo,
+      totalAmount: totalPayment,
+      orderType: {
+          name: 'copyForm',
+          court: 'highCourt',
+      },
     };
-    console.log("form : ", copyFormDetails);
-    let forms;
-    try {
-      // Retrieving case and personal details from storage
-      const formsJson = await AsyncStorage.getItem("@forms");
-      if (formsJson){
-        forms = JSON.parse(formsJson);
-        forms.push(copyFormDetails)
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
-      }else{
-        forms = [copyFormDetails]
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
-      }
-    } catch (e) {
-      // error reading value
-    }  
-  }
-  const onNext = async () => {
-    saveDetails();
-    props.navigation.navigate("SubmitDetails");
+    addForm(orderDetails, addFormCallBack);
   };
   const goBackFn = () => {
-    props.navigation.navigate("CopyFormCase2");
+    props.navigation.navigate("CopyFormDocs");
   };
   const addDoc = () => {
     if (documemnts.length < 3) {
@@ -222,9 +215,10 @@ export default function CopyFormDocs(props) {
     setcontainerOpacity(0.05);
     console.log(isModalVisible);
   };
-  const submitAnotherForm = () => {
-    saveDetails();
-    props.navigation.navigate("CopyFormCase");
+  const hideModal = () => {
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
+    props.navigation.navigate("Payments", { isUrgent: switchMode });
   };
   const applicationSteps = [
     { title: "Personal", title2: "" },
@@ -258,77 +252,19 @@ export default function CopyFormDocs(props) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Do you want to submit another copy form?
+              Your details have been submitted.
             </Text>
-            <Text style={styles.modalSubtext}>
-              If you want copy of another case, press Yes
-            </Text>
-            <View style={styles.modalButtonsContainer}>
-              <Button
-                style={styles.buttonModalNo}
-                type="primary"
-                onPress={onNext}
-              >
-                <Text style={{color:'black'}}>
-                No
-                </Text>
-              </Button>
-              <Button
-                style={styles.buttonModalYes}
-                type="primary"
-                onPress={submitAnotherForm}
-              >
-                Yes
-              </Button>
-            </View>
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
           </View>
         </View>
       </Modal>
-      {/* <View style={styles.stepsContainer}>
-        <Steps size="small" current={1} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View> */}
-      {/* <Button
-        onPress={() => {
-          login();
-        }}
-      >
-        Login
-      </Button>
-      <Button
-        onPress={() => {
-          register();
-        }}
-      >
-        Register
-      </Button>
-      <Button
-        onPress={() => {
-          checkSignedIn();
-        }}
-      >
-        Check
-      </Button>
-      <Button
-        onPress={() => {
-          logout();
-        }}
-      >
-        Log Out
-      </Button>
-       */}
+      
       <ScrollView scrollEnabled={scroll}>
         <View
           style={{
@@ -339,100 +275,46 @@ export default function CopyFormDocs(props) {
         >
           <View style={styles.sectionContainer}>
             <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sctionTitle}>Document Details</Text>
+              <Text style={styles.sctionTitle}>Submit Details</Text>
             </View>
 
+
+            
             <View style={styles.infoContainer}>
-              <View
-                style={[
-                  styles.labelContainer,
-                  { flexDirection: "row", justifyContent: "space-between" },
-                ]}
-              >
-                <Text style={styles.label}>Documents</Text>
-                <Text style={styles.label}>کاغزات</Text>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>فوری طور پر درکار</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.label}>Urgently Required</Text>
+                  <Switch
+                    value={switchMode}
+                    onChange={toggleSwitch}
+                    color={Secondary}
+                    style={{ marginTop: 0 }}
+                  />
+                </View>
+                {switchMode ? (
+                  <View style={styles.urgentMessageContainer}>
+                    <Text style={styles.urgentMessage}>
+                      * Your document will be delivered within 24 hours with
+                      additional charges.
+                    </Text>
+                  </View>
+                ) : (
+                  <View />
+                )}
               </View>
             </View>
-            {/* {documemnts.map((doc) => {
-              return (
-                <DocumentDetails
-                  key={doc.key}
-                  labelValue={doc.key}
-                  onChange={(e) =>
-                    setdocumemnts(
-                      getUpdatedDictionaryOnchange(doc.key, e.nativeEvent.text)
-                    )
-                  }
-                />
-              );
-            })} */}
-
-            <View style={styles.checkboxContainer}>
-              <View style={styles.documemntsContainer}>
-                <Checkbox
-                  status={isDocumemnt ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setDocumemnt(!isDocumemnt);
-                  }}
-                  color={Secondary}
-                />
-                <Text>Document</Text>
-              </View>
-
-              <View style={styles.documemntsContainer}>
-                <Checkbox
-                  status={isPetition ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setPetition(!isPetition);
-                  }}
-                  color={Secondary}
-                />
-                <Text>Petition</Text>
-              </View>
-
-              <View style={styles.documemntsContainer}>
-                <Checkbox
-                  status={isSOW ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setSOW(!isSOW);
-                  }}
-                  color={Secondary}
-                />
-                <Text>Statement of Witness</Text>
-              </View>
-
-              <View style={styles.documemntsContainer}>
-                <Checkbox
-                  status={isOrderDated ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setOrderDated(!isOrderDated);
-                  }}
-                  color={Secondary}
-                />
-                <Text>Order Dated</Text>
-              </View>
-            </View>
-
-            {/* {isVisibleFab ? (
-              <FAB
-                style={styles.fab}
-                small
-                icon="plus"
-                onPress={addDoc}
-                color={"white"}
-              />
-            ) : (
-              <View />
-            )} */}
           </View>
 
-          <View style={styles.nextContainer}>
-            <Button
-              style={styles.next}
-              type="primary"
-              onPress={showModal}
-            >
-              <Text>Next</Text>
+          <View style={styles.submitContainer}>
+            <Button style={styles.submit} type="primary" onPress={onSubmit}>
+              <Text>Submit</Text>
             </Button>
           </View>
         </View>
@@ -510,16 +392,17 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  nextContainer: {
+  submitContainer: {
     margin: 30,
     flex: 1,
+    marginTop: 50,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
   },
-  next: {
+  submit: {
     width: "40%",
-    height: 50,
+    minHeight: 60,
     backgroundColor: Secondary,
     borderWidth: 0,
   },
@@ -564,29 +447,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
   },
-  modalButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 40,
-  },
-  modalSubtext: {
-    fontSize: 12,
-    color: 'grey',
-    marginTop:-10,
-  },
-  buttonModalYes: {
+  buttonModalClose: {
     width: "30%",
     height: 45,
     backgroundColor: Secondary,
     borderWidth: 0,
-    alignSelf: "flex-end",
-  },
-  buttonModalNo: {
-    width: "30%",
-    height: 45,
-    backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "black",
     alignSelf: "flex-end",
   },
   urgentMessage: {

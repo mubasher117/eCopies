@@ -42,7 +42,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
-export default function CopyFormCase(props) {
+export default function CopyFormCase2(props) {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [datePucca, setDatePucca] = useState(new Date());
@@ -50,7 +50,8 @@ export default function CopyFormCase(props) {
   const [showLoading, setshowLoading] = useState(false);
   const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
-  const [caseNo, setcaseNo] = useState("");
+  const [plaintiff, setPlaintiff] = useState("");
+  const [defendant, setDefendant] = useState("");
   const [judges, setJudges] = useState([{ key: 1, value: '' }]);
   const [isVisibleFab, setIsVisibleFab] = useState(true);
   useEffect(() => {
@@ -78,8 +79,9 @@ export default function CopyFormCase(props) {
   const showDatepicker = () => {
     setShow(!show);
   };
+  
   const goBackFn = () => {
-    props.navigation.navigate("CopyForm");
+    props.navigation.navigate("CopyFormCase");
   };
 
   const applicationSteps = [
@@ -87,19 +89,20 @@ export default function CopyFormCase(props) {
     { title: "Case", title2: "" },
     { title: "Docs", title2: "" },
   ];
-  // Function triggered on pressing next button
   const goNext = async () => {
     const details = {
-      caseNo: caseNo,
-      decisionDate: decisionDate,
+      plaintiff: plaintiff,
+      defendant: defendant,
+      judges: []
     }
+    judges.map(judge => details.judges.push(judge.value))
     try {
         const jsonValue = JSON.stringify(details);
-        await AsyncStorage.setItem("@caseDetails", jsonValue);
+        await AsyncStorage.setItem("@caseDetails2", jsonValue);
       } catch (e) {
         console.log(e);
       }
-    props.navigation.navigate("CopyFormCase2");
+    props.navigation.navigate("CopyFormDocs");
   };
   const getUpdatedDictionaryOnchange = (key, value) => {
     let tempDict = Array.from(judges);
@@ -108,29 +111,9 @@ export default function CopyFormCase(props) {
     tempDict[index].value = value
     return tempDict
   }
-  // Function to open drawer
-  const openDrawerFn = () => {
-    props.navigation.toggleDrawer();
-  };
   return (
     <KeyboardAwareScrollView>
-      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      {/* <View style={styles.stepsContainer}>
-        <Steps size="small" current={0} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View> */}
+      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
       <ScrollView scrollEnabled={scroll}>
         <View
           style={{
@@ -143,22 +126,41 @@ export default function CopyFormCase(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Case Information</Text>
             </View>
+
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>کیس نمبر</Text>
+                <Text style={styles.label}>مدعی</Text>
               </View>
               <View style={styles.valueContainer}>
                 <TextInput
-                  label="Case No"
+                  label="Plaintiff Name"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
-                  placeholder="XX-XXX-XX"
-                  value={caseNo}
-                  onChange={(e) => setcaseNo(e.nativeEvent.text)}
-                  keyboardType="numeric"
+                  placeholder=""
+                  value={plaintiff}
+                  onChange={(e) => setPlaintiff(e.nativeEvent.text)}
+                  keyboardType="default"
+                />
+              </View>
+              <View style={[styles.valueContainer, { alignItems: "center" }]}>
+                <Text>vs</Text>
+              </View>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>مدعا علیہ</Text>
+              </View>
+              <View style={styles.valueContainer}>
+                <TextInput
+                  label="Defendant Name"
+                  selectionColor={Primary}
+                  underlineColor={PrimaryText}
+                  placeholder=""
+                  value={defendant}
+                  onChange={(e) => setDefendant(e.nativeEvent.text)}
+                  keyboardType="default"
                 />
               </View>
             </View>
+
             <View style={styles.infoContainer}>
               <View
                 style={[
@@ -166,36 +168,32 @@ export default function CopyFormCase(props) {
                   { flexDirection: "row", justifyContent: "space-between" },
                 ]}
               >
-                <Text style={styles.label}>Date of decision</Text>
-                <Text style={styles.label}>تاریخ فیصلہ</Text>
+                <Text style={styles.label}>Judges</Text>
+                <Text style={styles.label}>ججز</Text>
               </View>
-              <View style={styles.valueContainer}>
-                <Chip
-                  onPress={showDatepicker}
-                  style={{
-                    alignItems: "center",
-                    borderRadius: 5,
-                  }}
-                  textStyle={{
-                    color: PrimaryText,
-                    fontSize: 16,
-                  }}
-                >
-                  {decisionDate}
-                </Chip>
-                {show && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={onChange}
-                  />
-                )}
-              </View>
+              {judges.map((judge) => {
+                return (
+                  <View key={judge.key} style={styles.valueContainer}>
+                    <TextInput
+                      label="Mr. Justice"
+                      selectionColor={Primary}
+                      underlineColor={PrimaryText}
+                      onChange={(e) =>
+                        setJudges(
+                          getUpdatedDictionaryOnchange(
+                            judge.key,
+                            e.nativeEvent.text
+                          )
+                        )
+                      }
+                    />
+                  </View>
+                );
+              })}
             </View>
 
             <View style={{ width: "100%", height: 55 }} />
-            {/* {isVisibleFab ? (
+            {isVisibleFab ? (
               <FAB
                 style={styles.fab}
                 small
@@ -205,7 +203,7 @@ export default function CopyFormCase(props) {
               />
             ) : (
               <View />
-            )} */}
+            )}
             {/* <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>District</Text>

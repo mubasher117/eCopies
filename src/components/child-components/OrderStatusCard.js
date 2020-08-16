@@ -67,8 +67,10 @@ export default function OrderStatusCard(props) {
             </Text>
           </View>
           <View style={styles.orderDetails}>
-            <Text>Ordered on: </Text>
-            <Text>{props.order.createdOn}</Text>
+            <Text style={{ maxWidth: "50%" }}>Ordered on: </Text>
+            <Text style={{ maxWidth: "70%" }}>
+              {new Date(props.order.createdOn).toDateString()}
+            </Text>
           </View>
           <View style={styles.orderDetails}>
             <Text>Ordered Total: </Text>

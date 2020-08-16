@@ -11,7 +11,10 @@ import { createAppContainer } from "react-navigation";
 import CopyForm from "../components/copy-form/copy-form-highcourt/CopyForm";
 import CopyFormDC from "../components/copy-form/copy-form-dc/CopyFormDC";
 import CopyFormCase from "../components/copy-form/copy-form-highcourt/CopyFormCase";
+import CopyFormCase2 from "../components/copy-form/copy-form-highcourt/CopyFormCase2";
 import CopyFormDocs from "../components/copy-form/copy-form-highcourt/CopyFormDocs";
+import OrderOptions from "../components/copy-form/OrderOptions";
+import SubmitDetails from "../components/copy-form/copy-form-highcourt/SubmitDetails";
 import Payments from "../components/payments/Payments";
 import Notifications from "../components/notifications/Notifications";
 import { Button } from "react-native-paper";
@@ -19,6 +22,7 @@ import { logout, getNotifications } from "../api/firebase/authenication";
 import MyOrders from '../components/my-orders/MyOrders'
 import { getMyOrders } from "../api/firebase/backend";
 import OrderDetails from '../components/order-details/OrderDetails'
+import { sub } from "react-native-reanimated";
 const CustomDrawerContentComponent = (props) => {
   const [isLogged, setIsLogged] = useState(false);
   const [isActive, setisActive] = useState("");
@@ -290,6 +294,9 @@ const CustomDrawerContentComponent = (props) => {
 
 const Drawer = createDrawerNavigator(
   {
+    OrderOptions: {
+      screen: OrderOptions,
+    },
     CopyForm: {
       screen: CopyForm,
     },
@@ -299,8 +306,14 @@ const Drawer = createDrawerNavigator(
     CopyFormCase: {
       screen: CopyFormCase,
     },
+    CopyFormCase2: {
+      screen: CopyFormCase2,
+    },
     CopyFormDocs: {
       screen: CopyFormDocs,
+    },
+    SubmitDetails: {
+      screen: SubmitDetails,
     },
     Payments: {
       screen: Payments,

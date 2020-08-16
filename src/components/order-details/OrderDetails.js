@@ -66,45 +66,68 @@ export default function OrderDetails(props) {
             </Text>
           </View>
           <View style={styles.detailsContainer}>
-            <Text style={styles.entity}>
-              <Text style={styles.label}>Case No: </Text>
-              {details.caseNo}
-            </Text>
-            <Text style={styles.entity}>
-              <Text style={styles.label}>Date of decision: </Text>
-            </Text>
-            <Text style={styles.entity}>{details.decisionDate}</Text>
-            <View style={styles.loopContainer}>
-              <Text style={styles.entity}>
-                <Text style={styles.label}>Judges: </Text>
-              </Text>
-              {details.judges.map((judge, index) => {
-                return (
-                  <Text style={styles.entity}>
-                    {index + 1}- {judge}
-                  </Text>
-                );
-              })}
-            </View>
-            <View style={styles.loopContainer}>
-              <Text style={styles.entity}>
-                <Text style={styles.label}>Documents Required: </Text>
-              </Text>
-              {details.documentDetails.map((document, index) => {
-                return (
-                  <Text style={styles.entity}>
-                    {index + 1}- {document}
-                  </Text>
-                );
-              })}
-            </View>
-
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
               <Text style={{ fontSize: 16 }}>Order Total:</Text>
-              <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Rs. {details.totalAmount}</Text>
+              <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+                Rs. {details.totalAmount}
+              </Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text style={{ fontSize: 16 }}>Ordered on:</Text>
+              <Text style={{ fontSize: 18 }}>
+               {new Date(details.createdOn).toDateString()}
+              </Text>
             </View>
           </View>
+          {details.forms.map(form => {
+            return (
+              <View style={styles.detailsContainer}>
+                <Text style={styles.entity}>
+                  <Text style={styles.label}>Case No: </Text>
+                  {form.caseNo}
+                </Text>
+                <Text style={styles.entity}>
+                  <Text style={styles.label}>Date of decision: </Text>
+                </Text>
+                <Text style={styles.entity}>{form.decisionDate}</Text>
+                <View style={styles.caseEntitiesContainer}>
+                  <Text style={styles.caseEntity}>{form.plaintiff}</Text>
+                  <Text style={styles.vs}>VS</Text>
+                  <Text style={styles.caseEntity}>{form.defendant}</Text>
+                </View>
+                <View style={styles.loopContainer}>
+                  <Text style={styles.entity}>
+                    <Text style={styles.label}>Judges: </Text>
+                  </Text>
+                  {form.judges.map((judge, index) => {
+                    return (
+                      <Text style={styles.entity}>
+                        {index + 1}- {judge}
+                      </Text>
+                    );
+                  })}
+                </View>
+                <View style={styles.loopContainer}>
+                  <Text style={styles.entity}>
+                    <Text style={styles.label}>Documents Required: </Text>
+                  </Text>
+                  {form.documentDetails.map((document, index) => {
+                    return (
+                      <Text style={styles.entity}>
+                        {index + 1}- {document}
+                      </Text>
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
         </View>
+        <View style={{width: 10, height:150}}/>
       </ScrollView>
     </View>
   );
@@ -131,6 +154,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
+  caseEntitiesContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  caseEntity: {
+    fontSize: 16,
+    fontWeight: "bold",
+    borderBottomWidth: 0.5
+  },
+  vs: {
+    alignSelf: "center",
+    marginTop: 15,
+    marginBottom: 5,
+  },
   button: {
     backgroundColor: Secondary,
     borderWidth: 0,
@@ -152,5 +189,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#E1EEE1",
     padding: "3%",
     borderRadius: 10,
+    marginTop: 30,
   },
 });

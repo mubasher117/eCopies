@@ -93,34 +93,6 @@ export default function SubmitDetails(props) {
   function getRandomArbitrary(min, max) {
     return parseInt(Math.random() * (max - min) + min);
   }
-
-  // Verify unique order number
-  const getUniqueOrderNumber = async () => {
-    var num = getRandomArbitrary();
-    var isSame;
-    database
-      .ref("/testForm")
-      .orderByChild("orderNo")
-      .equalTo("60167234")
-      .once("value", (snapshot) => {
-        console.log("Snapshot", snapshot.val());
-        if (snapshot.val()) {
-          const userData = snapshot.val();
-          console.log("exists!", userData);
-          isSame = true;
-        } else {
-          isSame = false;
-        }
-      });
-    if (!isSame) {
-      console.log("ORDER NUMBER:   ", num);
-      return num.toString();
-    } else {
-      console.log("GOT SAME:    ", num);
-      //getUniqueOrderNumber()
-      return "47444";
-    }
-  };
   // Submits details to firebase
   const onSubmit = async () => {
     setshowLoading(true);

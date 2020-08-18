@@ -7,7 +7,7 @@ export async function getMyOrders (){
   console.log("STATE : ***********");
   getUserId().then((userId) => {
     var dbRef = database
-      .ref("/testForm")
+      .ref("/orders")
       .orderByChild("customerId")
       .equalTo(userId);
     dbRef.on("value", (snapshot) => {
@@ -23,6 +23,5 @@ export async function getMyOrders (){
         store.dispatch({ type: "setMyOrders", payload: tempMyOrders });
       }
     });
-  })
-  
+  })  
 }

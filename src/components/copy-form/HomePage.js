@@ -130,9 +130,9 @@ export default function HomPage(props) {
             <Text style={styles.modalText}>
               Please pay the remaining dues before submitting another form.
             </Text>
-            <Text style={styles.modalText}>
+            {/* <Text style={styles.modalText}>
               Please pay the remaining dues before submitting another form.
-            </Text>
+            </Text> */}
           </View>
         </View>
       </Modal>
@@ -156,6 +156,13 @@ export default function HomPage(props) {
             title="Session Court"
             titleUrdu="سیشن کورٹ"
             imgSource={require("../../../assets/images/static/district_court.jpg")}
+            navigateTo={() => navigateTo("CopyFormCase")}
+          />
+
+          <FormType
+            title="DC Office"
+            titleUrdu="ڈی سی آفس"
+            imgSource={require("../../../assets/images/static/dcoffice.jpeg")}
             navigateTo={() => navigateTo("CopyFormCase")}
           />
         </View>

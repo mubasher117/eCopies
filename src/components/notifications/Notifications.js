@@ -43,125 +43,6 @@ const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const Item = List.Item;
 
-const notifs = [
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your documents against order number 14215212 has been posted. Tap to see details of your order.",
-
-    time: "1 day ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your copy form recieved diary number 1855455 for your order. Tap to see details of your order.",
-    time: "3 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "Your copy form is applied to get diary number.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "We have recieved your payment against order number 1412785.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "We have recieved your order. Please pay the total amount one of our platform. Tap to see details of your order.",
-    time: "2 weeks ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your documents against order number 14215212 has been posted. Tap to see details of your order.",
-
-    time: "1 day ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your copy form recieved diary number 1855455 for your order. Tap to see details of your order.",
-    time: "3 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "Your copy form is applied to get diary number.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "We have recieved your payment against order number 1412785.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "We have recieved your order. Please pay the total amount one of our platform. Tap to see details of your order.",
-    time: "2 weeks ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your documents against order number 14215212 has been posted. Tap to see details of your order.",
-
-    time: "1 day ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your copy form recieved diary number 1855455 for your order. Tap to see details of your order.",
-    time: "3 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "Your copy form is applied to get diary number.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "We have recieved your payment against order number 1412785.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "We have recieved your order. Please pay the total amount one of our platform. Tap to see details of your order.",
-    time: "2 weeks ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your documents against order number 14215212 has been posted. Tap to see details of your order.",
-
-    time: "1 day ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "Your copy form recieved diary number 1855455 for your order. Tap to see details of your order.",
-    time: "3 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "Your copy form is applied to get diary number.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text: "We have recieved your payment against order number 1412785.",
-    time: "5 days ago",
-  },
-  {
-    logoPath: require("../../../assets/images/static/app-logo.png"),
-    text:
-      "We have recieved your order. Please pay the total amount one of our platform. Tap to see details of your order.",
-    time: "2 weeks ago",
-  },
-];
-
 
 // Code to normalize size on each type of screen
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -283,7 +164,7 @@ export default function Notifications(props) {
                   notification.isSeen ? null : { backgroundColor: "#E7EAE8" }
                 }
               >
-                <Text style={styles.text}>{notification.notification}</Text>
+                <Text style={styles.text}>{notification.body}</Text>
                 <Text style={styles.time}>
                   {new Date(notification.createdOn).toDateString()}
                 </Text>

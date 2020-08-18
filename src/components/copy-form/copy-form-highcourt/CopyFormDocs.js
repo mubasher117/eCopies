@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableOpacity,
   Platform,
   Dimensions,
   ScrollView,
@@ -29,7 +30,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, FAB, Switch, Checkbox } from "react-native-paper";
+import { TextInput, FAB, Chip, Switch, Checkbox } from "react-native-paper";
 import {
   addForm,
   login,
@@ -42,98 +43,20 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
-const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 
-import store from "../../../redux/store";
-const DocumentDetails = (props) => {
-  return (
-    <View style={styles.infoContainer}>
-      <View style={styles.valueContainer}>
-        <TextInput
-          label={"Document " + props.labelValue.toString()}
-          selectionColor={Primary}
-          underlineColor={PrimaryText}
-          onChange={props.onChange}
-        />
-      </View>
-    </View>
-  );
-};
 
 export default function CopyFormDocs(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    { key: index++, section: true, label: "Districts" },
-    { key: index++, label: "Lahore" },
-    { key: index++, label: "Faisalabad" },
-    { key: index++, label: "Sheikhupura" },
-  ];
-  const [showLoading, setshowLoading] = useState(false);
-  const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isVisibleFab, setIsVisibleFab] = useState(true);
-  const [switchMode, setSwitchMode] = useState(false);
-  const [documemnts, setdocumemnts] = useState([{ key: 1, value: "" }]);
   const [isDocumemnt, setDocumemnt] = useState(false);
   const [isPetition, setPetition] = useState(false);
   const [isOrderDated, setOrderDated] = useState(false);
   const [isSOW, setSOW] = useState(false);
-  const [paymentObject, setpaymentObject] = useState();
-  useEffect(() => {
-    database.ref("prices/copyForm").once("value", (snapshot) => {
-      setpaymentObject(snapshot.val());
-    });
-  }, [paymentObject]);
-  // Callback function after adding order
-  const addFormCallBack = async (error) => {
-    if (error) {
-      setshowLoading(false);
-      setScroll(true);
-      alert("adding failed");
-      showModal();
-    } else {
-      setshowLoading(false);
-      setScroll(true);
-      showModal();
-      await AsyncStorage.removeItem("@caseDetails");
-    }
-  };
-  // Returns random number between 70000000 and 99999999
-  function getRandomArbitrary(min, max) {
-    return parseInt(Math.random() * (max - min) + min);
-  }
+  const [showDate, setShowDate] = useState(false);
+  const [date, setDate] = useState(new Date());
 
-  // Verify unique order number
-  const getUniqueOrderNumber = async () => {
-    var num = getRandomArbitrary();
-    var isSame;
-    database
-      .ref("/testForm")
-      .orderByChild("orderNo")
-      .equalTo("60167234")
-      .once("value", (snapshot) => {
-        console.log("Snapshot", snapshot.val());
-        if (snapshot.val()) {
-          const userData = snapshot.val();
-          console.log("exists!", userData);
-          isSame = true;
-        } else {
-          isSame = false;
-        }
-      });
-    if (!isSame) {
-      console.log("ORDER NUMBER:   ", num);
-      return num.toString();
-    } else {
-      console.log("GOT SAME:    ", num);
-      //getUniqueOrderNumber()
-      return "47444";
-    }
-  };
-
+  // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = async() => {
     setIsModalVisible(false);
     setcontainerOpacity(1);
@@ -204,19 +127,8 @@ export default function CopyFormDocs(props) {
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase2");
   };
-  const addDoc = () => {
-    if (documemnts.length < 3) {
-      // Deep Copy of documents
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    } else {
-      setIsVisibleFab(false);
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    }
-  };
+
+  var decisionDate = date.toDateString().toString();
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
@@ -226,23 +138,10 @@ export default function CopyFormDocs(props) {
     saveDetails();
     props.navigation.navigate("CopyFormCase");
   };
-  const applicationSteps = [
-    { title: "Personal", title2: "" },
-    { title: "Case", title2: "" },
-    { title: "Docs", title2: "" },
-  ];
-
-  const getUpdatedDictionaryOnchange = (key, value) => {
-    console.log("IN UPDATE");
-    let tempDict = Array.from(documemnts);
-    const index = tempDict.findIndex((temp) => temp.key == key);
-    console.log(index);
-    tempDict[index].value = value;
-    console.log(tempDict);
-    return tempDict;
-  };
-  const toggleSwitch = () => {
-    setSwitchMode(!switchMode);
+  const onChangeDate = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDate(Platform.OS === "ios");
+    setDate(currentDate);
   };
   return (
     <KeyboardAwareScrollView>
@@ -269,9 +168,7 @@ export default function CopyFormDocs(props) {
                 type="primary"
                 onPress={onNext}
               >
-                <Text style={{color:'black'}}>
-                No
-                </Text>
+                <Text style={{ color: "black" }}>No</Text>
               </Button>
               <Button
                 style={styles.buttonModalYes}
@@ -284,52 +181,7 @@ export default function CopyFormDocs(props) {
           </View>
         </View>
       </Modal>
-      {/* <View style={styles.stepsContainer}>
-        <Steps size="small" current={1} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View> */}
-      {/* <Button
-        onPress={() => {
-          login();
-        }}
-      >
-        Login
-      </Button>
-      <Button
-        onPress={() => {
-          register();
-        }}
-      >
-        Register
-      </Button>
-      <Button
-        onPress={() => {
-          checkSignedIn();
-        }}
-      >
-        Check
-      </Button>
-      <Button
-        onPress={() => {
-          logout();
-        }}
-      >
-        Log Out
-      </Button>
-       */}
-      <ScrollView scrollEnabled={scroll}>
+      <ScrollView >
         <View
           style={{
             alignItems: "center",
@@ -353,19 +205,6 @@ export default function CopyFormDocs(props) {
                 <Text style={styles.label}>کاغزات</Text>
               </View>
             </View>
-            {/* {documemnts.map((doc) => {
-              return (
-                <DocumentDetails
-                  key={doc.key}
-                  labelValue={doc.key}
-                  onChange={(e) =>
-                    setdocumemnts(
-                      getUpdatedDictionaryOnchange(doc.key, e.nativeEvent.text)
-                    )
-                  }
-                />
-              );
-            })} */}
 
             <View style={styles.checkboxContainer}>
               <View style={styles.documemntsContainer}>
@@ -376,8 +215,17 @@ export default function CopyFormDocs(props) {
                   }}
                   color={Secondary}
                 />
-                <Text>Document</Text>
+                <Text style={{ fontSize: 16 }}>Document</Text>
               </View>
+              <TextInput
+                style={{
+                  marginLeft: "10%",
+                  height: 40,
+                  width: "80%",
+                  borderColor: "gray",
+                }}
+                editable={isDocumemnt}
+              />
 
               <View style={styles.documemntsContainer}>
                 <Checkbox
@@ -411,38 +259,42 @@ export default function CopyFormDocs(props) {
                 />
                 <Text>Order Dated</Text>
               </View>
+              <TouchableOpacity
+                style={styles.valueContainer}
+                onPress={() => setShowDate(!showDate)}
+                disabled = {!isOrderDated}
+              >
+                <Chip
+                  style={{
+                    alignItems: "center",
+                    borderRadius: 5,
+                  }}
+                  textStyle={{
+                    color: PrimaryText,
+                    fontSize: 12,
+                  }}
+                >
+                  {decisionDate}
+                </Chip>
+                {showDate && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="default"
+                    onChange={onChangeDate}
+                  />
+                )}
+              </TouchableOpacity>
             </View>
-
-            {/* {isVisibleFab ? (
-              <FAB
-                style={styles.fab}
-                small
-                icon="plus"
-                onPress={addDoc}
-                color={"white"}
-              />
-            ) : (
-              <View />
-            )} */}
           </View>
 
           <View style={styles.nextContainer}>
-            <Button
-              style={styles.next}
-              type="primary"
-              onPress={showModal}
-            >
+            <Button style={styles.next} type="primary" onPress={showModal}>
               <Text>Next</Text>
             </Button>
           </View>
         </View>
       </ScrollView>
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-        text="Submitting..."
-      />
     </KeyboardAwareScrollView>
   );
 }
@@ -476,6 +328,8 @@ const styles = StyleSheet.create({
   },
   valueContainer: {
     marginTop: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   value: {
     marginLeft: "-5%",
@@ -527,6 +381,9 @@ const styles = StyleSheet.create({
     width: "120%",
     alignItems: "center",
     marginTop: 20,
+  },
+  infoContainer:{
+    marginBottom: 15
   },
   centeredView: {
     flex: 1,
@@ -595,6 +452,7 @@ const styles = StyleSheet.create({
   documemntsContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 15,
   },
   checkboxContainer: {
     marginTop: 10,

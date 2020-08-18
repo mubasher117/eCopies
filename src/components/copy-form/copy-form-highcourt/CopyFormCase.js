@@ -117,22 +117,6 @@ export default function CopyFormCase(props) {
   return (
     <KeyboardAwareScrollView>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      {/* <View style={styles.stepsContainer}>
-        <Steps size="small" current={0} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View> */}
       <ScrollView scrollEnabled={scroll}>
         <View
           style={{
@@ -198,51 +182,6 @@ export default function CopyFormCase(props) {
             </View>
 
             <View style={{ width: "100%", height: 55 }} />
-            {/* {isVisibleFab ? (
-              <FAB
-                style={styles.fab}
-                small
-                icon="plus"
-                onPress={addJudge}
-                color={"white"}
-              />
-            ) : (
-              <View />
-            )} */}
-            {/* <View style={styles.infoContainer}>
-              <View style={styles.labelContainer}>
-                <Text style={styles.label}>District</Text>
-              </View>
-              <View
-                style={[
-                  styles.valueContainer,
-                  { backgroundColor: InputBackground },
-                ]}
-              >
-                {Platform.OS === "ios" ? (
-                  <ModalPicker
-                    data={districts}
-                    initValue="Select District"
-                    onChange={(option) => {
-                      setDistrict(option);
-                    }}
-                  />
-                ) : (
-                  <Picker
-                    selectedValue={district}
-                    style={{ height: 50, width: "100%" }}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setDistrict(itemValue)
-                    }
-                  >
-                    <Picker.Item label="Select Distrtict" value="-1" />
-                    <Picker.Item label="Lahore" value="Lahore" />
-                    <Picker.Item label="Sheikhupura" value="Sheikhupura" />
-                    <Picker.Item label="Faisalabad" value="Faisalabad" />
-                  </Picker>
-                )}
-              </View>
-            </View> */}
           </View>
           <View
             style={{

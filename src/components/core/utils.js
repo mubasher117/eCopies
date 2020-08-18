@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-community/async-storage";
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
 
@@ -18,3 +19,19 @@ export const nameValidator = name => {
 
   return '';
 };
+
+
+
+export const getUserId = () =>
+  new Promise(async (resolve, reject) => {
+    let storedUser = await AsyncStorage.getItem("@loggedUser");
+    try {
+      storedUser = JSON.parse(storedUser);
+    } catch (error) {
+      console.log("Error in parsing userId ");
+    }
+    if (storedUser) {
+      console.log("STORED ID FOUND:   ", storedUser.user.uid);
+      resolve(storedUser.user.uid);
+    }
+  });

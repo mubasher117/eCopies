@@ -571,8 +571,8 @@ const styles = StyleSheet.create({
   },
   modalSubtext: {
     fontSize: 12,
-    color: 'grey',
-    marginTop:-10,
+    color: "grey",
+    marginTop: -10,
   },
   buttonModalYes: {
     width: "30%",
@@ -584,9 +584,8 @@ const styles = StyleSheet.create({
   buttonModalNo: {
     width: "30%",
     height: 45,
-    backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "black",
+    backgroundColor: "#E6E6E6",
+    borderWidth: 0,
     alignSelf: "flex-end",
   },
   urgentMessage: {

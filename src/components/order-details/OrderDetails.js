@@ -79,13 +79,26 @@ export default function OrderDetails(props) {
             >
               <Text style={{ fontSize: 16 }}>Ordered on:</Text>
               <Text style={{ fontSize: 18 }}>
-               {new Date(details.createdOn).toDateString()}
+                {new Date(details.createdOn).toDateString()}
+              </Text>
+            </View>
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  alignSelf: "center",
+                }}
+              >
+                {details.progress.postDetails.trackingId}
               </Text>
             </View>
           </View>
-          {details.forms.map(form => {
+          {details.forms.map((form, index) => {
             return (
               <View style={styles.detailsContainer}>
+                <Text>Copy Form {index + 1}</Text>
                 <Text style={styles.entity}>
                   <Text style={styles.label}>Case No: </Text>
                   {form.caseNo}
@@ -127,7 +140,7 @@ export default function OrderDetails(props) {
             );
           })}
         </View>
-        <View style={{width: 10, height:150}}/>
+        <View style={{ width: 10, height: 150 }} />
       </ScrollView>
     </View>
   );
@@ -161,7 +174,8 @@ const styles = StyleSheet.create({
   caseEntity: {
     fontSize: 16,
     fontWeight: "bold",
-    borderBottomWidth: 0.5
+    borderBottomWidth: 0.5,
+    textAlign: "center",
   },
   vs: {
     alignSelf: "center",

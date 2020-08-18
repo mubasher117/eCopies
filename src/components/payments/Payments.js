@@ -297,7 +297,7 @@ function Payments(props) {
             );
           })}
 
-          <View
+          {/* <View
             style={{
               margin: 30,
               flex: 1,
@@ -315,7 +315,7 @@ function Payments(props) {
             >
               Add Payment Details
             </Button>
-          </View>
+          </View> */}
         </View>
         <View
           style={{

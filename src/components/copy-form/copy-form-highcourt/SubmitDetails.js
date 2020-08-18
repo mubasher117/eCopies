@@ -153,15 +153,18 @@ export default function SubmitDetails(props) {
     if (isOrderDated) {
       documentDetails.push("Order Dated");
     }
-    var totalPayment = 0;
+    let totalPayment = 0;
     if (switchMode) {
+      console.log("total payment", paymentObject.urgentFee,  forms.length)
       totalPayment = paymentObject.urgentFee * forms.length;
     } else {
       totalPayment = paymentObject.normalFee * forms.lenght;
+      console.log("total payment", paymentObject.urgentFee, forms.length);
     }
     // Adding document details in array
     // documemnts.map((doc) => documentDetails.push(doc.value));
-
+    console.log('calculations:  ', paymentObject.urgentFee * forms.length)
+    console.log(totalPayment);
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
@@ -186,10 +189,12 @@ export default function SubmitDetails(props) {
       customerId: storedUserId,
       createdOn: new Date().toString(),
       orderNo: orderNo,
-      totalAmount: totalPayment,
+      totalAmount: switchMode
+        ? paymentObject.urgentFee * forms.length
+        : paymentObject.normalFee * forms.length,
       orderType: {
-          name: 'copyForm',
-          court: 'highCourt',
+        name: "copyForm",
+        court: "highCourt",
       },
     };
     addForm(orderDetails, addFormCallBack);

@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Keyboard,
   Picker,
+  TouchableOpacity
 } from "react-native";
 import {
   InputItem,
@@ -39,6 +40,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import ModalPicker from "react-native-modal-picker";
 import { NavigationActions } from "react-navigation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
@@ -152,10 +154,10 @@ export default function CopyFormCase(props) {
                   label="Case No"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
-                  placeholder="XX-XXX-XX"
+                  placeholder="CP14580/2020"
                   value={caseNo}
                   onChange={(e) => setcaseNo(e.nativeEvent.text)}
-                  keyboardType="numeric"
+                  keyboardType="default"
                 />
               </View>
             </View>
@@ -169,9 +171,9 @@ export default function CopyFormCase(props) {
                 <Text style={styles.label}>Date of decision</Text>
                 <Text style={styles.label}>تاریخ فیصلہ</Text>
               </View>
-              <View style={styles.valueContainer}>
+              <TouchableOpacity style={styles.valueContainer}
+                  onPress={showDatepicker}>
                 <Chip
-                  onPress={showDatepicker}
                   style={{
                     alignItems: "center",
                     borderRadius: 5,
@@ -179,6 +181,7 @@ export default function CopyFormCase(props) {
                   textStyle={{
                     color: PrimaryText,
                     fontSize: 16,
+                    padding: 10
                   }}
                 >
                   {decisionDate}
@@ -191,7 +194,7 @@ export default function CopyFormCase(props) {
                     onChange={onChange}
                   />
                 )}
-              </View>
+              </TouchableOpacity>
             </View>
 
             <View style={{ width: "100%", height: 55 }} />

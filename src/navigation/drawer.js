@@ -8,6 +8,7 @@ import {
   SecondaryLight,
 } from "../constants/colors";
 import { createAppContainer } from "react-navigation";
+import CopyFormHomePage from '../components/copy-form/HomePage'
 import CopyForm from "../components/copy-form/copy-form-highcourt/CopyForm";
 import CopyFormDC from "../components/copy-form/copy-form-dc/CopyFormDC";
 import CopyFormCase from "../components/copy-form/copy-form-highcourt/CopyFormCase";
@@ -17,12 +18,10 @@ import OrderOptions from "../components/copy-form/OrderOptions";
 import SubmitDetails from "../components/copy-form/copy-form-highcourt/SubmitDetails";
 import Payments from "../components/payments/Payments";
 import Notifications from "../components/notifications/Notifications";
-import { Button } from "react-native-paper";
 import { logout, getNotifications } from "../api/firebase/authenication";
 import MyOrders from '../components/my-orders/MyOrders'
 import { getMyOrders } from "../api/firebase/backend";
 import OrderDetails from '../components/order-details/OrderDetails'
-import { sub } from "react-native-reanimated";
 const CustomDrawerContentComponent = (props) => {
   const [isLogged, setIsLogged] = useState(false);
   const [isActive, setisActive] = useState("");
@@ -66,7 +65,7 @@ const CustomDrawerContentComponent = (props) => {
         <TouchableOpacity
           onPress={() => {
             setisActive("home");
-            props.navigation.navigate("CopyFormCase");
+            props.navigation.navigate("CopyFormHomePage");
           }}
         >
           <View
@@ -326,6 +325,9 @@ const Drawer = createDrawerNavigator(
     },
     OrderDetails: {
       screen: OrderDetails,
+    },
+    CopyFormHomePage: {
+      screen: CopyFormHomePage,
     },
   },
   {

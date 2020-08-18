@@ -30,7 +30,10 @@ import {
   ActivityIndicator,
   Steps,
 } from "@ant-design/react-native";
-import {getUserData} from '../../api/firebase/authenication'
+import {
+  getUserData,
+  registerForPushNotificationsAsync,
+} from "../../api/firebase/authenication";
 const { height, width } = Dimensions.get("window");
 
 export default function HomeScreen(props){
@@ -45,12 +48,13 @@ let getUserId = () =>
     if (storedUser) {
       console.log("STORED ID FOUND:   ", storedUser.user.uid);
       getUserData(storedUser);
+      registerForPushNotificationsAsync(storedUser.user.uid);
       resolve();
     }
   });
 useEffect(() => {
   setTimeout(() => {getUserId().then(() => {
-                      props.navigation.navigate("main");
+                      props.navigation.navigate("CopyFormHomePage");
                     });}, 500)
   
 }, [props]);

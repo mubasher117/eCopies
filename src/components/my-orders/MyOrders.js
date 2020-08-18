@@ -16,7 +16,6 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   InputItem,
   Tag,
-  Button,
   ActivityIndicator,
   Steps,
   Tabs,
@@ -29,21 +28,27 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
-import { TextInput, Chip } from "react-native-paper";
+import { TextInput, Chip, Button } from "react-native-paper";
 import Header from "../header/Header";
 import OrderStatusCard from "../child-components/OrderStatusCard";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 
-
 export default function MyOrders(props) {
   const details = props.navigation.getParam("details", "N/A");
-
   let tempMyOrders = useSelector((state) => state.ordersReducer.myOrders);
   const [myOrders, setMyOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [noOrders, setNoOrders] = useState(false); // If user has no orders
+  setTimeout(() => {
+    setNoOrders(true)
+  }, 2000)
+
   useEffect(() => {
+
     if (tempMyOrders != undefined) {
       setMyOrders(tempMyOrders);
+      setIsLoading(false);
     }
   }, [tempMyOrders]);
   // Function to be passed to Header
@@ -55,28 +60,43 @@ export default function MyOrders(props) {
     <View style={styles.container}>
       <Header title="My Orders" openDrawerFn={openDrawerFn} />
       <ScrollView>
-        <View style={styles.centeredView}>
-          {myOrders.map((order, index) => {
-            return (
-              <OrderStatusCard
-                key={index}
-                order={order}
-                seeDetails={() =>
-                  props.navigation.navigate("OrderDetails", {
-                    details: order,
-                    screen: "MyOrders",
-                  })
-                }
-                updateStatus={() => {
-                  props.navigation.navigate("OrderStatus", {
-                    details: order,
-                    screen: "MyOrders",
-                  });
-                }}
-              />
-            );
-          })}
-        </View>
+        {!myOrders.length && !noOrders ? (<View style={styles.centeredView}>
+            <Button
+              mode="contained"
+              onPress={() => console.log("Pressed")}
+              color={Secondary}
+              loading
+              style={{ width: "60%", marginTop: "65%" }}
+            >
+              Loading
+            </Button>
+          </View>) : <View></View>
+
+        }
+          <View style={styles.centeredView}>
+            {myOrders.map((order, index) => {
+              return (
+                <OrderStatusCard
+                  key={index}
+                  order={order}
+                  seeDetails={() =>
+                    props.navigation.navigate("OrderDetails", {
+                      details: order,
+                      screen: "MyOrders",
+                    })
+                  }
+                  updateStatus={() => {
+                    props.navigation.navigate("OrderStatus", {
+                      details: order,
+                      screen: "MyOrders",
+                    });
+                  }}
+                />
+              );
+            })}
+          </View>
+          
+        
 
         <View style={{ width: "100%", height: 150 }} />
       </ScrollView>

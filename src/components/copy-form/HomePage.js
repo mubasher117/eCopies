@@ -46,13 +46,13 @@ const FormType = (props) => {
           borderRadius: 5,
           width: "45%",
           backgroundColor: "#E6E6E6",
-          height: 160,
+          minHeight: 160,
           padding: 10,
           margin: 10,
         }}
       >
         <Image
-          style={{ width: "100%", height: "70%", marginBottom: 5 }}
+          style={{ width: "100%", height: 100, marginBottom: 5 }}
           source={props.imgSource}
         />
         <Text style={{ fontWeight: "bold" }}>{props.title}</Text>

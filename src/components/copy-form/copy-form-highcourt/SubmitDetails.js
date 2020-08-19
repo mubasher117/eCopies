@@ -215,9 +215,14 @@ export default function SubmitDetails(props) {
   const toggleSwitch = () => {
     setSwitchMode(!switchMode);
   };
+
+  // Function to be passed to Header
+  const openDrawerFn = () => {
+    props.navigation.toggleDrawer();
+  };
   return (
     <KeyboardAwareScrollView>
-      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
+      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
         animationType="slide"
         transparent={true}
@@ -241,7 +246,7 @@ export default function SubmitDetails(props) {
           </View>
         </View>
       </Modal>
-      
+
       <ScrollView scrollEnabled={scroll}>
         <View
           style={{
@@ -255,8 +260,6 @@ export default function SubmitDetails(props) {
               <Text style={styles.sctionTitle}>Submit Details</Text>
             </View>
 
-
-            
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>فوری طور پر درکار</Text>
@@ -372,13 +375,13 @@ const styles = StyleSheet.create({
   submitContainer: {
     margin: 30,
     flex: 1,
-    marginTop: 50,
+    marginTop: '100%',
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
   },
   submit: {
-    width: "40%",
+    width: "100%",
     minHeight: 60,
     backgroundColor: Secondary,
     borderWidth: 0,

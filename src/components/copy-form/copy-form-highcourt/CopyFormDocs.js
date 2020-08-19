@@ -10,8 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
   Keyboard,
-  Picker,
-  List,
+  Picker,Image,
   Modal,
 } from "react-native";
 import {
@@ -49,12 +48,18 @@ const { height, width } = Dimensions.get("window");
 export default function CopyFormDocs(props) {
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDocumemnt, setDocumemnt] = useState(false);
-  const [isPetition, setPetition] = useState(false);
-  const [isOrderDated, setOrderDated] = useState(false);
-  const [isSOW, setSOW] = useState(false);
+  const [isDocument, setDocument] = useState({mode: false, value: ''});
+  const [isPetition, setPetition] = useState({
+    mode: false,
+    value: new Date(),
+  });
+  const [isOrderDated, setOrderDated] = useState({
+    mode: false,
+    value: new Date(),
+  });
+  const [isSOW, setSOW] = useState({ mode: false, value: "" });
   const [showDate, setShowDate] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [showPetitionDate, setPetitionDate] = useState(false);
 
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = async() => {
@@ -63,17 +68,17 @@ export default function CopyFormDocs(props) {
     // Array to store order details to be saved in db
     var documentDetails = [];
     // Adding checked documents in array
-    if (isDocumemnt) {
-      documentDetails.push("Document");
+    if (isDocument.mode) {
+      documentDetails.push({type: "Document", value:isDocument.value});
     }
-    if (isPetition) {
-      documentDetails.push("Petition");
+    if (isPetition.mode) {
+      documentDetails.push({type: "Petition", value:isPetition.value});
     }
-    if (isSOW) {
-      documentDetails.push("Statement of witness");
+    if (isSOW.mode) {
+      documentDetails.push({type: "Statement of witness", value:isSOW.value});
     }
-    if (isOrderDated) {
-      documentDetails.push("Order Dated");
+    if (isOrderDated.mode) {
+      documentDetails.push({ type: "Order Dated", value: isOrderDated.value });
     }
     let caseDetails;
     try {
@@ -122,13 +127,23 @@ export default function CopyFormDocs(props) {
   }
   const onNext = async () => {
     saveDetails();
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
     props.navigation.navigate("SubmitDetails");
   };
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase2");
   };
-
-  var decisionDate = date.toDateString().toString();
+  // Converts date to string to display on screen
+  var decisionDate = isOrderDated.value.toDateString().toString();
+  var petitionDate = isPetition.value.toDateString().toString();
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
@@ -139,9 +154,18 @@ export default function CopyFormDocs(props) {
     props.navigation.navigate("CopyFormCase");
   };
   const onChangeDate = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
+    const currentDate = selectedDate || isOrderDated.value;
     setShowDate(Platform.OS === "ios");
-    setDate(currentDate);
+    setOrderDated({...isOrderDated, value: currentDate});
+  };
+  const onChangePetitionDate = (event, selectedDate) => {
+    const currentDate = selectedDate || isPetition.value;
+    setPetitionDate(Platform.OS === "ios");
+    setPetition({...isPetition, value: currentDate});
+  };
+  const hideModal = () => {
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
   };
   return (
     <KeyboardAwareScrollView>
@@ -156,6 +180,15 @@ export default function CopyFormDocs(props) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <TouchableOpacity
+              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
+              onPress={hideModal}
+            >
+              <Image
+                style={styles.modalQuit}
+                source={require("../../../../assets/images/static/quit.png")}
+              />
+            </TouchableOpacity>
             <Text style={styles.modalText}>
               Do you want to submit another copy form?
             </Text>
@@ -181,7 +214,7 @@ export default function CopyFormDocs(props) {
           </View>
         </View>
       </Modal>
-      <ScrollView >
+      <ScrollView>
         <View
           style={{
             alignItems: "center",
@@ -209,9 +242,9 @@ export default function CopyFormDocs(props) {
             <View style={styles.checkboxContainer}>
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isDocumemnt ? "checked" : "unchecked"}
+                  status={isDocument.mode ? "checked" : "unchecked"}
                   onPress={() => {
-                    setDocumemnt(!isDocumemnt);
+                    setDocument({ ...isDocument, mode: !isDocument.mode });
                   }}
                   color={Secondary}
                 />
@@ -223,46 +256,103 @@ export default function CopyFormDocs(props) {
                   height: 40,
                   width: "80%",
                   borderColor: "gray",
+                  opacity: isDocument.mode ? 1 : 0.3,
                 }}
-                editable={isDocumemnt}
+                placeholder="Sales deed"
+                onChangeText={(text) =>
+                  setDocument({ ...isDocument, value: text })
+                }
+                editable={isDocument.mode}
               />
 
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isPetition ? "checked" : "unchecked"}
+                  status={isPetition.mode ? "checked" : "unchecked"}
                   onPress={() => {
-                    setPetition(!isPetition);
+                    setPetition({ ...isPetition, mode: !isPetition.mode });
                   }}
                   color={Secondary}
                 />
                 <Text>Petition</Text>
               </View>
 
+              <TouchableOpacity
+                style={[
+                  styles.valueContainer,
+                  {
+                    opacity: isPetition.mode ? 1 : 0.3,
+                  },
+                ]}
+                onPress={() => setPetitionDate(!showPetitionDate)}
+                disabled={!isPetition.mode}
+              >
+                <Chip
+                  style={{
+                    alignItems: "center",
+                    borderRadius: 5,
+                  }}
+                  textStyle={{
+                    color: PrimaryText,
+                    fontSize: 12,
+                  }}
+                >
+                  {petitionDate}
+                </Chip>
+                {showPetitionDate && (
+                  <DateTimePicker
+                    value={isPetition.value}
+                    mode="date"
+                    display="default"
+                    onChange={onChangePetitionDate}
+                  />
+                )}
+              </TouchableOpacity>
+
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isSOW ? "checked" : "unchecked"}
+                  status={isSOW.mode ? "checked" : "unchecked"}
                   onPress={() => {
-                    setSOW(!isSOW);
+                    setSOW({ ...isSOW, mode: !isSOW.mode });
                   }}
                   color={Secondary}
                 />
                 <Text>Statement of Witness</Text>
               </View>
+              <TextInput
+                style={{
+                  marginLeft: "10%",
+                  height: 40,
+                  width: "80%",
+                  borderColor: "gray",
+                  opacity: isSOW.mode ? 1 : 0.3,
+                }}
+                placeholder="PWs or DWs"
+                editable={isSOW.mode}
+                onChangeText={(text) => setSOW({ ...isSOW, value: text })}
+              />
 
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isOrderDated ? "checked" : "unchecked"}
+                  status={isOrderDated.mode ? "checked" : "unchecked"}
                   onPress={() => {
-                    setOrderDated(!isOrderDated);
+                    setOrderDated({
+                      ...isOrderDated,
+                      mode: !isOrderDated.mode,
+                    });
                   }}
                   color={Secondary}
                 />
                 <Text>Order Dated</Text>
               </View>
               <TouchableOpacity
-                style={styles.valueContainer}
+                style={[
+                  styles.valueContainer,
+                  {
+                    opacity: isOrderDated.mode ? 1 : 0.3,
+                  },
+                ]}
                 onPress={() => setShowDate(!showDate)}
-                disabled = {!isOrderDated}
+                disabled={!isOrderDated.mode}
               >
                 <Chip
                   style={{
@@ -278,7 +368,7 @@ export default function CopyFormDocs(props) {
                 </Chip>
                 {showDate && (
                   <DateTimePicker
-                    value={date}
+                    value={isOrderDated.value}
                     mode="date"
                     display="default"
                     onChange={onChangeDate}
@@ -328,8 +418,8 @@ const styles = StyleSheet.create({
   },
   valueContainer: {
     marginTop: 10,
-    width: '80%',
-    alignSelf: 'center',
+    width: "80%",
+    alignSelf: "center",
   },
   value: {
     marginLeft: "-5%",
@@ -382,8 +472,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
-  infoContainer:{
-    marginBottom: 15
+  infoContainer: {
+    marginBottom: 15,
   },
   centeredView: {
     flex: 1,
@@ -405,6 +495,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  modalQuit: {
+    width: 30,
+    height: 30,
   },
   modalText: {
     fontSize: 16,

@@ -42,7 +42,8 @@ export default function CopyFormCase(props) {
     let form = state.ordersReducer.currentForm;
     console.log("IN COPY FORM")
     console.log(form)
-    setcaseNo(form.caseNo ? form.caseNo : 'jinkies');
+    setcaseNo(form.caseNo ? form.caseNo : '');
+    setDate(form.decisionDate ? form.decisionDate : new Date())
   }, []);
   var decisionDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {

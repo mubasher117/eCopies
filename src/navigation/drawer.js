@@ -22,6 +22,7 @@ import { logout, getNotifications } from "../api/firebase/authenication";
 import MyOrders from '../components/my-orders/MyOrders'
 import { getMyOrders } from "../api/firebase/backend";
 import OrderDetails from '../components/order-details/OrderDetails'
+import Profile from "../components/profile/Profile";
 const CustomDrawerContentComponent = (props) => {
   const [isLogged, setIsLogged] = useState(false);
   const [isActive, setisActive] = useState("");
@@ -37,7 +38,7 @@ const CustomDrawerContentComponent = (props) => {
         <TouchableOpacity
           onPress={() => {
             setisActive("profile");
-            props.navigation.navigate("Payments");
+            props.navigation.navigate("Profile");
           }}
         >
           <View
@@ -328,6 +329,9 @@ const Drawer = createDrawerNavigator(
     },
     CopyFormHomePage: {
       screen: CopyFormHomePage,
+    },
+    Profile: {
+      screen: Profile,
     },
   },
   {

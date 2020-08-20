@@ -39,14 +39,16 @@ import ModalPicker from "react-native-modal-picker";
 import { NavigationActions } from "react-navigation";
 import { ImagePropTypes } from "react-native";
 import { not } from "react-native-reanimated";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import store from "../../redux/store";
+import { seeNotification } from "../../api/firebase/backend";
+import { database } from "../../api/firebase/authenication";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const Item = List.Item;
 
-
 // Code to normalize size on each type of screen
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-
 // based on iphone 5s's scale
 const scale = SCREEN_WIDTH / 320;
 
@@ -60,16 +62,6 @@ export function normalize(size) {
 }
 // till here
 export default function Notifications(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    { key: index++, section: true, label: "Districts" },
-    { key: index++, label: "Lahore" },
-    { key: index++, label: "Faisalabad" },
-    { key: index++, label: "Sheikhupura" },
-  ];
-  const [showLoading, setshowLoading] = useState(false);
-  const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -78,14 +70,14 @@ export default function Notifications(props) {
     { key: 2 },
     { key: 3 },
   ]);
-  let notificationsState = useSelector((state) => state.ordersReducer.notifications)
-  console.log(notificationsState)
+  let notificationsState = useSelector(
+    (state) => state.ordersReducer.notifications
+  );
   useEffect(() => {
     if (notificationsState != undefined) {
       setNotifications(notificationsState);
-      console.log("set Notifications", notificationsState)
-    }
-    else{
+      //console.log("set Notifications", notificationsState);
+    } else {
       console.log("set Notifications", notificationsState);
     }
   }, [notificationsState]);
@@ -112,7 +104,20 @@ export default function Notifications(props) {
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
-
+  const openNotification = (notification) => {
+    console.log(notification);
+    let state = store.getState();
+    console.log("FOUND STATE *******************");
+    let myOrders = state.ordersReducer.myOrders;
+    console.log(myOrders);
+    seeNotification(notification);
+    let index = myOrders.findIndex(obj => obj.id == notification.orderId)
+    console.log(index)
+    props.navigation.navigate("OrderDetails", {
+      details: myOrders[index],
+      screen: "Notifications",
+    });
+  };
   return (
     <SafeAreaView
       behaviour="padding"
@@ -148,9 +153,9 @@ export default function Notifications(props) {
         </View>
       </Modal>
       <ScrollView>
-        <List>
-          {notifications.map((notification, index) => {
-            return (
+        {notifications.map((notification, index) => {
+          return (
+            <TouchableOpacity key={index} onPress={() => openNotification(notification)}>
               <Item
                 thumb={
                   <Image
@@ -169,17 +174,11 @@ export default function Notifications(props) {
                   {new Date(notification.createdOn).toDateString()}
                 </Text>
               </Item>
-            );
-          })}
-        </List>
+            </TouchableOpacity>
+          );
+        })}
+        <View style={{ width: width, height: 100 }} />
       </ScrollView>
-
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-        text="Submitting..."
-      />
     </SafeAreaView>
   );
 }

@@ -61,6 +61,7 @@ export default function OrderStatusCard(props) {
               style={{
                 fontWeight: "bold",
                 color: Secondary,
+                width: "45%",
               }}
             >
               {props.order.status}
@@ -68,13 +69,13 @@ export default function OrderStatusCard(props) {
           </View>
           <View style={styles.orderDetails}>
             <Text style={{ maxWidth: "50%" }}>Ordered on: </Text>
-            <Text style={{ maxWidth: "70%" }}>
+            <Text style={{ width: "45%" }}>
               {new Date(props.order.createdOn).toDateString()}
             </Text>
           </View>
           <View style={styles.orderDetails}>
             <Text>Ordered Total: </Text>
-            <Text style={{ fontWeight: "bold" }}>
+            <Text style={{ fontWeight: "bold", width: "45%" }}>
               Rs. {props.order.totalAmount}
             </Text>
           </View>

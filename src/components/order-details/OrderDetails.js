@@ -33,7 +33,11 @@ import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
-
+// Display words against db values
+const displayDictionary = {
+  copyForm : 'Copy Form',
+  highCourt: 'High Court'
+}
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
   const previousScreen = props.navigation.getParam("screen", "Orders");
@@ -65,12 +69,19 @@ export default function OrderDetails(props) {
               {details.status}
             </Text>
           </View>
-          <View style={styles.detailsContainer}>
+          <View
+            style={[
+              styles.detailsContainer,
+              {
+                borderRadius: 10,
+              },
+            ]}
+          >
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text style={{ fontSize: 16 }}>Order Total:</Text>
-              <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 18, width: "45%" }}>
                 Rs. {details.totalAmount}
               </Text>
             </View>
@@ -78,44 +89,53 @@ export default function OrderDetails(props) {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text style={{ fontSize: 16 }}>Ordered on:</Text>
-              <Text style={{ fontSize: 18 }}>
+              <Text style={{ fontSize: 18, width: "45%" }}>
                 {new Date(details.createdOn).toDateString()}
               </Text>
             </View>
-            <View style={{ marginTop: 10 }}>
-              <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 18,
-                  alignSelf: "center",
-                }}
-              >
-                {details.progress.postDetails.trackingId}
-              </Text>
-            </View>
+            {details.progress.postDetails ? (
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
+                <Text
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 18,
+                    alignSelf: "center",
+                  }}
+                >
+                  {details.progress.postDetails.trackingId}
+                </Text>
+              </View>
+            ) : (
+              <View />
+            )}
           </View>
           {details.forms.map((form, index) => {
             return (
               <View style={styles.detailsContainer}>
-                <Text>Copy Form {index + 1}</Text>
-                <Text style={styles.entity}>
+                <View style={styles.orderInformation}>
+                  <Text style={styles.orderType}>
+                    {displayDictionary[details.orderType.name]} {index + 1}
+                  </Text>
+                  <Text style={styles.orderCourt}>
+                    {displayDictionary[details.orderType.court]}
+                  </Text>
+                </View>
+                <View style={styles.entityContainer}>
                   <Text style={styles.label}>Case No: </Text>
-                  {form.caseNo}
-                </Text>
-                <Text style={styles.entity}>
+                  <Text style={styles.entityValue}>{form.caseNo}</Text>
+                </View>
+                <View style={styles.entityContainer}>
                   <Text style={styles.label}>Date of decision: </Text>
-                </Text>
-                <Text style={styles.entity}>{form.decisionDate}</Text>
+                  <Text style={styles.entityValue}>{form.decisionDate}</Text>
+                </View>
                 <View style={styles.caseEntitiesContainer}>
                   <Text style={styles.caseEntity}>{form.plaintiff}</Text>
                   <Text style={styles.vs}>VS</Text>
                   <Text style={styles.caseEntity}>{form.defendant}</Text>
                 </View>
                 <View style={styles.loopContainer}>
-                  <Text style={styles.entity}>
-                    <Text style={styles.label}>Judges: </Text>
-                  </Text>
+                  <Text style={styles.loopLabel}>Judges</Text>
                   {form.judges.map((judge, index) => {
                     return (
                       <Text style={styles.entity}>
@@ -125,14 +145,27 @@ export default function OrderDetails(props) {
                   })}
                 </View>
                 <View style={styles.loopContainer}>
-                  <Text style={styles.entity}>
-                    <Text style={styles.label}>Documents Required: </Text>
-                  </Text>
+                  <Text style={styles.loopLabel}>Documents Required</Text>
+
                   {form.documentDetails.map((document, index) => {
                     return (
-                      <Text style={styles.entity}>
-                        {index + 1}- {document}
-                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Text style={[styles.entity, { width: "45%" }]}>
+                          {index + 1}- {document.type}
+                          {": "}
+                        </Text>
+                        <Text style={{ width: "45%" }}>
+                          {document.type == "Order Dated" ||
+                          document.type == "Petition"
+                            ? new Date(document.value).toDateString()
+                            : document.value}
+                        </Text>
+                      </View>
                     );
                   })}
                 </View>
@@ -160,12 +193,35 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
+  orderInformation: {
+    marginBottom: 15,
+  },
+  orderType: {
+    alignSelf: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  orderCourt: {
+    alignSelf: "center",
+    fontWeight: "bold",
+  },
+  entityContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   entity: {
     fontSize: 16,
   },
   label: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
+    width: "45%",
+  },
+  entityValue: { 
+    fontSize: 16, 
+    alignSelf: "flex-end",
+    width: "45%",
   },
   caseEntitiesContainer: {
     marginTop: 20,
@@ -173,7 +229,6 @@ const styles = StyleSheet.create({
   },
   caseEntity: {
     fontSize: 16,
-    fontWeight: "bold",
     borderBottomWidth: 0.5,
     textAlign: "center",
   },
@@ -181,6 +236,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 15,
     marginBottom: 5,
+    fontWeight: "bold",
   },
   button: {
     backgroundColor: Secondary,
@@ -197,12 +253,18 @@ const styles = StyleSheet.create({
   loopContainer: {
     marginTop: 10,
     marginBottom: 10,
+    borderWidth: 0.5,
+    padding: 10,
+  },
+  loopLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   detailsContainer: {
     width: "90%",
     backgroundColor: "#E1EEE1",
     padding: "3%",
-    borderRadius: 10,
     marginTop: 30,
   },
 });

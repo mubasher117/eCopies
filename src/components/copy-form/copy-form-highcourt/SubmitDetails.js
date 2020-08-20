@@ -428,11 +428,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   buttonModalClose: {
-    width: "30%",
-    height: 45,
+    width: "100%",
+    height: 40,
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
+    marginTop: 30
   },
   urgentMessage: {
     color: "red",

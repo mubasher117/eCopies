@@ -49,7 +49,7 @@ export const getNotifications = async () => {
         let data = snapshot.val();
         let keys = Object.keys(data);
         for (var key of keys) {
-          objArray.push({ ...data[key] });
+          objArray.push({ id: key, ...data[key] });
         }
         store.dispatch({
           type: "setNotifications",
@@ -285,4 +285,17 @@ export function addForm(json, callbackfn) {
   database.ref("pendingOrders/" + uuidv4()).set(json, () => {
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });
+}
+export function updateUserDetails(user, callBackFn){
+  let updates = {}
+  updates['/name'] = user.name
+  updates["/id"] = user.id;
+  updates["/address"] = user.address;
+  updates["/cellNo"] = user.cellNo;
+  database
+    .ref("userData/")
+    .child(user.id)
+    .update(updates, (data) => {
+      console.log("IN USER DATA");
+      console.log(data); callBackFn()});
 }

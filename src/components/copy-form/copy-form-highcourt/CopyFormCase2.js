@@ -27,20 +27,9 @@ import {
   PrimaryText,
 } from "../../../constants/colors";
 import { TextInput, Chip, FAB } from "react-native-paper";
-import {
-  addForm,
-  login,
-  register,
-  logout,
-} from "../../../api/firebase/authenication";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
-import AsyncStorage from "@react-native-community/async-storage";
-import ModalPicker from "react-native-modal-picker";
-import { NavigationActions } from "react-navigation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
-const Step = Steps.Step;
+import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase2(props) {
   const [date, setDate] = useState(new Date());
@@ -84,24 +73,14 @@ export default function CopyFormCase2(props) {
     props.navigation.navigate("CopyFormCase");
   };
 
-  const applicationSteps = [
-    { title: "Personal", title2: "" },
-    { title: "Case", title2: "" },
-    { title: "Docs", title2: "" },
-  ];
   const goNext = async () => {
     const details = {
       plaintiff: plaintiff,
       defendant: defendant,
       judges: []
     }
-    judges.map(judge => details.judges.push(judge.value))
-    try {
-        const jsonValue = JSON.stringify(details);
-        await AsyncStorage.setItem("@caseDetails2", jsonValue);
-      } catch (e) {
-        console.log(e);
-      }
+    judges.map(judge => details.judges.push(judge.value))    
+    store.dispatch({ type: "setCurrentFormItem", payload: details });
     props.navigation.navigate("CopyFormDocs");
   };
   const getUpdatedDictionaryOnchange = (key, value) => {

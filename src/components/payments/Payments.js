@@ -148,32 +148,6 @@ function Payments(props) {
   return (
     <SafeAreaView style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Payments" openDrawerFn={openDrawerFn} />
-      {/* <Modal
-        visible={isModalVisible}
-        onTouchOutside={() => {
-          setisModalVisible(false);
-        }}
-        useNativeDriver={true}
-        modalAnimation={
-          new SlideAnimation({
-            slideFrom: "bottom",
-          })
-        }
-      >
-        <ModalContent>
-          <View style={{ width: "85%", height: 200 }}>
-            <Text>
-              Please transfer the amount equivalent to charges to the bank
-              account with the following details
-            </Text>
-            <Text>1245454545</Text>
-            <View style={{ flexDirection: "row" }}>
-              <Button onPress={hideModal}>Close</Button>
-              <Button onPress={hideModal}>Verify</Button>
-            </View>
-          </View>
-        </ModalContent>
-      </Modal> */}
       {/*Modal Start*/}
       <Modal
         animationType="slide"
@@ -215,21 +189,6 @@ function Payments(props) {
             )}
             <Text>Account Number:</Text>
             <Text style={styles.modalAccNo}>{accountNo}</Text>
-            {/* <View
-              style={{
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Checkbox
-                status={isPaid ? "checked" : "unchecked"}
-                onPress={() => {
-                  setIsPaid(!isPaid);
-                }}
-                color={Secondary}
-              />
-              <Text>I have paid on above details.</Text>
-            </View> */}
             <Button
               style={styles.buttonModalClose}
               type="primary"
@@ -241,24 +200,6 @@ function Payments(props) {
         </View>
       </Modal>
 
-      {/*Modal End*/}
-      {/* 
-      <View style={styles.stepsContainer}>
-        <Steps size="small" current={0} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View> */}
       <ScrollView>
         <View
           style={{
@@ -296,26 +237,6 @@ function Payments(props) {
               />
             );
           })}
-
-          {/* <View
-            style={{
-              margin: 30,
-              flex: 1,
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-              width: "85%",
-            }}
-          >
-            <Button
-              style={styles.home}
-              type="primary"
-              onPress={() => {
-                props.navigation.navigate("CopyForm");
-              }}
-            >
-              Add Payment Details
-            </Button>
-          </View> */}
         </View>
         <View
           style={{

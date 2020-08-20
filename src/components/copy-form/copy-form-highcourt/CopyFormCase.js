@@ -28,49 +28,23 @@ import {
   PrimaryText,
 } from "../../../constants/colors";
 import { TextInput, Chip, FAB } from "react-native-paper";
-import {
-  addForm,
-  login,
-  register,
-  logout,
-} from "../../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
-import AsyncStorage from "@react-native-community/async-storage";
-import ModalPicker from "react-native-modal-picker";
-import { NavigationActions } from "react-navigation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { TouchableHighlight } from "react-native-gesture-handler";
-
-const Step = Steps.Step;
+import store from '../../../redux/store'
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase(props) {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [datePucca, setDatePucca] = useState(new Date());
-  const [showPucca, setShowPucca] = useState(false);
-  const [showLoading, setshowLoading] = useState(false);
-  const [scroll, setScroll] = useState(true);
-  const [containerOpacity, setcontainerOpacity] = useState(1);
   const [caseNo, setcaseNo] = useState("");
-  const [judges, setJudges] = useState([{ key: 1, value: '' }]);
-  const [isVisibleFab, setIsVisibleFab] = useState(true);
   useEffect(() => {
-    return () => {};
+    let state = store.getState();
+    let form = state.ordersReducer.currentForm;
+    console.log("IN COPY FORM")
+    console.log(form)
+    setcaseNo(form.caseNo ? form.caseNo : '');
+    setDate(form.decisionDate ? form.decisionDate : new Date())
   }, []);
-  const addJudge = () => {
-    if (judges.length < 2) {
-      // Deep Copy of documents
-      var tempJudges = Array.from(judges);
-      tempJudges.push({ key: judges.length + 1 });
-      setJudges(tempJudges);
-    } else {
-      var tempJudges = Array.from(judges);
-      tempJudges.push({ key: judges.length + 1 });
-      setJudges(tempJudges);
-      setIsVisibleFab(false);
-    }
-  };
   var decisionDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -80,36 +54,15 @@ export default function CopyFormCase(props) {
   const showDatepicker = () => {
     setShow(!show);
   };
-  const goBackFn = () => {
-    props.navigation.navigate("CopyForm");
-  };
-
-  const applicationSteps = [
-    { title: "Personal", title2: "" },
-    { title: "Case", title2: "" },
-    { title: "Docs", title2: "" },
-  ];
   // Function triggered on pressing next button
   const goNext = async () => {
     const details = {
       caseNo: caseNo,
       decisionDate: decisionDate,
     }
-    try {
-        const jsonValue = JSON.stringify(details);
-        await AsyncStorage.setItem("@caseDetails", jsonValue);
-      } catch (e) {
-        console.log(e);
-      }
+    store.dispatch({ type: "setCurrentFormItem", payload: details });
     props.navigation.navigate("CopyFormCase2");
   };
-  const getUpdatedDictionaryOnchange = (key, value) => {
-    let tempDict = Array.from(judges);
-    const index = tempDict.findIndex(temp => temp.key == key)
-    console.log(index)
-    tempDict[index].value = value
-    return tempDict
-  }
   // Function to open drawer
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
@@ -117,11 +70,10 @@ export default function CopyFormCase(props) {
   return (
     <KeyboardAwareScrollView>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      <ScrollView scrollEnabled={scroll}>
+      <ScrollView>
         <View
           style={{
             alignItems: "center",
-            opacity: containerOpacity,
             marginTop: 15,
           }}
         >
@@ -198,12 +150,6 @@ export default function CopyFormCase(props) {
           </View>
         </View>
       </ScrollView>
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-        text="Submitting..."
-      />
     </KeyboardAwareScrollView>
   );
 }

@@ -30,6 +30,7 @@ import { TextInput, Chip } from "react-native-paper";
 import AsyncStorage from "@react-native-community/async-storage";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import store from "../../../redux/store";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 export default function CopyForm(props) {
@@ -52,6 +53,7 @@ export default function CopyForm(props) {
       address: address,
       cellNo: cellNo,
     };
+    store.dispatch({ type: "setCurrentFormItem", payload: details });
     const jsonValue = JSON.stringify(details);
     try {
       await AsyncStorage.setItem("@personalDetails", jsonValue);
@@ -60,7 +62,6 @@ export default function CopyForm(props) {
     }
     props.navigation.navigate("CopyFormCase");
   };
-  let myScroller = useRef();
 
   return (
     <KeyboardAwareScrollView>

@@ -42,6 +42,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
+import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 
 
@@ -60,7 +61,12 @@ export default function CopyFormDocs(props) {
   const [isSOW, setSOW] = useState({ mode: false, value: "" });
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
-
+  useEffect(() => {
+    let state = store.getState();
+    console.log("FOUND STATE *******************");
+    let myOrders = state.ordersReducer.currentForm;
+    console.log(myOrders);
+  })
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = async() => {
     setIsModalVisible(false);
@@ -80,36 +86,16 @@ export default function CopyFormDocs(props) {
     if (isOrderDated.mode) {
       documentDetails.push({ type: "Order Dated", value: isOrderDated.value });
     }
-    let caseDetails;
-    try {
-      // Retrieving case details from storage
-      const caseDetailsJson = await AsyncStorage.getItem("@caseDetails");
-      caseDetailsJson != null
-        ? (caseDetails = JSON.parse(caseDetailsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    // Retrieving case details 2
-    let caseDetails2;
-    try {
-      // Retrieving case and personal details from storage
-      const caseDetails2Json = await AsyncStorage.getItem("@caseDetails2");
-      caseDetails2Json != null
-        ? (caseDetails2 = JSON.parse(caseDetails2Json))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
+    let state = store.getState();
+    let formDetails = state.ordersReducer.currentForm;
     let copyFormDetails = {
-      ...caseDetails,
-      ...caseDetails2,
+      ...formDetails,
       documentDetails,
     };
     console.log("form : ", copyFormDetails);
     let forms;
     try {
-      // Retrieving case and personal details from storage
+      // Retrieving previous forms from storage
       const formsJson = await AsyncStorage.getItem("@forms");
       if (formsJson){
         forms = JSON.parse(formsJson);
@@ -124,6 +110,19 @@ export default function CopyFormDocs(props) {
     } catch (e) {
       // error reading value
     }  
+    // Clear pervious form
+
+    store.dispatch({type: 'clearForm'})
+    setDocument({ mode: false, value: "" });
+    setPetition({
+      mode: false,
+      value: new Date(),
+    });
+    setOrderDated({
+      mode: false,
+      value: new Date(),
+    });
+    setSOW({ mode: false, value: "" });
   }
   const onNext = async () => {
     saveDetails();

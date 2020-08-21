@@ -73,9 +73,10 @@ export default function Profile(props) {
   useEffect(() => {
     let state = store.getState();
     let user = state.userReducer.user;
+    console.log(user)
     setName({...name, value:user.name})
     setCellNo({ ...cellNo, value: user.cellNo });
-    setEmail({ ...email, value: user.user.user.email });
+    setEmail({ ...email, value: user.email });
     setAddress({...address, value:user.address})
   }, [])
 

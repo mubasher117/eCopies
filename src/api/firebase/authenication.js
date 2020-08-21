@@ -60,15 +60,6 @@ export const getNotifications = async () => {
   });
 };
 
-// const callBackLogin = async (userData) => {
-//   // Storing user after login
-//   try {
-//     const jsonValue = JSON.stringify(userData);
-//     await AsyncStorage.setItem("@loggedUser", jsonValue);
-//   } catch (e) {
-//     console.log("Error in callBackLogin: ", e);
-//   }
-// };
 export const login = async (email, password, isDirect, callBackFn) => {
   console.log("IN LOGIN");
   firebase
@@ -83,19 +74,16 @@ export const login = async (email, password, isDirect, callBackFn) => {
         console.log("Error in storing id: ", e);
       }
       getUserData(user);
-      // if (!isDirect) {
-      //   registerPushNotifications(user);
-      //   callBackFn("success", user.user.uid);
-      // } else {
-      //   console.log("logged in after registration");
-      //   callBackFn("success", user.user.uid);
-      // }
+      if (callBackFn){
       callBackFn("success", user.user.uid);
+      }
     })
     .catch(function (error) {
       var errorCode = error.code;
       var errorMessage = error.message;
+      if (callBackFn){
       callBackFn("error", errorMessage);
+      }
     });
 };
 
@@ -121,7 +109,7 @@ export const register = async (userInputDetails, callBackFn) => {
       userInputDetails.password
     )
     .then((user) => {
-      console.log(user.user.uid);
+      callBackFn("success", user.user.uid);
       let userDetails = {
         id: user.user.uid,
         ...userInputDetails,
@@ -134,13 +122,11 @@ export const register = async (userInputDetails, callBackFn) => {
         address: userDetails.address,
         balance: 0,
       };
-      console.log("ADDITIONAL DETAILS");
-      console.log(userDetails);
       addAddtionalUserDetails(
         additionalDetails,
         userInputDetails.email,
         userInputDetails.password,
-        callBackFn
+        null
       );
     })
     .catch(function (error) {
@@ -158,7 +144,7 @@ export const addAddtionalUserDetails = (
   password,
   callBackFn
 ) => {
-  database.ref("userData/" + userDetails.id).set(userDetails, (response) => {
+  database.ref("userData/" + userDetails.id).set({...userDetails, email: email}, (response) => {
     console.log(response);
     login(email, password, true, callBackFn);
   });

@@ -41,7 +41,7 @@ export default function LoginScreen(props) {
       setEmail({ value: "", error: "" });
       setPassword({ value: "", error: "" });
       console.log("success");
-      props.navigation.navigate("CopyFormCase");
+      props.navigation.navigate("CopyFormHomePage");
     } else {
       alert(message);
     }

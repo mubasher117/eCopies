@@ -21,7 +21,7 @@ import {
   ActivityIndicator,
   Steps,
   Tabs,
-  Button
+  Button,
 } from "@ant-design/react-native";
 import {
   Primary,
@@ -31,70 +31,54 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
-import { TextInput, Chip} from "react-native-paper";
+import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
-import {database} from '../../api/firebase/authenication';
-import {getUserId} from '../core/utils'
+import { database } from "../../api/firebase/authenication";
+import { getUserId } from "../core/utils";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
-    return (
-      <TouchableOpacity
-        onPress={() => props.navigateTo()
-        }
-        style={{
-          borderRadius: 5,
-          width: "45%",
-          backgroundColor: "#E6E6E6",
-          minHeight: 160,
-          padding: 10,
-          margin: 10,
-        }}
-      >
-        <Image
-          style={{ width: "100%", height: 100, marginBottom: 5 }}
-          source={props.imgSource}
-        />
-        <Text style={{ fontWeight: "bold" }}>{props.title}</Text>
-        <Text style={{}}>{props.titleUrdu}</Text>
-      </TouchableOpacity>
-    );
-  };
+  return (
+    <TouchableOpacity
+      onPress={() => props.navigateTo()}
+      style={{
+        borderRadius: 5,
+        width: "45%",
+        backgroundColor: "#E6E6E6",
+        minHeight: 160,
+        padding: 10,
+        margin: 10,
+      }}
+    >
+      <Image
+        style={{ width: "100%", height: 100, marginBottom: 5 }}
+        source={props.imgSource}
+      />
+      <Text style={{ fontWeight: "bold" }}>{props.title}</Text>
+      <Text style={{}}>{props.titleUrdu}</Text>
+    </TouchableOpacity>
+  );
+};
 
-
-
-const copyFormOptions = [
-  {
-    title:"High Court",
-    titleUrdu:"ہائی کورٹ",
-    imgSource: require("../../../assets/images/static/highcourt.jpeg"),
-    navigateTo: "CopyFormCase"
-  }
-]
 export default function HomPage(props) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
-  useEffect(() => {
-    getUserId().then((userId) => setUserId(userId))
-  }, []);
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
   const navigateTo = (screen) => {
-    database.ref('/userData/'+ userId)
-    .once('value', (snapshot) => {
-      if (snapshot.val().balance == 0){
-        console.log(snapshot.val())
-        props.navigation.navigate(screen);
-      }
-      else{
-        showModal()
-      }
-    })
-  }
+    getUserId().then((userId) => {
+      database.ref("/userData/" + userId).once("value", (snapshot) => {
+        if (snapshot.val().balance == 0) {
+          console.log(snapshot.val());
+          props.navigation.navigate(screen);
+        } else {
+          showModal();
+        }
+      });
+    });
+  };
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.1);
@@ -203,9 +187,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  modalQuit:{
+  modalQuit: {
     width: 30,
-    height:30,
+    height: 30,
   },
   modalText: {
     fontSize: 16,

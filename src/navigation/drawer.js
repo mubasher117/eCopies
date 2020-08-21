@@ -23,7 +23,6 @@ import MyOrders from '../components/my-orders/MyOrders'
 import { getMyOrders } from "../api/firebase/backend";
 import OrderDetails from '../components/order-details/OrderDetails'
 import Profile from "../components/profile/Profile";
-import App from '../../App'
 const CustomDrawerContentComponent = (props) => {
   const [isLogged, setIsLogged] = useState(false);
   const [isActive, setisActive] = useState("");
@@ -295,7 +294,6 @@ const CustomDrawerContentComponent = (props) => {
 
 const Drawer = createDrawerNavigator(
   {
-    App: App,
     OrderOptions: {
       screen: OrderOptions,
     },

@@ -49,7 +49,7 @@ export default function RegisterScreen(props) {
       setName({ value: "", error: "" });
       setEmail({ value: "", error: "" });
       setPassword({ value: "", error: "" });
-      props.navigation.navigate("CopyFormCase");
+      props.navigation.navigate("CopyFormHomePage");
     } else {
       alert(message);
     }

@@ -12,6 +12,7 @@ import store from "./src/redux/store";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import AsyncStorage from "@react-native-community/async-storage";
+import * as firebase from "firebase";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
@@ -24,21 +25,18 @@ export default function App(props) {
   const responseListener = useRef();
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
-  
   useEffect(() => {
     notificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
         setNotification(notification);
       }
     );
-
     // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         console.log(response);
       }
     );
-
     return () => {
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);

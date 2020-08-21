@@ -35,7 +35,7 @@ import {
   registerForPushNotificationsAsync,
 } from "../../api/firebase/authenication";
 const { height, width } = Dimensions.get("window");
-
+import * as firebase from "firebase";
 export default function HomeScreen(props){
 let getUserId = () =>
   new Promise(async (resolve, reject) => {
@@ -53,7 +53,13 @@ let getUserId = () =>
     }
   });
 useEffect(() => {
-  setTimeout(() => {getUserId().then(() => {
+    // var user = firebase.auth().currentUser;
+    // console.log("USER AUTH");
+    // console.log(user);
+    // if (user){
+    //   props.navigation.navigate("CopyFormHomePage");
+    // }
+    setTimeout(() => {getUserId().then(() => {
                       props.navigation.navigate("CopyFormHomePage");
                     });}, 500)
   

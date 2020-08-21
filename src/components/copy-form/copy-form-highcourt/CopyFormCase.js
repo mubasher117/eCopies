@@ -36,15 +36,16 @@ const { height, width } = Dimensions.get("window");
 export default function CopyFormCase(props) {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [caseNo, setcaseNo] = useState("");
+  const [caseNo, setcaseNo] = useState({ value: "", error: false });
   useEffect(() => {
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
     let state = store.getState();
     let form = state.ordersReducer.currentForm;
-    console.log("IN COPY FORM")
-    console.log(form)
-    setcaseNo(form.caseNo ? form.caseNo : '');
-    setDate(form.decisionDate ? form.decisionDate : new Date())
-  }, []);
+      setcaseNo(form.caseNo ? { value: form.caseNo, error:false } : { value: "", error: false });
+      setDate(form.decisionDate ? new Date(form.decisionDate) : new Date());
+    });
+    return (() => unsubscribe)
+  }, [props.navigation]);
   var decisionDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -56,12 +57,17 @@ export default function CopyFormCase(props) {
   };
   // Function triggered on pressing next button
   const goNext = async () => {
+    if (caseNo.value != ""){
     const details = {
-      caseNo: caseNo,
+      caseNo: caseNo.value,
       decisionDate: decisionDate,
     }
     store.dispatch({ type: "setCurrentFormItem", payload: details });
     props.navigation.navigate("CopyFormCase2");
+  }
+  else{
+    setcaseNo({...caseNo, error:true})
+  }
   };
   // Function to open drawer
   const openDrawerFn = () => {
@@ -91,9 +97,13 @@ export default function CopyFormCase(props) {
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
                   placeholder="CP14580/2020"
-                  value={caseNo}
-                  onChange={(e) => setcaseNo(e.nativeEvent.text)}
+                  value={caseNo.value}
+                  onChange={(e) =>
+                    setcaseNo({ value: e.nativeEvent.text, error: false })
+                  }
                   keyboardType="default"
+                  error={caseNo.error}
+                  maxLength={20}
                 />
               </View>
             </View>
@@ -107,8 +117,10 @@ export default function CopyFormCase(props) {
                 <Text style={styles.label}>Date of decision</Text>
                 <Text style={styles.label}>تاریخ فیصلہ</Text>
               </View>
-              <TouchableOpacity style={styles.valueContainer}
-                  onPress={showDatepicker}>
+              <TouchableOpacity
+                style={styles.valueContainer}
+                onPress={showDatepicker}
+              >
                 <Chip
                   style={{
                     alignItems: "center",
@@ -117,7 +129,7 @@ export default function CopyFormCase(props) {
                   textStyle={{
                     color: PrimaryText,
                     fontSize: 16,
-                    padding: 10
+                    padding: 10,
                   }}
                 >
                   {decisionDate}

@@ -49,6 +49,7 @@ const { height, width } = Dimensions.get("window");
 export default function CopyFormDocs(props) {
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [checkModal, setCheckModal] = useState(false);
   const [isDocument, setDocument] = useState({mode: false, value: ''});
   const [isPetition, setPetition] = useState({
     mode: false,
@@ -69,8 +70,6 @@ export default function CopyFormDocs(props) {
   })
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = async() => {
-    setIsModalVisible(false);
-    setcontainerOpacity(1);
     // Array to store order details to be saved in db
     var documentDetails = [];
     // Adding checked documents in array
@@ -125,7 +124,8 @@ export default function CopyFormDocs(props) {
     setSOW({ mode: false, value: "" });
   }
   const onNext = async () => {
-    saveDetails();
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
     let forms;
     try {
       const formsJson = await AsyncStorage.getItem("@forms");
@@ -144,12 +144,14 @@ export default function CopyFormDocs(props) {
   var decisionDate = isOrderDated.value.toDateString().toString();
   var petitionDate = isPetition.value.toDateString().toString();
   const showModal = () => {
+    saveDetails();
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
     console.log(isModalVisible);
   };
   const submitAnotherForm = () => {
-    saveDetails();
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
     props.navigation.navigate("CopyFormCase");
   };
   const onChangeDate = (event, selectedDate) => {
@@ -164,8 +166,23 @@ export default function CopyFormDocs(props) {
   };
   const hideModal = () => {
     setIsModalVisible(false);
+    setCheckModal(false);
     setcontainerOpacity(1);
   };
+  // Checks if form edit made to form or not 
+  const checkForm = () => {
+    var isCleanForm = true;
+    if (isDocument.mode || isPetition.mode || isSOW.mode || isOrderDated.mode ){
+      isCleanForm = false
+    }
+    if (isCleanForm){
+      setcontainerOpacity(0.05);
+      setCheckModal(true)
+    }
+    else{
+      showModal();
+    }
+  }
   return (
     <KeyboardAwareScrollView>
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
@@ -174,7 +191,7 @@ export default function CopyFormDocs(props) {
         transparent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-          alert("Modal has been closed.");
+          //alert("Modal has been closed.");
         }}
       >
         <View style={styles.centeredView}>
@@ -210,6 +227,34 @@ export default function CopyFormDocs(props) {
                 Yes
               </Button>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* Modal if form is clean */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={checkModal}
+        onRequestClose={() => {
+          //alert("Modal has been closed.");
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
+              onPress={hideModal}
+            >
+              <Image
+                style={styles.modalQuit}
+                source={require("../../../../assets/images/static/quit.png")}
+              />
+            </TouchableOpacity>
+            <View style={{height: 10, width: 5}}/>
+            <Text style={styles.modalText}>
+              Select at least one document
+            </Text>
+            
           </View>
         </View>
       </Modal>
@@ -261,6 +306,7 @@ export default function CopyFormDocs(props) {
                 onChangeText={(text) =>
                   setDocument({ ...isDocument, value: text })
                 }
+                value={isDocument.value}
                 editable={isDocument.mode}
               />
 
@@ -328,6 +374,7 @@ export default function CopyFormDocs(props) {
                 placeholder="PWs or DWs"
                 editable={isSOW.mode}
                 onChangeText={(text) => setSOW({ ...isSOW, value: text })}
+                value={isSOW.value}
               />
 
               <View style={styles.documemntsContainer}>
@@ -378,7 +425,7 @@ export default function CopyFormDocs(props) {
           </View>
 
           <View style={styles.nextContainer}>
-            <Button style={styles.next} type="primary" onPress={showModal}>
+            <Button style={styles.next} type="primary" onPress={() => checkForm()}>
               <Text>Next</Text>
             </Button>
           </View>

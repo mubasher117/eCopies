@@ -43,7 +43,7 @@ export default function CopyFormCase2(props) {
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
-      console.log("FOCUSED")
+      console.log("FOCUSED ON")
       console.log(form)
       setPlaintiff(
         form.plaintiff ? { value: form.plaintiff, error: "" } : { value: "", error: "" }

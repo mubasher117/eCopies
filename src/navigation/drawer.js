@@ -25,7 +25,7 @@ import OrderDetails from '../components/order-details/OrderDetails'
 import Profile from "../components/profile/Profile";
 const CustomDrawerContentComponent = (props) => {
   const [isLogged, setIsLogged] = useState(false);
-  const [isActive, setisActive] = useState("");
+  const [isActive, setisActive] = useState("home");
   return (
     <View>
       <View style={styles.drawerHeader}>
@@ -106,7 +106,7 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
-            <View style={styles.pageLogoContainer}>
+            <View style={[styles.pageLogoContainer, {paddingLeft: 4}]}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/form-icon.png")}
@@ -191,7 +191,7 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
-            <View style={styles.pageLogoContainer}>
+            <View style={[styles.pageLogoContainer]}>
             <Image
               style={styles.pageLogo}
               source={require("../../assets/images/static/notification-icon.png")}
@@ -211,7 +211,7 @@ const CustomDrawerContentComponent = (props) => {
       </View>
       <View>
         <View elevation={5} style={styles.divider} />
-
+{/* 
         <TouchableOpacity
           onPress={() => {
             setisActive("settings");
@@ -260,7 +260,7 @@ const CustomDrawerContentComponent = (props) => {
               Terms & Conditions
             </Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           onPress={() => {
@@ -335,7 +335,7 @@ const Drawer = createDrawerNavigator(
     },
   },
   {
-    initialRouteName: "CopyFormCase",
+    initialRouteName: "CopyFormHomePage",
     drawerPosition: "left",
     contentComponent: CustomDrawerContentComponent,
     drawerOpenRoute: "DrawerOpen",
@@ -377,13 +377,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   pageLogo: {
-    height: 30,
-    width: 30,
+    height: 25,
+    width: 25,
   },
   pageLabel: {
     fontSize: 14,
     marginLeft: "10%",
-    fontWeight: "bold",
   },
   activeContainer: {
     flexDirection: "row",
@@ -423,7 +422,6 @@ const styles = StyleSheet.create({
   pageLowerLabel: {
     fontSize: 14,
     marginLeft: "5%",
-    fontWeight: "bold",
   },
   pageLowerActiveContainer: {
     flexDirection: "row",

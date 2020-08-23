@@ -114,9 +114,9 @@ export default function HomPage(props) {
             <Text style={styles.modalText}>
               Please pay the remaining dues before submitting another form.
             </Text>
-            {/* <Text style={styles.modalText}>
-              Please pay the remaining dues before submitting another form.
-            </Text> */}
+            <Text style={styles.modalText}>
+              براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔
+            </Text>
           </View>
         </View>
       </Modal>

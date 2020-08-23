@@ -24,7 +24,8 @@
     },
     "android": {
       "package": "com.example.services",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true
     }
   }
 }

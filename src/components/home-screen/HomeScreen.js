@@ -37,21 +37,6 @@ import {
 const { height, width } = Dimensions.get("window");
 import * as firebase from "firebase";
 export default function HomeScreen(props){
-let getUserId = () =>
-  new Promise(async (resolve, reject) => {
-    let storedUser = await AsyncStorage.getItem("@loggedUser");
-    try {
-      storedUser = JSON.parse(storedUser);
-    } catch (error) {
-      console.log("Error in parsing userId ");
-    }
-    if (storedUser) {
-      console.log("STORED ID FOUND:   ", storedUser.user.uid);
-      getUserData(storedUser);
-      registerForPushNotificationsAsync(storedUser.user.uid);
-      resolve();
-    }
-  });
 useEffect(() => {
     // var user = firebase.auth().currentUser;
     // console.log("USER AUTH");
@@ -59,11 +44,11 @@ useEffect(() => {
     // if (user){
     //   props.navigation.navigate("CopyFormHomePage");
     // }
-    setTimeout(() => {getUserId().then(() => {
-                      props.navigation.navigate("CopyFormHomePage");
-                    });}, 500)
+    // setTimeout(() => {getUserId().then(() => {
+    //                   props.navigation.navigate("CopyFormHomePage");
+    //                 });}, 500)
   
-}, [props]);
+});
   return (
     <View style={styles.container}>
       <Logo />

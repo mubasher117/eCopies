@@ -73,7 +73,7 @@ export const login = async (email, password, isDirect, callBackFn) => {
       } catch (e) {
         console.log("Error in storing id: ", e);
       }
-      getUserData(user);
+      getUserData(user.user);
       if (callBackFn){
       callBackFn("success", user.user.uid);
       }
@@ -89,7 +89,9 @@ export const login = async (email, password, isDirect, callBackFn) => {
 
 // Get additional userData
 export const getUserData = (user) => {
-  var dbRef = database.ref("/userData/" + user.user.uid);
+  console.log("In getUserData");
+  console.log(user);
+  var dbRef = database.ref("/userData/" + user.uid);
   dbRef.on("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
@@ -268,7 +270,9 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 };
 export function addForm(json, callbackfn) {
   console.log(json);
-  database.ref("pendingOrders/" + uuidv4()).set(json, () => {
+  database.ref("pendingOrders/" + uuidv4()).set(json, (res) => {
+    console.log("**************************IN ADD FORM************************ ")
+    console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });
 }

@@ -197,21 +197,6 @@ export default function SubmitDetails(props) {
     setcontainerOpacity(1);
     props.navigation.navigate("Payments", { isUrgent: switchMode });
   };
-  const applicationSteps = [
-    { title: "Personal", title2: "" },
-    { title: "Case", title2: "" },
-    { title: "Docs", title2: "" },
-  ];
-
-  const getUpdatedDictionaryOnchange = (key, value) => {
-    console.log("IN UPDATE");
-    let tempDict = Array.from(documemnts);
-    const index = tempDict.findIndex((temp) => temp.key == key);
-    console.log(index);
-    tempDict[index].value = value;
-    console.log(tempDict);
-    return tempDict;
-  };
   const toggleSwitch = () => {
     setSwitchMode(!switchMode);
   };
@@ -235,6 +220,9 @@ export default function SubmitDetails(props) {
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
               Your details have been submitted.
+            </Text>
+            <Text style={styles.modalText}>
+              آپ کی تفصیلات جمع کر لی گئی ہیں۔
             </Text>
             <Button
               style={styles.buttonModalClose}

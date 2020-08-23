@@ -184,7 +184,7 @@ export default function CopyFormDocs(props) {
     }
   }
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
       <Modal
         animationType="slide"
@@ -208,8 +208,8 @@ export default function CopyFormDocs(props) {
             <Text style={styles.modalText}>
               Do you want to submit another copy form?
             </Text>
-            <Text style={styles.modalSubtext}>
-              If you want copy of another case, press Yes
+            <Text style={styles.modalText}>
+              کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟
             </Text>
             <View style={styles.modalButtonsContainer}>
               <Button
@@ -217,7 +217,7 @@ export default function CopyFormDocs(props) {
                 type="primary"
                 onPress={onNext}
               >
-                <Text style={{ color: "black" }}>No</Text>
+                <Text style={{ color: Secondary }}>No</Text>
               </Button>
               <Button
                 style={styles.buttonModalYes}
@@ -250,15 +250,12 @@ export default function CopyFormDocs(props) {
                 source={require("../../../../assets/images/static/quit.png")}
               />
             </TouchableOpacity>
-            <View style={{height: 10, width: 5}}/>
-            <Text style={styles.modalText}>
-              Select at least one document
-            </Text>
-            
+            <View style={{ height: 10, width: 5 }} />
+            <Text style={styles.modalText}>Select at least one document</Text>
           </View>
         </View>
       </Modal>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",
@@ -302,7 +299,7 @@ export default function CopyFormDocs(props) {
                   borderColor: "gray",
                   opacity: isDocument.mode ? 1 : 0.3,
                 }}
-                placeholder="Sales deed"
+                placeholder="Enter document name"
                 onChangeText={(text) =>
                   setDocument({ ...isDocument, value: text })
                 }
@@ -371,7 +368,7 @@ export default function CopyFormDocs(props) {
                   borderColor: "gray",
                   opacity: isSOW.mode ? 1 : 0.3,
                 }}
-                placeholder="PWs or DWs"
+                placeholder="Enter PWs or DWs"
                 editable={isSOW.mode}
                 onChangeText={(text) => setSOW({ ...isSOW, value: text })}
                 value={isSOW.value}
@@ -425,7 +422,11 @@ export default function CopyFormDocs(props) {
           </View>
 
           <View style={styles.nextContainer}>
-            <Button style={styles.next} type="primary" onPress={() => checkForm()}>
+            <Button
+              style={styles.next}
+              type="primary"
+              onPress={() => checkForm()}
+            >
               <Text>Next</Text>
             </Button>
           </View>
@@ -572,14 +573,14 @@ const styles = StyleSheet.create({
     marginTop: -10,
   },
   buttonModalYes: {
-    width: "30%",
+    width: "40%",
     height: 45,
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
   },
   buttonModalNo: {
-    width: "30%",
+    width: "40%",
     height: 45,
     backgroundColor: "#E6E6E6",
     borderWidth: 0,

@@ -2,16 +2,24 @@ import AsyncStorage from "@react-native-community/async-storage";
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
 
-  if (!email || email.length <= 0) return 'Email cannot be empty.';
-  if (!re.test(email)) return 'Ooops! We need a valid email address.';
+  if (!email || email.length <= 0) return '* Email cannot be empty.';
+  if (!re.test(email)) return '* Enter a valid email address.';
 
   return '';
 };
 
-export const passwordValidator = password => {
-  if (!password || password.length <= 0) return 'Password cannot be empty.';
-
-  return '';
+export const passwordValidator = (password) => {
+  if (!password || password.length <= 0) return "* Password cannot be empty.";
+  if (password.length < 6) return "* Password must be more than 6 digits"
+  return "";
+};
+export const cellNoValidator = (cellNo) => {
+  if (!cellNo || cellNo.length <= 0) return "* Cell Number cannot be empty."; 
+  return "";
+};
+export const addressValidator = (address) => {
+  if (!address || address.length <= 0) return "* Address cannot be empty.";
+  return "";
 };
 
 export const nameValidator = name => {
@@ -22,7 +30,7 @@ export const nameValidator = name => {
 export const nameValidator2 = (name) => {
   if (!name || name.length <= 0) return "* Name cannot be empty.";
   else if (/^[a-zA-Z .]*$/.test(name) == false)
-         return "* Name shlould be alphabet only";
+         return "* Name shlould be alphabets only";
   return "";
 };
 

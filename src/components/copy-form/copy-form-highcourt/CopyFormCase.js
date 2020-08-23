@@ -74,9 +74,9 @@ export default function CopyFormCase(props) {
     props.navigation.toggleDrawer();
   };
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",

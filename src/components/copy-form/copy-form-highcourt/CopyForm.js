@@ -64,26 +64,26 @@ export default function CopyForm(props) {
   };
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={styles.container}>
-      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      {/* Application Steps */}
-      <View style={styles.stepsContainer}>
-        <Steps size="small" current={-1} direction="horizontal">
-          {applicationSteps.map((item, index) => (
-            <Step
-              key={index}
-              title={
-                <View style={{ marginTop: 10 }}>
-                  <Text>{item.title}</Text>
-                  <Text>{item.title2}</Text>
-                </View>
-              }
-              status={item.status}
-            />
-          ))}
-        </Steps>
-      </View>
+        <Header title="Copy Form" openDrawerFn={openDrawerFn} />
+        {/* Application Steps */}
+        <View style={styles.stepsContainer}>
+          <Steps size="small" current={-1} direction="horizontal">
+            {applicationSteps.map((item, index) => (
+              <Step
+                key={index}
+                title={
+                  <View style={{ marginTop: 10 }}>
+                    <Text>{item.title}</Text>
+                    <Text>{item.title2}</Text>
+                  </View>
+                }
+                status={item.status}
+              />
+            ))}
+          </Steps>
+        </View>
         <View
           style={{
             alignItems: "center",
@@ -94,7 +94,7 @@ export default function CopyForm(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Personal Information</Text>
             </View>
-            <KeyboardAwareScrollView>
+            <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
               <View style={styles.infoContainer}>
                 <View style={styles.valueContainer}>
                   <TextInput
@@ -142,7 +142,7 @@ export default function CopyForm(props) {
             </Button>
           </View>
         </View>
-        </View>
+      </View>
     </KeyboardAwareScrollView>
   );
 }

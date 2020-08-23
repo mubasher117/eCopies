@@ -13,7 +13,9 @@ import BackButton from "../child-components/BackButton";
 import {
   emailValidator,
   passwordValidator,
-  nameValidator,
+  nameValidator2,
+  cellNoValidator,
+  addressValidator,
 } from "../core/utils";
 import {
   Primary,
@@ -50,13 +52,19 @@ export default function Profile(props) {
   };
 
   const _onUpdatePressed = async () => {
-    const nameError = nameValidator(name.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
+    const nameError = nameValidator2(name.value);
+    const cellNoError = cellNoValidator(cellNo.value);
+    const addressError = addressValidator(address.value);
     let state = store.getState();
     let user = state.userReducer.user;
-    if (nameError) {
+    if (
+      nameError ||
+      cellNoError ||
+      addressError
+    ) {
       setName({ ...name, error: nameError });
+      setCellNo({ ...cellNo, error: cellNoError });
+      setAddress({ ...address, error: addressError });
       return;
     } else {
       setshowLoading(true);
@@ -65,9 +73,9 @@ export default function Profile(props) {
         name: name.value,
         cellNo: cellNo.value,
         address: address.value,
-        id: user.id
+        id: user.id,
       };
-      updateUserDetails(userDetails, callBackUpdate )
+      updateUserDetails(userDetails, callBackUpdate);
     }
   };
   useEffect(() => {
@@ -81,7 +89,7 @@ export default function Profile(props) {
   }, [])
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={[styles.container, { opacity: containerOpacity }]}>
         <BackButton
           goBack={() => props.navigation.navigate("CopyFormHomePage")}
@@ -95,20 +103,20 @@ export default function Profile(props) {
             value={name.value}
             onChangeText={(text) => setName({ value: text, error: "" })}
             error={!!name.error}
-            errorText={name.error}
-            style={{ marginBottom: 10 }}
+            maxLength={25}
           />
+          <Text style={styles.error}>{name.error}</Text>
           <TextInput
             label="Cell No"
             returnKeyType="next"
-            value={cellNo.value}
             onChangeText={(text) => setCellNo({ value: text, error: "" })}
             error={!!cellNo.error}
-            errorText={cellNo.error}
             autoCapitalize="none"
             keyboardType="phone-pad"
-            style={{ marginBottom: 10 }}
+            maxLength={15}
+            value={cellNo.value}
           />
+          <Text style={styles.error}>{cellNo.error}</Text>
           <TextInput
             label="Email"
             disabled
@@ -117,19 +125,17 @@ export default function Profile(props) {
             textContentType="emailAddress"
             style={{ marginBottom: 10 }}
           />
+
           <TextInput
             label="Address"
             returnKeyType="next"
             value={address.value}
             onChangeText={(text) => setAddress({ value: text, error: "" })}
             error={!!address.error}
-            errorText={address.error}
             autoCapitalize="none"
-            autoCompleteType="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
-            style={{ marginBottom: 10 }}
+            keyboardType="default"
           />
+          <Text style={styles.error}>{address.error}</Text>
 
           <Button
             onPress={_onUpdatePressed}
@@ -176,5 +182,10 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     marginTop: 24,
     marginBottom: 10,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
+    marginLeft: 5,
   },
 });

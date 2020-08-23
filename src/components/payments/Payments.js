@@ -45,6 +45,11 @@ const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const paymentMethods = [
   {
+    source: require("../../../assets/images/static/easypaisa-icon.png"),
+    methodName: "Easypaisa",
+    accNo: "03134243117",
+  },
+  {
     source: require("../../../assets/images/static/hbl.png"),
     methodName: "HBL",
     accNo: "148953134243117",
@@ -57,43 +62,20 @@ const paymentMethods = [
     accTitle: "Fast Services",
   },
   {
-    source: require("../../../assets/images/static/easypaisa-icon.png"),
-    methodName: "Easypaisa",
-    accNo: "03134243117",
-  },
-  {
     source: require("../../../assets/images/static/jazzcash.png"),
     methodName: "Jazz Cash",
     accNo: "03134243117",
   },
 ];
 function Payments(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    {
-      key: index++,
-      section: true,
-      label: "Districts",
-    },
-    { key: index++, label: "Lahore" },
-    {
-      key: index++,
-      label: "Faisalabad",
-    },
-    {
-      key: index++,
-      label: "Sheikhupura",
-    },
-  ];
   const [showLoading, setshowLoading] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setisModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountTitle, setAccountTitle] = useState("");
-  const [isPaid, setIsPaid] = useState(false);
   const [totalPayment, setTotalPayment] = useState(0);
+  const [isPendingPayment, setPendingPayment] = useState(false);
 
   // Retrieve user id from storage
   let getUserId = () =>
@@ -108,8 +90,8 @@ function Payments(props) {
       let storedUserId = storedUser.user.uid;
       resolve(storedUserId);
     });
+
   useEffect(() => {
-    // Get user's balance from firebase
     getUserId().then((userId) => {
       console.log("STORED USER ID in Payments:  ", userId);
       database
@@ -117,17 +99,30 @@ function Payments(props) {
         .on("value", (snapshot) => {
           console.log(snapshot.val());
           setTotalPayment(snapshot.val());
+          if (snapshot.val() != 0) {
+            showPendingPaymentModal();
+          }
         });
     });
-  }, [totalPayment]);
+    // On focus page listener
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      console.log("FOC PAY",totalPayment);
+      if (totalPayment != 0){
+        showPendingPaymentModal();
+      }
+    });
+    return () => unsubscribe;
+  }, []);
+  // Show pending payment modal
+  const showPendingPaymentModal = () => {
+    setPendingPayment(true);
+    setcontainerOpacity(0.05);
+    console.log(isModalVisible);
+  };
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
-  const applicationSteps = [
-    { title: "Info", title2: "" },
-    { title: "Payments", title2: "" },
-  ];
   const onPressMethod = (method, acc, title) => {
     setPaymentMethod(method);
     setAccountNo(acc);
@@ -141,6 +136,7 @@ function Payments(props) {
   };
   const hideModal = () => {
     setisModalVisible(false);
+    setPendingPayment(false);
     setcontainerOpacity(1);
     console.log(isModalVisible);
   };
@@ -148,15 +144,36 @@ function Payments(props) {
   return (
     <SafeAreaView style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Payments" openDrawerFn={openDrawerFn} />
-      {/*Modal Start*/}
+      {/* Pendinding Payment Modal */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={isModalVisible}
+        visible={isPendingPayment}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
+          //alert("Modal has been closed.");
         }}
       >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              Please make a payment of Rs.
+              <Text style={{ fontWeight: "bold" }}>{totalPayment}</Text> through
+              Easypaisa to account No.{" "}
+              <Text style={{ fontWeight: "bold" }}>03134243117</Text>.
+            </Text>
+
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
+          </View>
+        </View>
+      </Modal>
+      {/*Modal Start*/}
+      <Modal animationType="slide" transparent={true} visible={isModalVisible}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
@@ -333,11 +350,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
   },
+
   buttonModalClose: {
-    width: "30%",
-    height: 45,
+    width: "100%",
+    height: 40,
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
+    marginTop: 30,
   },
 });

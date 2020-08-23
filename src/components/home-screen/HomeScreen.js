@@ -30,10 +30,6 @@ import {
   ActivityIndicator,
   Steps,
 } from "@ant-design/react-native";
-import {
-  getUserData,
-  registerForPushNotificationsAsync,
-} from "../../api/firebase/authenication";
 const { height, width } = Dimensions.get("window");
 import * as firebase from "firebase";
 export default function HomeScreen(props){

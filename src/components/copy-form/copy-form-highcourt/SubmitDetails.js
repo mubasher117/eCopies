@@ -68,11 +68,27 @@ export default function SubmitDetails(props) {
   const [isOrderDated, setOrderDated] = useState(false);
   const [isSOW, setSOW] = useState(false);
   const [paymentObject, setpaymentObject] = useState();
+  const [forms, setForms] = useState([]);
+  const getForms = async () => {
+    // Retrieving forms from storage
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
+    console.log("FORMS:",forms)
+    return forms;
+  };
   useEffect(() => {
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
+      setForms(getForms());
     });
-  }, [paymentObject]);
+  }, []);
   // Callback function after adding order
   const addFormCallBack = async (error) => {
     if (error) {
@@ -127,7 +143,7 @@ export default function SubmitDetails(props) {
     }
     let totalPayment = 0;
     if (switchMode) {
-      console.log("total payment", paymentObject.urgentFee,  forms.length)
+      console.log("total payment", paymentObject.urgentFee, forms.length);
       totalPayment = paymentObject.urgentFee * forms.length;
     } else {
       totalPayment = paymentObject.normalFee * forms.lenght;
@@ -135,7 +151,7 @@ export default function SubmitDetails(props) {
     }
     // Adding document details in array
     // documemnts.map((doc) => documentDetails.push(doc.value));
-    console.log('calculations:  ', paymentObject.urgentFee * forms.length)
+    console.log("calculations:  ", paymentObject.urgentFee * forms.length);
     console.log(totalPayment);
     // retrieving user data
     let state = store.getState();
@@ -170,22 +186,6 @@ export default function SubmitDetails(props) {
       },
     };
     addForm(orderDetails, addFormCallBack);
-  };
-  const goBackFn = () => {
-    props.navigation.navigate("CopyFormDocs");
-  };
-  const addDoc = () => {
-    if (documemnts.length < 3) {
-      // Deep Copy of documents
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    } else {
-      setIsVisibleFab(false);
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    }
   };
   const showModal = () => {
     setIsModalVisible(true);
@@ -250,12 +250,20 @@ export default function SubmitDetails(props) {
 
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>فوری طور پر درکار</Text>
+                <Text>
+                  Copy form would be delivered within 2 days. If you want to get
+                  it today, then please tap on the urgent button.
+                </Text>
+                <Text>
+                  نقل فارم 2 دن میں فراہم کیا جائے گا۔ اگر آپ اسے ابھی حاصل کرنا
+                  چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
+                </Text>
+                {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
                 <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    marginTop: 10,
+                    marginTop: 20,
                   }}
                 >
                   <Text style={styles.label}>Urgently Required</Text>
@@ -263,7 +271,11 @@ export default function SubmitDetails(props) {
                     value={switchMode}
                     onChange={toggleSwitch}
                     color={Secondary}
-                    style={{ marginTop: 0 }}
+                    style={{
+                      marginTop: 0,
+                      marginRight: 15,
+                      transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+                    }}
                   />
                 </View>
                 {switchMode ? (
@@ -276,6 +288,7 @@ export default function SubmitDetails(props) {
                 ) : (
                   <View />
                 )}
+                {/* <Text>{forms.length} 0</Text> */}
               </View>
             </View>
           </View>
@@ -363,7 +376,7 @@ const styles = StyleSheet.create({
   submitContainer: {
     margin: 30,
     flex: 1,
-    marginTop: '100%',
+    marginTop: height - 450,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
@@ -421,7 +434,7 @@ const styles = StyleSheet.create({
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
-    marginTop: 30
+    marginTop: 30,
   },
   urgentMessage: {
     color: "red",

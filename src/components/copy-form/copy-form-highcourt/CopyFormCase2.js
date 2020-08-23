@@ -116,9 +116,9 @@ export default function CopyFormCase2(props) {
     setJudges(tempJudges);
   }
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",
@@ -147,6 +147,7 @@ export default function CopyFormCase2(props) {
                   keyboardType="default"
                   error={!!plaintiff.error}
                   maxLength={25}
+                  returnKeyType="next"
                 />
                 <Text style={styles.error}>{plaintiff.error}</Text>
               </View>
@@ -169,6 +170,7 @@ export default function CopyFormCase2(props) {
                   keyboardType="default"
                   maxLength={25}
                   error={!!defendant.error}
+                  returnKeyType="next"
                 />
                 <Text style={styles.error}>{defendant.error}</Text>
               </View>
@@ -195,6 +197,7 @@ export default function CopyFormCase2(props) {
                       value={judge.value}
                       error={!!judge.error}
                       maxLength={25}
+                      returnKeyType="next"
                     />
                     <Text style={styles.error}>{judge.error}</Text>
                   </View>

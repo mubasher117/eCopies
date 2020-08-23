@@ -62,7 +62,7 @@ export default function LoginScreen(props) {
   };
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={[styles.container, { opacity: containerOpacity }]}>
         <BackButton goBack={() => props.navigation.navigate("Home")} />
 

@@ -99,19 +99,8 @@ function Payments(props) {
         .on("value", (snapshot) => {
           console.log(snapshot.val());
           setTotalPayment(snapshot.val());
-          if (snapshot.val() != 0) {
-            showPendingPaymentModal();
-          }
         });
     });
-    // On focus page listener
-    const unsubscribe = props.navigation.addListener("didFocus", () => {
-      console.log("FOC PAY",totalPayment);
-      if (totalPayment != 0){
-        showPendingPaymentModal();
-      }
-    });
-    return () => unsubscribe;
   }, []);
   // Show pending payment modal
   const showPendingPaymentModal = () => {

@@ -10,7 +10,8 @@ import {
   ScrollView,
   SafeAreaView,
   Keyboard,
-  Picker,Image,
+  Picker,
+  Image,
   Modal,
 } from "react-native";
 import {
@@ -45,12 +46,11 @@ import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 
-
 export default function CopyFormDocs(props) {
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [checkModal, setCheckModal] = useState(false);
-  const [isDocument, setDocument] = useState({mode: false, value: ''});
+  const [isDocument, setDocument] = useState({ mode: false, value: "" });
   const [isPetition, setPetition] = useState({
     mode: false,
     value: new Date(),
@@ -67,20 +67,23 @@ export default function CopyFormDocs(props) {
     console.log("FOUND STATE *******************");
     let myOrders = state.ordersReducer.currentForm;
     console.log(myOrders);
-  })
+  });
   // Retreives previous parts of forms, merge it with this part and saves it.
-  const saveDetails = async() => {
+  const saveDetails = async () => {
     // Array to store order details to be saved in db
     var documentDetails = [];
     // Adding checked documents in array
     if (isDocument.mode) {
-      documentDetails.push({type: "Document", value:isDocument.value});
+      documentDetails.push({ type: "Document", value: isDocument.value });
     }
     if (isPetition.mode) {
-      documentDetails.push({type: "Petition", value:isPetition.value});
+      documentDetails.push({ type: "Petition", value: isPetition.value });
     }
     if (isSOW.mode) {
-      documentDetails.push({type: "Statement of witness", value:isSOW.value});
+      documentDetails.push({
+        type: "Statement of witness",
+        value: isSOW.value,
+      });
     }
     if (isOrderDated.mode) {
       documentDetails.push({ type: "Order Dated", value: isOrderDated.value });
@@ -96,22 +99,22 @@ export default function CopyFormDocs(props) {
     try {
       // Retrieving previous forms from storage
       const formsJson = await AsyncStorage.getItem("@forms");
-      if (formsJson){
+      if (formsJson) {
         forms = JSON.parse(formsJson);
-        forms.push(copyFormDetails)
+        forms.push(copyFormDetails);
         const jsonValue = JSON.stringify(forms);
         await AsyncStorage.setItem("@forms", jsonValue);
-      }else{
-        forms = [copyFormDetails]
+      } else {
+        forms = [copyFormDetails];
         const jsonValue = JSON.stringify(forms);
         await AsyncStorage.setItem("@forms", jsonValue);
       }
     } catch (e) {
       // error reading value
-    }  
+    }
     // Clear pervious form
 
-    store.dispatch({type: 'clearForm'})
+    store.dispatch({ type: "clearForm" });
     setDocument({ mode: false, value: "" });
     setPetition({
       mode: false,
@@ -122,7 +125,7 @@ export default function CopyFormDocs(props) {
       value: new Date(),
     });
     setSOW({ mode: false, value: "" });
-  }
+  };
   const onNext = async () => {
     setIsModalVisible(false);
     setcontainerOpacity(1);
@@ -157,32 +160,31 @@ export default function CopyFormDocs(props) {
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || isOrderDated.value;
     setShowDate(Platform.OS === "ios");
-    setOrderDated({...isOrderDated, value: currentDate});
+    setOrderDated({ ...isOrderDated, value: currentDate });
   };
   const onChangePetitionDate = (event, selectedDate) => {
     const currentDate = selectedDate || isPetition.value;
     setPetitionDate(Platform.OS === "ios");
-    setPetition({...isPetition, value: currentDate});
+    setPetition({ ...isPetition, value: currentDate });
   };
   const hideModal = () => {
     setIsModalVisible(false);
     setCheckModal(false);
     setcontainerOpacity(1);
   };
-  // Checks if form edit made to form or not 
+  // Checks if form edit made to form or not
   const checkForm = () => {
     var isCleanForm = true;
-    if (isDocument.mode || isPetition.mode || isSOW.mode || isOrderDated.mode ){
-      isCleanForm = false
+    if (isDocument.mode || isPetition.mode || isSOW.mode || isOrderDated.mode) {
+      isCleanForm = false;
     }
-    if (isCleanForm){
+    if (isCleanForm) {
       setcontainerOpacity(0.05);
-      setCheckModal(true)
-    }
-    else{
+      setCheckModal(true);
+    } else {
       showModal();
     }
-  }
+  };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
@@ -421,13 +423,13 @@ export default function CopyFormDocs(props) {
             </View>
           </View>
 
-          <View style={styles.nextContainer}>
-            <Button
-              style={styles.next}
-              type="primary"
-              onPress={() => checkForm()}
-            >
-              <Text>Next</Text>
+          <View style={styles.buttonsContainer}>
+            <Button style={styles.previous} type="primary" onPress={goBackFn}>
+              <Text style={{ color: Secondary }}>Previous</Text>
+            </Button>
+
+            <Button style={styles.next} type="primary" onPress={checkForm}>
+              Next
             </Button>
           </View>
         </View>
@@ -501,17 +503,24 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  nextContainer: {
+  buttonsContainer: {
     margin: 30,
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "flex-end",
     width: "90%",
+    flexDirection: "row",
   },
   next: {
     width: "40%",
     height: 50,
     backgroundColor: Secondary,
+    borderWidth: 0,
+  },
+  previous: {
+    width: "40%",
+    height: 50,
+    backgroundColor: "#E6E6E6",
     borderWidth: 0,
   },
   stepsContainer: {

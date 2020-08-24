@@ -32,7 +32,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
-import { TextInput, FAB } from "react-native-paper";
+import { TextInput, FAB, Button as PaperButton } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../header/Header";
 import ModalPicker from "react-native-modal-picker";
@@ -153,6 +153,22 @@ export default function Notifications(props) {
         </View>
       </Modal>
       <ScrollView>
+        {!notifications.length && (
+          <View style={styles.centeredView}>
+            <PaperButton
+              mode="contained"
+              onPress={() => console.log("Pressed")}
+              color={Secondary}
+              loading
+              style={{
+                width: "60%",
+                marginTop: "65%",
+              }}
+            >
+              Loading
+            </PaperButton>
+          </View>
+        )}
         {notifications.map((notification, index) => {
           return (
             <TouchableOpacity key={index} onPress={() => openNotification(notification)}>

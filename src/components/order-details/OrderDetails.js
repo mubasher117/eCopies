@@ -117,9 +117,6 @@ export default function OrderDetails(props) {
                   <Text style={styles.orderType}>
                     {displayDictionary[details.orderType.name]} {index + 1}
                   </Text>
-                  <Text style={styles.orderCourt}>
-                    {displayDictionary[details.orderType.court]}
-                  </Text>
                 </View>
                 <View style={styles.entityContainer}>
                   <Text style={styles.label}>Case No: </Text>
@@ -229,7 +226,6 @@ const styles = StyleSheet.create({
   },
   caseEntity: {
     fontSize: 16,
-    borderBottomWidth: 0.5,
     textAlign: "center",
   },
   vs: {
@@ -253,7 +249,6 @@ const styles = StyleSheet.create({
   loopContainer: {
     marginTop: 10,
     marginBottom: 10,
-    borderWidth: 0.5,
     padding: 10,
   },
   loopLabel: {

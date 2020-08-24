@@ -48,27 +48,15 @@ const { height, width } = Dimensions.get("window");
 import store from "../../../redux/store";
 
 export default function SubmitDetails(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    { key: index++, section: true, label: "Districts" },
-    { key: index++, label: "Lahore" },
-    { key: index++, label: "Faisalabad" },
-    { key: index++, label: "Sheikhupura" },
-  ];
+  console.log("IN CREATE Submit details")
   const [showLoading, setshowLoading] = useState(false);
   const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isVisibleFab, setIsVisibleFab] = useState(true);
   const [switchMode, setSwitchMode] = useState(false);
-  const [documemnts, setdocumemnts] = useState([{ key: 1, value: "" }]);
-  const [isDocumemnt, setDocumemnt] = useState(false);
-  const [isPetition, setPetition] = useState(false);
-  const [isOrderDated, setOrderDated] = useState(false);
-  const [isSOW, setSOW] = useState(false);
   const [paymentObject, setpaymentObject] = useState();
   const [forms, setForms] = useState([]);
+  const [orderTotal, setOrderTotal] = useState(0);
   const getForms = async () => {
     // Retrieving forms from storage
     let forms;
@@ -84,9 +72,9 @@ export default function SubmitDetails(props) {
     return forms;
   };
   useEffect(() => {
+    console.log("IN USE EFFECT")
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
-      setForms(getForms());
     });
   }, []);
   // Callback function after adding order
@@ -111,6 +99,7 @@ export default function SubmitDetails(props) {
   }
   // Submits details to firebase
   const onSubmit = async () => {
+    var totalAmount = 0;
     setshowLoading(true);
     setScroll(false);
     setcontainerOpacity(0.3);
@@ -126,33 +115,12 @@ export default function SubmitDetails(props) {
     } catch (e) {
       // error reading value
     }
-    // Array to store order details to be saved in db
-    var documentDetails = [];
-    // Adding checked documents in array
-    if (isDocumemnt) {
-      documentDetails.push("Document");
-    }
-    if (isPetition) {
-      documentDetails.push("Petition");
-    }
-    if (isSOW) {
-      documentDetails.push("Statement of witness");
-    }
-    if (isOrderDated) {
-      documentDetails.push("Order Dated");
-    }
-    let totalPayment = 0;
-    if (switchMode) {
-      console.log("total payment", paymentObject.urgentFee, forms.length);
-      totalPayment = paymentObject.urgentFee * forms.length;
-    } else {
-      totalPayment = paymentObject.normalFee * forms.lenght;
-      console.log("total payment", paymentObject.urgentFee, forms.length);
-    }
-    // Adding document details in array
-    // documemnts.map((doc) => documentDetails.push(doc.value));
-    console.log("calculations:  ", paymentObject.urgentFee * forms.length);
-    console.log(totalPayment);
+    console.log("PAYMENTS OBJ: ", paymentObject);
+    console.log("Forms: ", forms.length);
+    totalAmount = switchMode
+        ? paymentObject.urgentFee * forms.length
+        : paymentObject.normalFee * forms.length
+    console.log("totalAmount", totalAmount)
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
@@ -177,15 +145,15 @@ export default function SubmitDetails(props) {
       customerId: storedUserId,
       createdOn: new Date().toString(),
       orderNo: orderNo,
-      totalAmount: switchMode
-        ? paymentObject.urgentFee * forms.length
-        : paymentObject.normalFee * forms.length,
+      totalAmount: totalAmount,
       orderType: {
         name: "copyForm",
         court: "highCourt",
       },
     };
+    console.log(orderDetails)
     addForm(orderDetails, addFormCallBack);
+    setOrderTotal(totalAmount);
   };
   const showModal = () => {
     setIsModalVisible(true);
@@ -219,7 +187,10 @@ export default function SubmitDetails(props) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Your details have been submitted.
+              Your details have been submitted. Please make a payment of Rs.
+              <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> through
+              Easypaisa to account#{" "}
+              <Text style={{ fontWeight: "bold" }}>03134243117</Text>
             </Text>
             <Text style={styles.modalText}>
               آپ کی تفصیلات جمع کر لی گئی ہیں۔
@@ -291,6 +262,12 @@ export default function SubmitDetails(props) {
                 {/* <Text>{forms.length} 0</Text> */}
               </View>
             </View>
+          </View>
+
+          <View style={styles.submitAnotherFormContainer}>
+            <Button style={styles.submit} type="primary" onPress={() => props.navigation.navigate("CopyFormCase")}>
+              <Text>Another Copy Form</Text>
+            </Button>
           </View>
 
           <View style={styles.submitContainer}>
@@ -377,6 +354,14 @@ const styles = StyleSheet.create({
     margin: 30,
     flex: 1,
     marginTop: height - 450,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    width: "90%",
+  },
+  submitAnotherFormContainer: {
+    margin: 30,
+    flex: 1,
+    marginTop: 50,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",

@@ -30,31 +30,33 @@ import { TextInput, Chip, FAB } from "react-native-paper";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import store from "../../../redux/store";
-import {nameValidator2} from '../../core/utils'
+import { nameValidator2 } from "../../core/utils";
 import { Value } from "react-native-reanimated";
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase2(props) {
   const [plaintiff, setPlaintiff] = useState({ value: "", error: "" });
   const [defendant, setDefendant] = useState({ value: "", error: "" });
-  const [judges, setJudges] = useState([{  value: "", error: "" }]);
+  const [judges, setJudges] = useState([{ value: "", error: "" }]);
   const [isVisibleFab, setIsVisibleFab] = useState(true);
 
   useEffect(() => {
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
-      console.log("FOCUSED ON")
-      console.log(form)
+      console.log("FOCUSED ON");
+      console.log(form);
       setPlaintiff(
-        form.plaintiff ? { value: form.plaintiff, error: "" } : { value: "", error: "" }
+        form.plaintiff
+          ? { value: form.plaintiff, error: "" }
+          : { value: "", error: "" }
       );
       setDefendant(
         form.defendant
           ? { value: form.defendant, error: "" }
           : { value: "", error: "" }
       );
-      if (!form.judges){
-        setJudges([{  value: "", error: "" }]);
+      if (!form.judges) {
+        setJudges([{ value: "", error: "" }]);
         setIsVisibleFab(true);
       }
     });
@@ -64,16 +66,16 @@ export default function CopyFormCase2(props) {
     if (judges.length < 2) {
       // Deep Copy of documents
       var tempJudges = Array.from(judges);
-      tempJudges.push({  value: "", error: "" });
+      tempJudges.push({ value: "", error: "" });
       setJudges(tempJudges);
     } else {
       var tempJudges = Array.from(judges);
-      tempJudges.push({  value: "", error: "" });
+      tempJudges.push({ value: "", error: "" });
       setJudges(tempJudges);
       setIsVisibleFab(false);
     }
   };
-  
+
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase");
   };
@@ -82,15 +84,14 @@ export default function CopyFormCase2(props) {
     var plaintiffVal = nameValidator2(plaintiff.value);
     var defendantVal = nameValidator2(defendant.value);
     var judgesVal = nameValidator2(judges[0].value);
-    if (plaintiffVal || defendantVal || judgesVal){
+    if (plaintiffVal || defendantVal || judgesVal) {
       setPlaintiff({ ...plaintiff, error: plaintiffVal });
       setDefendant({ ...defendant, error: defendantVal });
       // Setting first judge's error
       let tempJudges = Array.from(judges);
       tempJudges[0] = { ...tempJudges[0], error: judgesVal };
       setJudges(tempJudges);
-    }
-    else{
+    } else {
       const details = {
         plaintiff: plaintiff.value,
         defendant: defendant.value,
@@ -111,10 +112,10 @@ export default function CopyFormCase2(props) {
   }
   */
   const updateJudges = (value, index) => {
-    let tempJudges = Array.from(judges)
-    tempJudges[index] = {value: value, error: ''}
+    let tempJudges = Array.from(judges);
+    tempJudges[index] = { value: value, error: "" };
     setJudges(tempJudges);
-  }
+  };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" backbutton goBackFn={goBackFn} />
@@ -205,7 +206,7 @@ export default function CopyFormCase2(props) {
               })}
             </View>
 
-            <View style={{ width: "100%", height: 55 }} />
+            <View style={{ width: "100%", height: 30 }} />
             {isVisibleFab ? (
               <FAB
                 style={styles.fab}
@@ -218,15 +219,11 @@ export default function CopyFormCase2(props) {
               <View />
             )}
           </View>
-          <View
-            style={{
-              margin: 30,
-              flex: 1,
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-              width: "90%",
-            }}
-          >
+          <View style={styles.buttonsContainer}>
+            <Button style={styles.previous} type="primary" onPress={goBackFn}>
+              <Text style={{ color: Secondary }}>Previous</Text>
+            </Button>
+
             <Button style={styles.next} type="primary" onPress={goNext}>
               Next
             </Button>
@@ -246,9 +243,9 @@ const styles = StyleSheet.create({
   sectionContainer: {
     width: "90%",
   },
-  error:{
-    color: 'red',
-    marginLeft: 5
+  error: {
+    color: "red",
+    marginLeft: 5,
   },
   sectionTitleContainer: {
     borderBottomColor: PrimaryText,
@@ -274,10 +271,24 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 2,
   },
+  buttonsContainer: {
+    margin: 30,
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    width: "90%",
+    flexDirection: "row",
+  },
   next: {
     width: "40%",
     height: 50,
     backgroundColor: Secondary,
+    borderWidth: 0,
+  },
+  previous: {
+    width: "40%",
+    height: 50,
+    backgroundColor: "#E6E6E6",
     borderWidth: 0,
   },
   stepsContainer: {
@@ -289,7 +300,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     backgroundColor: Secondary,
     marginRight: 16,
-    marginTop: 30,
     right: 0,
     bottom: 0,
   },

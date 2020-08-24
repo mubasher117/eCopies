@@ -271,7 +271,6 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 export function addForm(json, callbackfn) {
   console.log(json);
   database.ref("pendingOrders/" + uuidv4()).set(json, (res) => {
-    console.log("**************************IN ADD FORM************************ ")
     console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });

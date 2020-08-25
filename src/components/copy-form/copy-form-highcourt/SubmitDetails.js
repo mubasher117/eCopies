@@ -48,7 +48,6 @@ const { height, width } = Dimensions.get("window");
 import store from "../../../redux/store";
 
 export default function SubmitDetails(props) {
-  console.log("IN CREATE Submit details")
   const [showLoading, setshowLoading] = useState(false);
   const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
@@ -57,25 +56,32 @@ export default function SubmitDetails(props) {
   const [paymentObject, setpaymentObject] = useState();
   const [forms, setForms] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
-  const getForms = async () => {
-    // Retrieving forms from storage
-    let forms;
-    try {
-      const formsJson = await AsyncStorage.getItem("@forms");
-      formsJson != null
-        ? (forms = JSON.parse(formsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    console.log("FORMS:",forms)
-    return forms;
-  };
+  const getForms = () =>
+    new Promise(async (resolve, reject) => {
+      let forms;
+      try {
+        const formsJson = await AsyncStorage.getItem("@forms");
+        formsJson != null
+          ? (forms = JSON.parse(formsJson))
+          : console.log("Error");
+      } catch (e) {
+        // error reading value
+      }
+      resolve(forms);
+    });
   useEffect(() => {
-    console.log("IN USE EFFECT")
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
     });
+    getForms().then((forms) => {
+      setForms(forms);
+    });
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      getForms().then((forms) => {
+        setForms(forms);
+      });
+    });
+    return () => unsubscribe;
   }, []);
   // Callback function after adding order
   const addFormCallBack = async (error) => {
@@ -115,12 +121,9 @@ export default function SubmitDetails(props) {
     } catch (e) {
       // error reading value
     }
-    console.log("PAYMENTS OBJ: ", paymentObject);
-    console.log("Forms: ", forms.length);
     totalAmount = switchMode
-        ? paymentObject.urgentFee * forms.length
-        : paymentObject.normalFee * forms.length
-    console.log("totalAmount", totalAmount)
+      ? paymentObject.urgentFee * forms.length
+      : paymentObject.normalFee * forms.length;
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
@@ -151,7 +154,7 @@ export default function SubmitDetails(props) {
         court: "highCourt",
       },
     };
-    console.log(orderDetails)
+    console.log(orderDetails);
     addForm(orderDetails, addFormCallBack);
     setOrderTotal(totalAmount);
   };
@@ -172,6 +175,20 @@ export default function SubmitDetails(props) {
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
+  };
+  // Passes the current order details to Order Details page
+  const reviewOrder = () => {
+    let order = {
+      totalAmount: switchMode
+        ? paymentObject.urgentFee * forms.length
+        : paymentObject.normalFee * forms.length,
+      forms: forms,
+      orderType: { name: "copyForm" },
+    };
+    props.navigation.navigate("OrderDetails", {
+      details: order,
+      screen: "SubmitDetails",
+    });
   };
   return (
     <KeyboardAwareScrollView>
@@ -218,7 +235,6 @@ export default function SubmitDetails(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Submit Details</Text>
             </View>
-
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text>
@@ -264,9 +280,28 @@ export default function SubmitDetails(props) {
             </View>
           </View>
 
-          <View style={styles.submitAnotherFormContainer}>
-            <Button style={styles.submit} type="primary" onPress={() => props.navigation.navigate("CopyFormCase")}>
-              <Text>Another Copy Form</Text>
+          {/* <Text>Do you want to submit another copy form?</Text>
+          <FAB
+            style={styles.fab}
+            small
+            icon="plus"
+            onPress={() => props.navigation.navigate("CopyFormCase")}
+            color={"white"}
+          /> */}
+          <View style={{ width: 10, height: 30 }} />
+          <View style={styles.reviewContainer}>
+            <Button
+              style={styles.review}
+              type="primary"
+              onPress={() => props.navigation.navigate("CopyFormCase")}
+            >
+              <Text>Submit Another Form</Text>
+            </Button>
+          </View>
+
+          <View style={styles.reviewContainer}>
+            <Button style={styles.review} type="primary" onPress={reviewOrder}>
+              <Text>Review Order</Text>
             </Button>
           </View>
 
@@ -343,25 +378,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   fab: {
-    position: "absolute",
+    alignSelf: "flex-end",
     backgroundColor: Secondary,
     marginRight: 16,
-    marginTop: 30,
-    right: 0,
+    marginTop: 10,
+    right: 20,
     bottom: 0,
   },
   submitContainer: {
     margin: 30,
     flex: 1,
-    marginTop: height - 450,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    width: "90%",
-  },
-  submitAnotherFormContainer: {
-    margin: 30,
-    flex: 1,
-    marginTop: 50,
+    marginTop: height - 600,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
@@ -369,8 +396,22 @@ const styles = StyleSheet.create({
   submit: {
     width: "100%",
     minHeight: 60,
+    backgroundColor: "#f44336",
+    borderWidth: 0,
+  },
+  reviewContainer: {
+    margin: 5,
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    width: "90%",
+  },
+  review: {
+    width: "80%",
+    minHeight: 40,
     backgroundColor: Secondary,
     borderWidth: 0,
+    alignSelf: "center",
   },
   stepsContainer: {
     width: "120%",

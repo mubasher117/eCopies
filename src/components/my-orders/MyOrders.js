@@ -35,34 +35,17 @@ import store from '../../redux/store'
 const { height, width } = Dimensions.get("window");
 
 export default function MyOrders(props) {
-  store.subscribe(() => {
-    console.log("STATE Changed")
-  })
-  //const details = props.navigation.getParam("details", "N/A");
-  //let tempMyOrders = useSelector((state) => state.ordersReducer.myOrders);
+  const details = props.navigation.getParam("details", "N/A");
+  let tempMyOrders = useSelector((state) => state.ordersReducer.myOrders);
   const [myOrders, setMyOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [noOrders, setNoOrders] = useState(false);
-  const getMyOrders = () =>
-   new Promise(async(resolve, reject) => {
-      let state = store.getState();
-      let myOrders = state.ordersReducer.myOrders;
-      console.log(myOrders)
-      await setMyOrders(tempMyOrders);
-      resolve()
-   })
   useEffect(() => {
-    let state = store.getState();
-    let myOrders = state.ordersReducer.myOrders;
-    setMyOrders(myOrders);
-    const unsubscribe = props.navigation.addListener("didFocus", () => {
-      console.log("FOCUSED")
-      let state = store.getState();
-      let myOrders = state.ordersReducer.myOrders;
-      setMyOrders(myOrders);
-    });
-    return () => unsubscribe;
-  }, []);
+    if (tempMyOrders != undefined) {
+      setMyOrders(tempMyOrders);
+      setIsLoading(false);
+    }
+  }, [tempMyOrders]);
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();

@@ -35,9 +35,9 @@ const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 // Display words against db values
 const displayDictionary = {
-  copyForm : 'Copy Form',
-  highCourt: 'High Court'
-}
+  copyForm: "Copy Form",
+  highCourt: "High Court",
+};
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
   const previousScreen = props.navigation.getParam("screen", "Orders");
@@ -54,21 +54,14 @@ export default function OrderDetails(props) {
       <Header title="Details" backbutton goBackFn={goBackFn} />
       <ScrollView>
         <View style={styles.centeredView}>
-          <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
-          <View style={styles.orderDetails}>
-            <Text
-              style={{
-                fontWeight: "bold",
-                color: "white",
-                fontSize: 16,
-                backgroundColor: Secondary,
-                padding: 10,
-                borderRadius: 15,
-              }}
-            >
-              {details.status}
-            </Text>
-          </View>
+          {props.navigation.getParam("screen") != "SubmitDetails" && (
+            <View style={styles.centeredView}>
+              <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
+              <View style={styles.orderDetails}>
+                <Text style={styles.status}>{details.status}</Text>
+              </View>
+            </View>
+          )}
           <View
             style={[
               styles.detailsContainer,
@@ -85,30 +78,36 @@ export default function OrderDetails(props) {
                 Rs. {details.totalAmount}
               </Text>
             </View>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <Text style={{ fontSize: 16 }}>Ordered on:</Text>
-              <Text style={{ fontSize: 18, width: "45%" }}>
-                {new Date(details.createdOn).toDateString()}
-              </Text>
-            </View>
-            {details.progress.postDetails ? (
-              <View style={{ marginTop: 10 }}>
-                <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 18,
-                    alignSelf: "center",
-                  }}
-                >
-                  {details.progress.postDetails.trackingId}
+            {props.navigation.getParam("screen") != "SubmitDetails" && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>Ordered on:</Text>
+                <Text style={{ fontSize: 18, width: "45%" }}>
+                  {new Date(details.createdOn).toDateString()}
                 </Text>
               </View>
-            ) : (
-              <View />
             )}
+            {props.navigation.getParam("screen") != "SubmitDetails" &&
+              (details.progress.postDetails ? (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 18,
+                      alignSelf: "center",
+                    }}
+                  >
+                    {details.progress.postDetails.trackingId}
+                  </Text>
+                </View>
+              ) : (
+                <View />
+              ))}
           </View>
           {details.forms.map((form, index) => {
             return (
@@ -215,8 +214,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     width: "45%",
   },
-  entityValue: { 
-    fontSize: 16, 
+  entityValue: {
+    fontSize: 16,
     alignSelf: "flex-end",
     width: "45%",
   },
@@ -261,5 +260,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#E1EEE1",
     padding: "3%",
     marginTop: 30,
+  },
+  status: {
+    fontWeight: "bold",
+    color: "white",
+    fontSize: 16,
+    backgroundColor: Secondary,
+    padding: 10,
+    borderRadius: 15,
   },
 });

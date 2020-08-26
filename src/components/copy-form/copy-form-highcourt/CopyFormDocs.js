@@ -62,83 +62,79 @@ export default function CopyFormDocs(props) {
   const [isSOW, setSOW] = useState({ mode: false, value: "" });
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
-  useEffect(() => {
-    let state = store.getState();
-    console.log("FOUND STATE *******************");
-    let myOrders = state.ordersReducer.currentForm;
-    console.log(myOrders);
-  });
+  const [showLoading, setshowLoading] = useState(false);
+  useEffect(() => {});
   // Retreives previous parts of forms, merge it with this part and saves it.
-  const saveDetails = async () => {
-    // Array to store order details to be saved in db
-    var documentDetails = [];
-    // Adding checked documents in array
-    if (isDocument.mode) {
-      documentDetails.push({ type: "Document", value: isDocument.value });
-    }
-    if (isPetition.mode) {
-      documentDetails.push({ type: "Petition", value: isPetition.value });
-    }
-    if (isSOW.mode) {
-      documentDetails.push({
-        type: "Statement of witness",
-        value: isSOW.value,
-      });
-    }
-    if (isOrderDated.mode) {
-      documentDetails.push({ type: "Order Dated", value: isOrderDated.value });
-    }
-    let state = store.getState();
-    let formDetails = state.ordersReducer.currentForm;
-    let copyFormDetails = {
-      ...formDetails,
-      documentDetails,
-    };
-    console.log("form : ", copyFormDetails);
-    let forms;
-    try {
-      // Retrieving previous forms from storage
-      const formsJson = await AsyncStorage.getItem("@forms");
-      if (formsJson) {
-        forms = JSON.parse(formsJson);
-        forms.push(copyFormDetails);
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
-      } else {
-        forms = [copyFormDetails];
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
+  const saveDetails = () =>
+    new Promise(async (resolve, reject) => {
+      // Array to store order details to be saved in db
+      var documentDetails = [];
+      // Adding checked documents in array
+      if (isDocument.mode) {
+        documentDetails.push({ type: "Document", value: isDocument.value });
       }
-    } catch (e) {
-      // error reading value
-    }
-    // Clear pervious form
-
-    store.dispatch({ type: "clearForm" });
-    setDocument({ mode: false, value: "" });
-    setPetition({
-      mode: false,
-      value: new Date(),
+      if (isPetition.mode) {
+        documentDetails.push({ type: "Petition", value: isPetition.value });
+      }
+      if (isSOW.mode) {
+        documentDetails.push({
+          type: "Statement of witness",
+          value: isSOW.value,
+        });
+      }
+      if (isOrderDated.mode) {
+        documentDetails.push({
+          type: "Order Dated",
+          value: isOrderDated.value,
+        });
+      }
+      let state = store.getState();
+      let formDetails = state.ordersReducer.currentForm;
+      let copyFormDetails = {
+        ...formDetails,
+        documentDetails,
+        court: "highCourt",
+      };
+      console.log("form : ", copyFormDetails);
+      let forms;
+      try {
+        // Retrieving previous forms from storage
+        const formsJson = await AsyncStorage.getItem("@forms");
+        if (formsJson) {
+          forms = JSON.parse(formsJson);
+          forms.push(copyFormDetails);
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        } else {
+          forms = [copyFormDetails];
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        }
+      } catch (e) {
+        // error reading value
+      }
+      // Clear pervious form
+      store.dispatch({ type: "clearForm" });
+      setDocument({ mode: false, value: "" });
+      setPetition({
+        mode: false,
+        value: new Date(),
+      });
+      setOrderDated({
+        mode: false,
+        value: new Date(),
+      });
+      setSOW({ mode: false, value: "" });
+      resolve();
     });
-    setOrderDated({
-      mode: false,
-      value: new Date(),
-    });
-    setSOW({ mode: false, value: "" });
-  };
   const onNext = async () => {
+    setshowLoading(true);
     setIsModalVisible(false);
-    setcontainerOpacity(1);
-    let forms;
-    try {
-      const formsJson = await AsyncStorage.getItem("@forms");
-      formsJson != null
-        ? (forms = JSON.parse(formsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    props.navigation.navigate("SubmitDetails");
+    saveDetails().then(async () => {
+      setcontainerOpacity(1);
+      setshowLoading(false);
+      props.navigation.navigate("SubmitDetails");
+    });
   };
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase2");
@@ -147,15 +143,17 @@ export default function CopyFormDocs(props) {
   var decisionDate = isOrderDated.value.toDateString().toString();
   var petitionDate = isPetition.value.toDateString().toString();
   const showModal = () => {
-    saveDetails();
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
-    console.log(isModalVisible);
   };
   const submitAnotherForm = () => {
+    setshowLoading(true);
     setIsModalVisible(false);
-    setcontainerOpacity(1);
-    props.navigation.navigate("CopyFormCase");
+    saveDetails().then(() => {
+      setcontainerOpacity(1);
+      setshowLoading(false);
+      props.navigation.navigate("CopyFormCase");
+    });
   };
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || isOrderDated.value;
@@ -187,7 +185,7 @@ export default function CopyFormDocs(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
+      <Header title="High Court" backbutton goBackFn={goBackFn} />
       <Modal
         animationType="slide"
         transparent={true}
@@ -434,6 +432,11 @@ export default function CopyFormDocs(props) {
           </View>
         </View>
       </ScrollView>
+      <ActivityIndicator
+        animating={showLoading}
+        toast
+        size="large"
+      />
     </KeyboardAwareScrollView>
   );
 }

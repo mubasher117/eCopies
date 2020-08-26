@@ -10,7 +10,7 @@ import {
   SafeAreaView,
   Keyboard,
   Picker,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import {
   InputItem,
@@ -31,23 +31,38 @@ import { TextInput, Chip, FAB } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import store from '../../../redux/store'
+import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
-export default function CopyFormCase(props) {
+export default function CopyForm(props) {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [caseNo, setcaseNo] = useState({ value: "", error: false });
+  const [documentNo, setDocumentNo] = useState({ value: "", error: false });
+  const [bahiNo, setBahiNo] = useState({ value: "", error: false });
+  const [volume, setVolume] = useState({ value: "", error: false });
   useEffect(() => {
     const unsubscribe = props.navigation.addListener("didFocus", () => {
-    let state = store.getState();
-    let form = state.ordersReducer.currentForm;
-    console.log("FOUND FORM IN REDUCER:   ", form)
-      setcaseNo(form.caseNo ? { value: form.caseNo, error:false } : { value: "", error: false });
-      setDate(form.decisionDate ? new Date(form.decisionDate) : new Date());
+      let state = store.getState();
+      let form = state.ordersReducer.currentForm;
+      setDocumentNo(
+        form.documentNo
+          ? { value: form.documentNo, error: false }
+          : { value: "", error: false }
+      );
+      setBahiNo(
+        form.bahiNo
+          ? { value: form.bahiNo, error: false }
+          : { value: "", error: false }
+      );
+      setVolume(
+        form.volume
+          ? { value: form.volume, error: false }
+          : { value: "", error: false }
+      );
+      setDate(form.registerDate ? new Date(form.registerDate) : new Date());
     });
-    return (() => unsubscribe)
+    return () => unsubscribe;
   }, [props.navigation]);
-  var decisionDate = date.toDateString().toString();
+  var registerDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
@@ -58,17 +73,27 @@ export default function CopyFormCase(props) {
   };
   // Function triggered on pressing next button
   const goNext = async () => {
-    if (caseNo.value != ""){
-    const details = {
-      caseNo: caseNo.value,
-      decisionDate: decisionDate,
+    if (documentNo.value != "" && bahiNo.value != "" && volume.value != "") {
+      const details = {
+        documentNo: documentNo.value,
+        bahiNo: bahiNo.value,
+        volume: volume.value,
+        registerDate: registerDate
+      };
+      store.dispatch({ type: "setCurrentFormItem", payload: details });
+      props.navigation.navigate("RevenueCopyForm2");
+    } else {
+      // Setting errors of empty fields
+      if (documentNo.value == "") {
+        setDocumentNo({ value: "", error: true });
+      }
+      if (bahiNo.value == "") {
+        setBahiNo({ value: "", error: true });
+      }
+      if (volume.value == "") {
+        setVolume({ value: "", error: true });
+      }
     }
-    store.dispatch({ type: "setCurrentFormItem", payload: details });
-    props.navigation.navigate("CopyFormCase2");
-  }
-  else{
-    setcaseNo({...caseNo, error:true})
-  }
   };
   // Function to open drawer
   const openDrawerFn = () => {
@@ -76,7 +101,7 @@ export default function CopyFormCase(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="High Court" openDrawerFn={openDrawerFn} />
+      <Header title="Revenue Court" openDrawerFn={openDrawerFn} />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
@@ -90,20 +115,60 @@ export default function CopyFormCase(props) {
             </View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>کیس نمبر</Text>
+                <Text style={styles.label}>دستاویز نمبر</Text>
               </View>
               <View style={styles.valueContainer}>
                 <TextInput
-                  label="Case No"
+                  label="Document Number"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
-                  placeholder="CP14580/2020"
-                  value={caseNo.value}
+                  placeholder=""
+                  value={documentNo.value}
                   onChange={(e) =>
-                    setcaseNo({ value: e.nativeEvent.text, error: false })
+                    setDocumentNo({ value: e.nativeEvent.text, error: false })
                   }
-                  keyboardType="default"
-                  error={caseNo.error}
+                  keyboardType="numeric"
+                  error={documentNo.error}
+                  maxLength={20}
+                />
+              </View>
+            </View>
+            <View style={styles.infoContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>بہی نمبر</Text>
+              </View>
+              <View style={styles.valueContainer}>
+                <TextInput
+                  label="Bahi Number"
+                  selectionColor={Primary}
+                  underlineColor={PrimaryText}
+                  placeholder=""
+                  value={bahiNo.value}
+                  onChange={(e) =>
+                    setBahiNo({ value: e.nativeEvent.text, error: false })
+                  }
+                  keyboardType="numeric"
+                  error={bahiNo.error}
+                  maxLength={20}
+                />
+              </View>
+            </View>
+            <View style={styles.infoContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>جلد نمبر</Text>
+              </View>
+              <View style={styles.valueContainer}>
+                <TextInput
+                  label="Volume"
+                  selectionColor={Primary}
+                  underlineColor={PrimaryText}
+                  placeholder=""
+                  value={volume.value}
+                  onChange={(e) =>
+                    setVolume({ value: e.nativeEvent.text, error: false })
+                  }
+                  keyboardType="numeric"
+                  error={volume.error}
                   maxLength={20}
                 />
               </View>
@@ -115,8 +180,8 @@ export default function CopyFormCase(props) {
                   { flexDirection: "row", justifyContent: "space-between" },
                 ]}
               >
-                <Text style={styles.label}>Date of decision</Text>
-                <Text style={styles.label}>تاریخ فیصلہ</Text>
+                <Text style={styles.label}>Date of register</Text>
+                <Text style={styles.label}>تاریخ ریجسٹر</Text>
               </View>
               <TouchableOpacity
                 style={styles.valueContainer}
@@ -133,7 +198,7 @@ export default function CopyFormCase(props) {
                     padding: 10,
                   }}
                 >
-                  {decisionDate}
+                  {registerDate}
                 </Chip>
                 {show && (
                   <DateTimePicker
@@ -146,7 +211,7 @@ export default function CopyFormCase(props) {
               </TouchableOpacity>
             </View>
 
-            <View style={{ width: "100%", height: 55 }} />
+            <View style={{ width: "100%", height: 0 }} />
           </View>
           <View
             style={{

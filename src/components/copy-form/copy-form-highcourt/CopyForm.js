@@ -66,7 +66,7 @@ export default function CopyForm(props) {
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={styles.container}>
-        <Header title="Copy Form" openDrawerFn={openDrawerFn} />
+        <Header title="High Court" openDrawerFn={openDrawerFn} />
         {/* Application Steps */}
         <View style={styles.stepsContainer}>
           <Steps size="small" current={-1} direction="horizontal">

@@ -8,7 +8,8 @@ import {
   SecondaryLight,
 } from "../constants/colors";
 import { createAppContainer } from "react-navigation";
-import CopyFormHomePage from '../components/copy-form/HomePage'
+import AsyncStorage from "@react-native-community/async-storage";
+import CopyFormHomePage from "../components/copy-form/HomePage";
 import CopyForm from "../components/copy-form/copy-form-highcourt/CopyForm";
 import CopyFormDC from "../components/copy-form/copy-form-dc/CopyFormDC";
 import CopyFormCase from "../components/copy-form/copy-form-highcourt/CopyFormCase";
@@ -19,12 +20,13 @@ import SubmitDetails from "../components/copy-form/copy-form-highcourt/SubmitDet
 import Payments from "../components/payments/Payments";
 import Notifications from "../components/notifications/Notifications";
 import { logout, getNotifications } from "../api/firebase/authenication";
-import MyOrders from '../components/my-orders/MyOrders'
+import MyOrders from "../components/my-orders/MyOrders";
 import { getMyOrders } from "../api/firebase/backend";
-import OrderDetails from '../components/order-details/OrderDetails'
+import OrderDetails from "../components/order-details/OrderDetails";
 import Profile from "../components/profile/Profile";
+import RevenueCopyForm from "../components/copy-form/revenue-court/CopyForm";
+import RevenueCopyForm2 from "../components/copy-form/revenue-court/CopyForm2";
 const CustomDrawerContentComponent = (props) => {
-  const [isLogged, setIsLogged] = useState(false);
   const [isActive, setisActive] = useState("home");
   return (
     <View>
@@ -49,10 +51,10 @@ const CustomDrawerContentComponent = (props) => {
             }
           >
             <View style={styles.pageLogoContainer}>
-            <Image
-              style={styles.pageLogo}
-              source={require("../../assets/images/static/user.png")}
-            />
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/user.png")}
+              />
             </View>
             <Text
               style={
@@ -77,10 +79,10 @@ const CustomDrawerContentComponent = (props) => {
             }
           >
             <View style={styles.pageLogoContainer}>
-            <Image
-              style={styles.pageLogo}
-              source={require("../../assets/images/static/home-icon.png")}
-            />
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/home-icon.png")}
+              />
             </View>
             <Text
               style={
@@ -91,11 +93,58 @@ const CustomDrawerContentComponent = (props) => {
             </Text>
           </View>
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            let forms;
+            try {
+              forms = await AsyncStorage.getItem("@forms");
+              forms = JSON.parse(forms)
+            } catch (error) {
+              console.log(error);
+            }
+            console.log("FORMS:  ", forms);
+            if (forms) {
+              console.log(forms.length)
+              if (forms.length) {
+                setisActive("currentOrder");
+                props.navigation.navigate("SubmitDetails");
+              } else {
+                alert("You don't have any unsubmitted form.");
+              }
+            } else {
+              alert("You don't have any unsubmitted form.");
+            }
+          }}
+        >
+          <View
+            style={
+              isActive === "currentOrder"
+                ? styles.activeContainer
+                : styles.pageContainer
+            }
+          >
+            <View style={styles.pageLogoContainer}>
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/order.png")}
+              />
+            </View>
+            <Text
+              style={
+                isActive === "currentOrder"
+                  ? styles.activeLabel
+                  : styles.pageLabel
+              }
+            >
+              Unsubmitted Forms
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => {
             setisActive("orders");
-            getMyOrders()
+            getMyOrders();
             props.navigation.navigate("MyOrders");
           }}
         >
@@ -106,11 +155,11 @@ const CustomDrawerContentComponent = (props) => {
                 : styles.pageContainer
             }
           >
-            <View style={[styles.pageLogoContainer, {paddingLeft: 4}]}>
-            <Image
-              style={styles.pageLogo}
-              source={require("../../assets/images/static/form-icon.png")}
-            />
+            <View style={[styles.pageLogoContainer, { paddingLeft: 4 }]}>
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/form-icon.png")}
+              />
             </View>
             <Text
               style={
@@ -121,7 +170,7 @@ const CustomDrawerContentComponent = (props) => {
             </Text>
           </View>
         </TouchableOpacity>
-{/* 
+        {/* 
         <TouchableOpacity
           onPress={() => {
             setisActive("history");
@@ -162,10 +211,10 @@ const CustomDrawerContentComponent = (props) => {
             }
           >
             <View style={styles.pageLogoContainer}>
-            <Image
-              style={styles.pageLogo}
-              source={require("../../assets/images/static/payment-icon.png")}
-            />
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/payment-icon.png")}
+              />
             </View>
             <Text
               style={
@@ -192,10 +241,10 @@ const CustomDrawerContentComponent = (props) => {
             }
           >
             <View style={[styles.pageLogoContainer]}>
-            <Image
-              style={styles.pageLogo}
-              source={require("../../assets/images/static/notification-icon.png")}
-            />
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/notification-icon.png")}
+              />
             </View>
             <Text
               style={
@@ -211,7 +260,7 @@ const CustomDrawerContentComponent = (props) => {
       </View>
       <View>
         <View elevation={5} style={styles.divider} />
-{/* 
+        {/* 
         <TouchableOpacity
           onPress={() => {
             setisActive("settings");
@@ -265,7 +314,7 @@ const CustomDrawerContentComponent = (props) => {
         <TouchableOpacity
           onPress={() => {
             setisActive("logout");
-            logout()
+            logout();
             props.navigation.navigate("auth");
           }}
         >
@@ -333,6 +382,8 @@ const Drawer = createDrawerNavigator(
     Profile: {
       screen: Profile,
     },
+    RevenueCopyForm: RevenueCopyForm,
+    RevenueCopyForm2: RevenueCopyForm2,
   },
   {
     initialRouteName: "CopyFormHomePage",

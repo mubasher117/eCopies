@@ -54,34 +54,11 @@ export default function SubmitDetails(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [switchMode, setSwitchMode] = useState(false);
   const [paymentObject, setpaymentObject] = useState();
-  const [forms, setForms] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
-  const getForms = () =>
-    new Promise(async (resolve, reject) => {
-      let forms;
-      try {
-        const formsJson = await AsyncStorage.getItem("@forms");
-        formsJson != null
-          ? (forms = JSON.parse(formsJson))
-          : console.log("Error");
-      } catch (e) {
-        // error reading value
-      }
-      resolve(forms);
-    });
   useEffect(() => {
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
     });
-    getForms().then((forms) => {
-      setForms(forms);
-    });
-    const unsubscribe = props.navigation.addListener("didFocus", () => {
-      getForms().then((forms) => {
-        setForms(forms);
-      });
-    });
-    return () => unsubscribe;
   }, []);
   // Callback function after adding order
   const addFormCallBack = async (error) => {
@@ -151,7 +128,6 @@ export default function SubmitDetails(props) {
       totalAmount: totalAmount,
       orderType: {
         name: "copyForm",
-        court: "highCourt",
       },
     };
     console.log(orderDetails);
@@ -171,13 +147,22 @@ export default function SubmitDetails(props) {
   const toggleSwitch = () => {
     setSwitchMode(!switchMode);
   };
-
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
   // Passes the current order details to Order Details page
-  const reviewOrder = () => {
+  const reviewOrder = async() => {
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
+    console.log(forms)
     let order = {
       totalAmount: switchMode
         ? paymentObject.urgentFee * forms.length
@@ -210,7 +195,10 @@ export default function SubmitDetails(props) {
               <Text style={{ fontWeight: "bold" }}>03134243117</Text>
             </Text>
             <Text style={styles.modalText}>
-              آپ کی تفصیلات جمع کر لی گئی ہیں۔
+              آپ کی تفصیلات جمع کر لی گئی ہیں۔ ایزی پیسہ کے اکاؤنٹ نمبر
+              <Text style={{ fontWeight: "bold" }}> 03134243117 </Text> میں{" "}
+              <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> .Rs جمع
+              کروائیں۔
             </Text>
             <Button
               style={styles.buttonModalClose}
@@ -293,7 +281,7 @@ export default function SubmitDetails(props) {
             <Button
               style={styles.review}
               type="primary"
-              onPress={() => props.navigation.navigate("CopyFormCase")}
+              onPress={() => props.navigation.navigate("CopyFormHomePage")}
             >
               <Text>Submit Another Form</Text>
             </Button>

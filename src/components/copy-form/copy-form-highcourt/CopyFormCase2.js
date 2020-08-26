@@ -118,7 +118,7 @@ export default function CopyFormCase2(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
+      <Header title="High Court" backbutton goBackFn={goBackFn} />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{

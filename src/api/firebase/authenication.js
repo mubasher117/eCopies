@@ -170,6 +170,7 @@ export const logout = async () => {
     .then(async () => {
       console.log("User logged out");
       await AsyncStorage.removeItem("@loggedUser");
+      await AsyncStorage.removeItem("@forms");
     })
     .catch(function (error) {
       console.log(error);

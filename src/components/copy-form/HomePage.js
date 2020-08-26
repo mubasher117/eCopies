@@ -35,6 +35,7 @@ import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
 import { getUserId } from "../core/utils";
+import store from "../../redux/store";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
@@ -90,8 +91,7 @@ export default function HomPage(props) {
   };
   return (
     <View style={[styles.container, { opacity: containerOpacity }]}>
-      <Header title="Copy form" openDrawerFn={openDrawerFn} />
-
+      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
         animationType="slide"
         transparent={true}
@@ -126,28 +126,44 @@ export default function HomPage(props) {
             title="High Court"
             titleUrdu="ہائی کورٹ"
             imgSource={require("../../../assets/images/static/highcourt.jpeg")}
-            navigateTo={() => navigateTo("CopyFormCase")}
+            navigateTo={() => {
+              // Clear pervious form
+              store.dispatch({ type: "clearForm" });
+              navigateTo("CopyFormCase");
+            }}
           />
           <FormType
             title="District Court"
             titleUrdu="ضلعی عدالت"
             imgSource={require("../../../assets/images/static/district_court.jpg")}
-            navigateTo={() => navigateTo("CopyFormCase")}
+            navigateTo={() => {
+              // Clear pervious form
+              store.dispatch({ type: "clearForm" });
+              navigateTo("CopyFormCase");
+            }}
           />
         </View>
         <View style={styles.optionsContainer}>
           <FormType
-            title="Session Court"
-            titleUrdu="سیشن کورٹ"
-            imgSource={require("../../../assets/images/static/district_court.jpg")}
-            navigateTo={() => navigateTo("CopyFormCase")}
+            title="Revenue Court"
+            titleUrdu="ریونیو کورٹ"
+            imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
+            navigateTo={() => {
+              // Clear pervious form
+              store.dispatch({ type: "clearForm" });
+              navigateTo("RevenueCopyForm");
+            }}
           />
 
           <FormType
             title="DC Office"
             titleUrdu="ڈی سی آفس"
             imgSource={require("../../../assets/images/static/dcoffice.jpeg")}
-            navigateTo={() => navigateTo("CopyFormCase")}
+            navigateTo={() => {
+              // Clear pervious form
+              store.dispatch({ type: "clearForm" });
+              navigateTo("CopyFormCase");
+            }}
           />
         </View>
         <View style={{ width: "100%", height: 150 }} />

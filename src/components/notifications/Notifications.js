@@ -107,7 +107,6 @@ export default function Notifications(props) {
   const openNotification = (notification) => {
     console.log(notification);
     let state = store.getState();
-    console.log("FOUND STATE *******************");
     let myOrders = state.ordersReducer.myOrders;
     console.log(myOrders);
     seeNotification(notification);

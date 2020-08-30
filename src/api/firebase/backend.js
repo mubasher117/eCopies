@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 
 export async function getMyOrders() {
   getUserId().then((userId) => {
+    console.log("MY ORDERS USERID:   ", userId)
     var dbRef = database
       .ref("/orders")
       .orderByChild("customerId")
@@ -17,6 +18,9 @@ export async function getMyOrders() {
           tempMyOrders.push({ id: key, ...data[key] });
         }
         store.dispatch({ type: "setMyOrders", payload: tempMyOrders });
+      }
+      else{
+        store.dispatch({ type: "setMyOrders", payload: [] });
       }
     });
   });

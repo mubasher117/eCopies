@@ -15,6 +15,9 @@ export const passwordValidator = (password) => {
 };
 export const cellNoValidator = (cellNo) => {
   if (!cellNo || cellNo.length <= 0) return "* Cell Number cannot be empty."; 
+  if (cellNo[0] != "0" || cellNo[1] != "3" || cellNo.length != 11){
+  return "* Format should be 03XXXXXXXXX"
+  }
   return "";
 };
 export const addressValidator = (address) => {

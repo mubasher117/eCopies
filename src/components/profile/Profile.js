@@ -124,6 +124,7 @@ export default function Profile(props) {
             autoCapitalize="none"
             textContentType="emailAddress"
             style={{ marginBottom: 10 }}
+            maxLength={15}
           />
 
           <TextInput
@@ -134,6 +135,7 @@ export default function Profile(props) {
             error={!!address.error}
             autoCapitalize="none"
             keyboardType="default"
+            maxLength={50}
           />
           <Text style={styles.error}>{address.error}</Text>
 

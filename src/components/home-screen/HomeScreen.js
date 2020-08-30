@@ -48,8 +48,8 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <Logo />
-      <Header>Fast Services</Header>
-      <Paragraph>We deliver at your doorstep.</Paragraph>
+      <Header>eCopies</Header>
+      <Paragraph>Get certified copies at doorstep.</Paragraph>
       <View style={{width:'90%'}}>
         <Button
           style={styles.button}

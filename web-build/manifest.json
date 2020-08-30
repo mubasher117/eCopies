@@ -2,8 +2,8 @@
   "background_color": "#ffffff",
   "display": "standalone",
   "lang": "en",
-  "name": "Services",
-  "short_name": "Services",
+  "name": "eCopies",
+  "short_name": "eCopies",
   "start_url": "/?utm_source=web_app_manifest",
   "orientation": "portrait",
   "icons": [

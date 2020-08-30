@@ -131,6 +131,7 @@ export default function RegisterScreen(props) {
             error={!!address.error}
             autoCapitalize="none"
             keyboardType="default"
+            maxLength={50}
           />
           <Text style={styles.error}>{address.error}</Text>
           <TextInput
@@ -140,6 +141,7 @@ export default function RegisterScreen(props) {
             onChangeText={(text) => setPassword({ value: text, error: "" })}
             error={!!password.error}
             secureTextEntry
+            maxLength={20}
           />
           <Text style={styles.error}>{password.error}</Text>
 

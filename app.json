@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Services",
-    "slug": "Services",
+    "name": "eCopies",
+    "slug": "eCopies",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/favicon.png",
+    "icon": "./assets/eCopies.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",

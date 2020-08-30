@@ -36,6 +36,15 @@ export const getUserId = () =>
     resolve(storedUserId);
   });
 
+// Helper function to get notifications in ascending order
+function getAscending(a, b) {
+  if (a.createdOn > b.createdOn) {
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 // Get user's notification on login
 export const getNotifications = async () => {
   getUserId().then((userId) => {
@@ -51,11 +60,16 @@ export const getNotifications = async () => {
         for (var key of keys) {
           objArray.push({ id: key, ...data[key] });
         }
+        objArray.sort(getAscending)
         store.dispatch({
           type: "setNotifications",
-          payload: objArray.reverse(),
+          payload: objArray,
         });
       }
+      else{store.dispatch({
+             type: "setNotifications",
+             payload: [],
+           });}
     });
   });
 };
@@ -82,11 +96,19 @@ export const login = async (email, password, isDirect, callBackFn) => {
       var errorCode = error.code;
       var errorMessage = error.message;
       if (callBackFn){
-      callBackFn("error", errorMessage);
+        if (errorMessage.includes("no user record")){
+          errorMessage = "No user exists with this email"
+          callBackFn("error", errorMessage);
+        }
+        else if (errorMessage.includes("password is invalid")) {
+          errorMessage = "Password is incorrect";
+          callBackFn("error", errorMessage);
+        } else {
+          callBackFn("error", errorMessage);
+        }
       }
     });
 };
-
 // Get additional userData
 export const getUserData = (user) => {
   console.log("In getUserData");

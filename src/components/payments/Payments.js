@@ -49,17 +49,23 @@ const paymentMethods = [
     methodName: "Easypaisa",
     accNo: "03134243117",
   },
+  {
+    source: require("../../../assets/images/static/abl.jpg"),
+    methodName: "Allied Bank Limited",
+    accNo: "148953134243117",
+    accTitle: "eCopies",
+  },
   // {
   //   source: require("../../../assets/images/static/hbl.png"),
   //   methodName: "HBL",
   //   accNo: "148953134243117",
-  //   accTitle: "Fast Services",
+  //   accTitle: "Law Eservices",
   // },
   // {
   //   source: require("../../../assets/images/static/standardchartered-icon.png"),
   //   methodName: "Standard Chartered",
   //   accNo: "47554478787878848",
-  //   accTitle: "Fast Services",
+  //   accTitle: "Law Eservices",
   // },
   // {
   //   source: require("../../../assets/images/static/jazzcash.png"),

@@ -117,6 +117,13 @@ export default function HomPage(props) {
             <Text style={styles.modalText}>
               براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔
             </Text>
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
           </View>
         </View>
       </Modal>
@@ -212,10 +219,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   buttonModalClose: {
-    width: "30%",
-    height: 45,
+    width: "100%",
+    height: 40,
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
+    marginTop: 30,
   },
 });

@@ -12,13 +12,14 @@ import {
   Picker,
   List,
   Modal,
+  Image,
 } from "react-native";
 import {
   InputItem,
   Tag,
-  Button,
   ActivityIndicator,
   Steps,
+  Button
 } from "@ant-design/react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -29,7 +30,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, FAB, Switch, Checkbox } from "react-native-paper";
+import { TextInput, FAB, Switch, Checkbox, Button as PaperButton } from "react-native-paper";
 import {
   addForm,
   login,
@@ -38,38 +39,48 @@ import {
   logout,
 } from "../../../api/firebase/authenication";
 import AsyncStorage from "@react-native-community/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
-const Step = Steps.Step;
+import { cellNoValidator, addressValidator } from "../../core/utils";
 const { height, width } = Dimensions.get("window");
 
 import store from "../../../redux/store";
 
 export default function SubmitDetails(props) {
   const [showLoading, setshowLoading] = useState(false);
-  const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [switchMode, setSwitchMode] = useState(false);
   const [paymentObject, setpaymentObject] = useState();
   const [orderTotal, setOrderTotal] = useState(0);
+  const [cellNo, setCellNo] = useState({ error: "", value: "" });
+  const [address, setAddress] = useState({ error: "", value: "" });
   useEffect(() => {
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
     });
+    // retrieving user data
+    let state = store.getState();
+    let user = state.userReducer.user;
+    setAddress({value: user.address, error: ""});
+    setCellNo({ value: user.cellNo, error: "" });
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      let state = store.getState();
+      let user = state.userReducer.user;
+      setAddress({ value: user.address, error: "" });
+      setCellNo({ value: user.cellNo, error: "" });
+    });
+    return () => unsubscribe;
   }, []);
   // Callback function after adding order
   const addFormCallBack = async (error) => {
     if (error) {
       setshowLoading(false);
-      setScroll(true);
       alert("adding failed");
       showModal();
     } else {
       setshowLoading(false);
-      setScroll(true);
       showModal();
       await AsyncStorage.removeItem("@caseDetails");
       await AsyncStorage.removeItem("@caseDetails2");
@@ -82,9 +93,15 @@ export default function SubmitDetails(props) {
   }
   // Submits details to firebase
   const onSubmit = async () => {
+    var isNotValidCellNo = cellNoValidator(cellNo.value);
+    var isNotValidAddress = addressValidator(address.value);
+    if (isNotValidCellNo || isNotValidAddress){
+      setCellNo({ ...cellNo, error: isNotValidCellNo });
+      setAddress({...address, error:isNotValidAddress})
+    }
+    else{
     var totalAmount = 0;
     setshowLoading(true);
-    setScroll(false);
     setcontainerOpacity(0.3);
     //Geerates an order no ranging between the parameters
     var orderNo = getRandomArbitrary(1000000, 9999999);
@@ -114,16 +131,16 @@ export default function SubmitDetails(props) {
     // Final details ready to be posted
     let orderDetails = {
       applicantName: user.name,
-      cellNo: user.cellNo,
-      address: user.address,
+      cellNo: cellNo.value,
+      address: address.value,
       forms: forms,
       isUrgent: switchMode,
       status: "Pending",
       progress: {
-        pending: new Date().toString(),
+        pending: Date.now(),
       },
       customerId: storedUserId,
-      createdOn: new Date().toString(),
+      createdOn: Date.now(),
       orderNo: orderNo,
       totalAmount: totalAmount,
       orderType: {
@@ -133,6 +150,7 @@ export default function SubmitDetails(props) {
     console.log(orderDetails);
     addForm(orderDetails, addFormCallBack);
     setOrderTotal(totalAmount);
+  }
   };
   const showModal = () => {
     setIsModalVisible(true);
@@ -176,7 +194,7 @@ export default function SubmitDetails(props) {
     });
   };
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
         animationType="slide"
@@ -211,7 +229,7 @@ export default function SubmitDetails(props) {
         </View>
       </Modal>
 
-      <ScrollView scrollEnabled={scroll}>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",
@@ -225,23 +243,24 @@ export default function SubmitDetails(props) {
             </View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text>
+                {/* <Text>
                   Copy form would be delivered within 2 days. If you want to get
                   it today, then please tap on the urgent button.
                 </Text>
                 <Text>
                   نقل فارم 2 دن میں فراہم کیا جائے گا۔ اگر آپ اسے ابھی حاصل کرنا
                   چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
-                </Text>
+                </Text> */}
                 {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
                 <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    marginTop: 20,
+                    alignItems: "center",
+                    marginTop: 10,
                   }}
                 >
-                  <Text style={styles.label}>Urgently Required</Text>
+                  <Text style={styles.labelUrgent}>Urgently Required ?</Text>
                   <Switch
                     value={switchMode}
                     onChange={toggleSwitch}
@@ -276,26 +295,76 @@ export default function SubmitDetails(props) {
             onPress={() => props.navigation.navigate("CopyFormCase")}
             color={"white"}
           /> */}
-          <View style={{ width: 10, height: 30 }} />
-          <View style={styles.reviewContainer}>
+          <View style={{ width: 10, height: 50 }} />
+          {/* <View style={styles.reviewContainer}>
             <Button
               style={styles.review}
               type="primary"
               onPress={() => props.navigation.navigate("CopyFormHomePage")}
             >
-              <Text>Submit Another Form</Text>
+              <Text>Another Form</Text>
             </Button>
-          </View>
+          </View> */}
 
-          <View style={styles.reviewContainer}>
-            <Button style={styles.review} type="primary" onPress={reviewOrder}>
-              <Text>Review Order</Text>
-            </Button>
+          <PaperButton
+            color={Secondary}
+            icon="eye"
+            mode="contained"
+            onPress={reviewOrder}
+          >
+            Review Order
+          </PaperButton>
+          <View style={styles.deliveryInfoContainer}>
+            <Text style={styles.label}>Delivery Details</Text>
+            <View style={styles.addressContainer}>
+              <Image
+                style={{ height: 20, width: 20, marginRight: 10 }}
+                source={require("../../../../assets/images/static/phone.png")}
+              />
+              <TextInput
+                style={{
+                  width: "85%",
+                  borderColor: "gray",
+                  height: 40,
+                }}
+                placeholder="Enter Cell Number"
+                onChangeText={(text) => setCellNo({ ...cellNo, value: text })}
+                value={cellNo.value}
+                maxLength={11}
+                keyboardType="numeric"
+              />
+            </View>
+            <Text style={styles.error}>{cellNo.error}</Text>
+            <View style={styles.addressContainer}>
+              <Image
+                style={{ height: 25, width: 25, marginRight: 5 }}
+                source={require("../../../../assets/images/static/location.png")}
+              />
+              <TextInput
+                style={{
+                  width: "85%",
+                  borderColor: "gray",
+                }}
+                placeholder="Enter address"
+                onChangeText={(text) => setAddress({ ...address, value: text })}
+                value={address.value}
+                numberOfLines={2}
+                multiline={true}
+                maxLength={50}
+              />
+            </View>
+            <Text style={styles.error}>{address.error}</Text>
           </View>
+          {/* <View style={styles.reviewContainer}>
+            
+            <Button style={styles.review} type="primary">
+              <Text style={{ fontSize: 12 }}>Review Order</Text>
+            </Button>
+          </View> */}
 
           <View style={styles.submitContainer}>
             <Button style={styles.submit} type="primary" onPress={onSubmit}>
-              <Text>Submit</Text>
+              <Text>SUBMIT</Text>
             </Button>
           </View>
         </View>
@@ -322,7 +391,6 @@ const styles = StyleSheet.create({
   sectionTitleContainer: {
     borderBottomColor: PrimaryText,
     borderBottomWidth: 1,
-    marginBottom: 20,
   },
   sctionTitle: {
     fontSize: 22,
@@ -333,9 +401,14 @@ const styles = StyleSheet.create({
   labelContainer: {
     marginTop: 20,
   },
+  labelUrgent: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
   label: {
     fontSize: 16,
     fontWeight: "bold",
+    padding:15,
   },
   valueContainer: {
     marginTop: 10,
@@ -374,9 +447,8 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   submitContainer: {
-    margin: 30,
     flex: 1,
-    marginTop: height - 600,
+    marginTop: height - 590,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
@@ -395,16 +467,12 @@ const styles = StyleSheet.create({
     width: "90%",
   },
   review: {
-    width: "80%",
-    minHeight: 40,
+    width: "50%",
+    height: 35,
     backgroundColor: Secondary,
     borderWidth: 0,
+    borderRadius: 30,
     alignSelf: "center",
-  },
-  stepsContainer: {
-    width: "120%",
-    alignItems: "center",
-    marginTop: 20,
   },
   centeredView: {
     flex: 1,
@@ -460,5 +528,17 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     marginTop: 10,
+  },
+  deliveryInfoContainer: {
+    marginTop: 20,
+  },
+  addressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "95%",
+  },
+  error: {
+    color: "red",
+    marginLeft: "10%",
   },
 });

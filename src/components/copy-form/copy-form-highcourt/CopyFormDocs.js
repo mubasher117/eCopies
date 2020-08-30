@@ -252,6 +252,16 @@ export default function CopyFormDocs(props) {
             </TouchableOpacity>
             <View style={{ height: 10, width: 5 }} />
             <Text style={styles.modalText}>Select at least one document</Text>
+            <Text style={styles.modalText}>
+              کم از کم ایک دستاویز کا انتخاب کریں۔
+            </Text>
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
           </View>
         </View>
       </Modal>
@@ -432,11 +442,7 @@ export default function CopyFormDocs(props) {
           </View>
         </View>
       </ScrollView>
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-      />
+      <ActivityIndicator animating={showLoading} toast size="large" />
     </KeyboardAwareScrollView>
   );
 }
@@ -609,5 +615,13 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     marginTop: 10,
+  },
+  buttonModalClose: {
+    width: "100%",
+    height: 40,
+    backgroundColor: Secondary,
+    borderWidth: 0,
+    alignSelf: "flex-end",
+    marginTop: 30,
   },
 });

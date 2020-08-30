@@ -115,7 +115,7 @@ export default function CopyFormCase(props) {
                   { flexDirection: "row", justifyContent: "space-between" },
                 ]}
               >
-                <Text style={styles.label}>Date of decision</Text>
+                <Text style={styles.label}>Date of Decision</Text>
                 <Text style={styles.label}>تاریخ فیصلہ</Text>
               </View>
               <TouchableOpacity

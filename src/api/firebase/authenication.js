@@ -126,42 +126,44 @@ export const getUserData = (user) => {
 };
 
 export const register = async (userInputDetails, callBackFn) => {
-  firebase
-    .auth()
-    .createUserWithEmailAndPassword(
-      userInputDetails.email,
-      userInputDetails.password
-    )
-    .then((user) => {
-      callBackFn("success", user.user.uid);
-      let userDetails = {
-        id: user.user.uid,
-        ...userInputDetails,
-      };
-      //registerUserInDb(userDetails, callBackFn); // Creates other information in db for that user
-      var additionalDetails = {
-        id: user.user.uid,
-        name: userDetails.name,
-        cellNo: userDetails.cellNo,
-        address: userDetails.address,
-        balance: 0,
-      };
-      addAddtionalUserDetails(
-        additionalDetails,
-        userInputDetails.email,
-        userInputDetails.password,
-        null
-      );
-    })
-    .catch(function (error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(error);
-      callBackFn("error", errorMessage);
-      // ...
-    });
+
+  // firebase
+  //   .auth()
+  //   .createUserWithEmailAndPassword(
+  //     userInputDetails.email,
+  //     userInputDetails.password
+  //   )
+  //   .then((user) => {
+  //     callBackFn("success", user.user.uid);
+  //     let userDetails = {
+  //       id: user.user.uid,
+  //       ...userInputDetails,
+  //     };
+  //     //registerUserInDb(userDetails, callBackFn); // Creates other information in db for that user
+  //     var additionalDetails = {
+  //       id: user.user.uid,
+  //       name: userDetails.name,
+  //       cellNo: userDetails.cellNo,
+  //       address: userDetails.address,
+  //       balance: 0,
+  //     };
+  //     addAddtionalUserDetails(
+  //       additionalDetails,
+  //       userInputDetails.email,
+  //       userInputDetails.password,
+  //       null
+  //     );
+  //   })
+  //   .catch(function (error) {
+  //     // Handle Errors here.
+  //     var errorCode = error.code;
+  //     var errorMessage = error.message;
+  //     console.log(error);
+  //     callBackFn("error", errorMessage);
+  //     // ...
+  //   });
 };
+
 export const addAddtionalUserDetails = (
   userDetails,
   email,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   TouchableOpacity,
   StyleSheet,
@@ -10,6 +10,7 @@ import Logo from "../child-components/Logo";
 import Header from "../child-components/Header";
 import { TextInput, Chip } from "react-native-paper";
 import BackButton from "../child-components/BackButton";
+import firebase from './firebase'
 import {
   emailValidator,
   passwordValidator,
@@ -34,8 +35,10 @@ import {
 } from "@ant-design/react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { register } from "../../api/firebase/authenication";
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 const { height, width } = Dimensions.get("window");
 export default function RegisterScreen(props) {
+  const recaptchaVerifier = useRef(null);
   const [name, setName] = useState({ value: "", error: "" });
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
@@ -43,7 +46,28 @@ export default function RegisterScreen(props) {
   const [address, setAddress] = useState({ value: "", error: "" });
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [showLoading, setshowLoading] = useState(false);
-
+  const [verificationId, setVerificationId] = useState(null);
+  const sendVerification = () => {
+    console.log('cell nmber',cellNo)
+    const phoneProvider = new firebase.auth.PhoneAuthProvider();
+    console.log('phoneprovider',phoneProvider)
+    phoneProvider
+      .verifyPhoneNumber(cellNo.value, recaptchaVerifier.current)
+      .then(setVerificationId);
+  };
+  const confirmCode = () => {
+    const credential = firebase.auth.PhoneAuthProvider.credential(
+      verificationId,
+      code
+    );
+    firebase
+      .auth()
+      .signInWithCredential(credential)
+      .then((result) => {
+        // Do something with the results here
+        console.warn(result);
+      });
+  }
   const callBackSubmit = async (type, message) => {
     setcontainerOpacity(1);
     setshowLoading(false);
@@ -61,13 +85,15 @@ export default function RegisterScreen(props) {
     const nameError = nameValidator2(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
-    const cellNoError = cellNoValidator(cellNo.value);
+    // const cellNoError = cellNoValidator(cellNo.value);
     const addressError = addressValidator(address.value)
-    if (emailError || passwordError || nameError || cellNoError || addressError) {
+    if (emailError || passwordError || nameError
+      //  || cellNoError 
+       || addressError) {
       setName({ ...name, error: nameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
-      setCellNo({...cellNo, error: cellNoError})
+      // setCellNo({...cellNo, error: cellNoError})
       setAddress({...address, error: addressError})
   
       return;
@@ -81,7 +107,9 @@ export default function RegisterScreen(props) {
         cellNo: cellNo.value,
         address: address.value
       }
-      register(userDetails, callBackSubmit);
+      sendVerification()
+      
+      // register(userDetails, callBackSubmit);
     }
   };
 
@@ -92,6 +120,10 @@ export default function RegisterScreen(props) {
 
         <View style={{ width: "90%" }}>
           <Header>Create Account</Header>
+          <FirebaseRecaptchaVerifierModal
+          ref={recaptchaVerifier}
+          firebaseConfig={firebase.app().options}
+        />
           <TextInput
             label="Name"
             returnKeyType="next"

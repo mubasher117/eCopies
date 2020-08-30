@@ -41,7 +41,7 @@ export default function LoginScreen(props) {
       setEmail({ value: "", error: "" });
       setPassword({ value: "", error: "" });
       console.log("success");
-      props.navigation.navigate("CopyFormCase");
+      props.navigation.navigate("CopyFormHomePage");
     } else {
       alert(message);
     }
@@ -62,7 +62,7 @@ export default function LoginScreen(props) {
   };
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={[styles.container, { opacity: containerOpacity }]}>
         <BackButton goBack={() => props.navigation.navigate("Home")} />
 

@@ -4,10 +4,11 @@ import AsyncStorage from "@react-native-community/async-storage";
 
 export async function getMyOrders() {
   getUserId().then((userId) => {
+    console.log("MY ORDERS USERID:   ", userId)
     var dbRef = database
       .ref("/orders")
       .orderByChild("customerId")
-      .equalTo(userId)
+      .equalTo(userId);
     dbRef.on("value", (snapshot) => {
       let data = snapshot.val();
       if (data) {
@@ -18,11 +19,14 @@ export async function getMyOrders() {
         }
         store.dispatch({ type: "setMyOrders", payload: tempMyOrders });
       }
+      else{
+        store.dispatch({ type: "setMyOrders", payload: [] });
+      }
     });
   });
 }
 
-export async function seeNotification(notification){
-  let seenNotification = {...notification, isSeen: true}
-  database.ref('notifications/'+ notification.id).set(seenNotification);
+export async function seeNotification(notification) {
+  let seenNotification = { ...notification, isSeen: true };
+  database.ref("notifications/" + notification.id).set(seenNotification);
 }

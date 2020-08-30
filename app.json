@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Services",
-    "slug": "Services",
+    "name": "eCopies",
+    "slug": "eCopies",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/eCopies.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -24,7 +24,8 @@
     },
     "android": {
       "package": "com.example.services",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true
     }
   }
 }

@@ -12,13 +12,14 @@ import {
   Picker,
   List,
   Modal,
+  Image,
 } from "react-native";
 import {
   InputItem,
   Tag,
-  Button,
   ActivityIndicator,
   Steps,
+  Button
 } from "@ant-design/react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -29,7 +30,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, FAB, Switch, Checkbox } from "react-native-paper";
+import { TextInput, FAB, Switch, Checkbox, Button as PaperButton } from "react-native-paper";
 import {
   addForm,
   login,
@@ -38,51 +39,48 @@ import {
   logout,
 } from "../../../api/firebase/authenication";
 import AsyncStorage from "@react-native-community/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
-const Step = Steps.Step;
+import { cellNoValidator, addressValidator } from "../../core/utils";
 const { height, width } = Dimensions.get("window");
 
 import store from "../../../redux/store";
 
 export default function SubmitDetails(props) {
-  var val = "";
-  let index = 0;
-  const districts = [
-    { key: index++, section: true, label: "Districts" },
-    { key: index++, label: "Lahore" },
-    { key: index++, label: "Faisalabad" },
-    { key: index++, label: "Sheikhupura" },
-  ];
   const [showLoading, setshowLoading] = useState(false);
-  const [scroll, setScroll] = useState(true);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isVisibleFab, setIsVisibleFab] = useState(true);
   const [switchMode, setSwitchMode] = useState(false);
-  const [documemnts, setdocumemnts] = useState([{ key: 1, value: "" }]);
-  const [isDocumemnt, setDocumemnt] = useState(false);
-  const [isPetition, setPetition] = useState(false);
-  const [isOrderDated, setOrderDated] = useState(false);
-  const [isSOW, setSOW] = useState(false);
   const [paymentObject, setpaymentObject] = useState();
+  const [orderTotal, setOrderTotal] = useState(0);
+  const [cellNo, setCellNo] = useState({ error: "", value: "" });
+  const [address, setAddress] = useState({ error: "", value: "" });
   useEffect(() => {
     database.ref("prices/copyForm").once("value", (snapshot) => {
       setpaymentObject(snapshot.val());
     });
-  }, [paymentObject]);
+    // retrieving user data
+    let state = store.getState();
+    let user = state.userReducer.user;
+    setAddress({value: user.address, error: ""});
+    setCellNo({ value: user.cellNo, error: "" });
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      let state = store.getState();
+      let user = state.userReducer.user;
+      setAddress({ value: user.address, error: "" });
+      setCellNo({ value: user.cellNo, error: "" });
+    });
+    return () => unsubscribe;
+  }, []);
   // Callback function after adding order
   const addFormCallBack = async (error) => {
     if (error) {
       setshowLoading(false);
-      setScroll(true);
       alert("adding failed");
       showModal();
     } else {
       setshowLoading(false);
-      setScroll(true);
       showModal();
       await AsyncStorage.removeItem("@caseDetails");
       await AsyncStorage.removeItem("@caseDetails2");
@@ -95,8 +93,15 @@ export default function SubmitDetails(props) {
   }
   // Submits details to firebase
   const onSubmit = async () => {
+    var isNotValidCellNo = cellNoValidator(cellNo.value);
+    var isNotValidAddress = addressValidator(address.value);
+    if (isNotValidCellNo || isNotValidAddress){
+      setCellNo({ ...cellNo, error: isNotValidCellNo });
+      setAddress({...address, error:isNotValidAddress})
+    }
+    else{
+    var totalAmount = 0;
     setshowLoading(true);
-    setScroll(false);
     setcontainerOpacity(0.3);
     //Geerates an order no ranging between the parameters
     var orderNo = getRandomArbitrary(1000000, 9999999);
@@ -110,33 +115,9 @@ export default function SubmitDetails(props) {
     } catch (e) {
       // error reading value
     }
-    // Array to store order details to be saved in db
-    var documentDetails = [];
-    // Adding checked documents in array
-    if (isDocumemnt) {
-      documentDetails.push("Document");
-    }
-    if (isPetition) {
-      documentDetails.push("Petition");
-    }
-    if (isSOW) {
-      documentDetails.push("Statement of witness");
-    }
-    if (isOrderDated) {
-      documentDetails.push("Order Dated");
-    }
-    let totalPayment = 0;
-    if (switchMode) {
-      console.log("total payment", paymentObject.urgentFee,  forms.length)
-      totalPayment = paymentObject.urgentFee * forms.length;
-    } else {
-      totalPayment = paymentObject.normalFee * forms.lenght;
-      console.log("total payment", paymentObject.urgentFee, forms.length);
-    }
-    // Adding document details in array
-    // documemnts.map((doc) => documentDetails.push(doc.value));
-    console.log('calculations:  ', paymentObject.urgentFee * forms.length)
-    console.log(totalPayment);
+    totalAmount = switchMode
+      ? paymentObject.urgentFee * forms.length
+      : paymentObject.normalFee * forms.length;
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
@@ -150,42 +131,26 @@ export default function SubmitDetails(props) {
     // Final details ready to be posted
     let orderDetails = {
       applicantName: user.name,
-      cellNo: user.cellNo,
-      address: user.address,
+      cellNo: cellNo.value,
+      address: address.value,
       forms: forms,
       isUrgent: switchMode,
       status: "Pending",
       progress: {
-        pending: new Date().toString(),
+        pending: Date.now(),
       },
       customerId: storedUserId,
-      createdOn: new Date().toString(),
+      createdOn: Date.now(),
       orderNo: orderNo,
-      totalAmount: switchMode
-        ? paymentObject.urgentFee * forms.length
-        : paymentObject.normalFee * forms.length,
+      totalAmount: totalAmount,
       orderType: {
         name: "copyForm",
-        court: "highCourt",
       },
     };
+    console.log(orderDetails);
     addForm(orderDetails, addFormCallBack);
-  };
-  const goBackFn = () => {
-    props.navigation.navigate("CopyFormDocs");
-  };
-  const addDoc = () => {
-    if (documemnts.length < 3) {
-      // Deep Copy of documents
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    } else {
-      setIsVisibleFab(false);
-      var tempDocs = Array.from(documemnts);
-      tempDocs.push({ key: documemnts.length + 1 });
-      setdocumemnts(tempDocs);
-    }
+    setOrderTotal(totalAmount);
+  }
   };
   const showModal = () => {
     setIsModalVisible(true);
@@ -197,31 +162,39 @@ export default function SubmitDetails(props) {
     setcontainerOpacity(1);
     props.navigation.navigate("Payments", { isUrgent: switchMode });
   };
-  const applicationSteps = [
-    { title: "Personal", title2: "" },
-    { title: "Case", title2: "" },
-    { title: "Docs", title2: "" },
-  ];
-
-  const getUpdatedDictionaryOnchange = (key, value) => {
-    console.log("IN UPDATE");
-    let tempDict = Array.from(documemnts);
-    const index = tempDict.findIndex((temp) => temp.key == key);
-    console.log(index);
-    tempDict[index].value = value;
-    console.log(tempDict);
-    return tempDict;
-  };
   const toggleSwitch = () => {
     setSwitchMode(!switchMode);
   };
-
   // Function to be passed to Header
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
+  // Passes the current order details to Order Details page
+  const reviewOrder = async() => {
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      // error reading value
+    }
+    console.log(forms)
+    let order = {
+      totalAmount: switchMode
+        ? paymentObject.urgentFee * forms.length
+        : paymentObject.normalFee * forms.length,
+      forms: forms,
+      orderType: { name: "copyForm" },
+    };
+    props.navigation.navigate("OrderDetails", {
+      details: order,
+      screen: "SubmitDetails",
+    });
+  };
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
         animationType="slide"
@@ -234,7 +207,16 @@ export default function SubmitDetails(props) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Your details have been submitted.
+              Your details have been submitted. Please make a payment of Rs.
+              <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> through
+              Easypaisa to account#{" "}
+              <Text style={{ fontWeight: "bold" }}>03134243117</Text>
+            </Text>
+            <Text style={styles.modalText}>
+              آپ کی تفصیلات جمع کر لی گئی ہیں۔ ایزی پیسہ کے اکاؤنٹ نمبر
+              <Text style={{ fontWeight: "bold" }}> 03134243117 </Text> میں{" "}
+              <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> .Rs جمع
+              کروائیں۔
             </Text>
             <Button
               style={styles.buttonModalClose}
@@ -247,7 +229,7 @@ export default function SubmitDetails(props) {
         </View>
       </Modal>
 
-      <ScrollView scrollEnabled={scroll}>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",
@@ -259,23 +241,35 @@ export default function SubmitDetails(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Submit Details</Text>
             </View>
-
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>فوری طور پر درکار</Text>
+                {/* <Text>
+                  Copy form would be delivered within 2 days. If you want to get
+                  it today, then please tap on the urgent button.
+                </Text>
+                <Text>
+                  نقل فارم 2 دن میں فراہم کیا جائے گا۔ اگر آپ اسے ابھی حاصل کرنا
+                  چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
+                </Text> */}
+                {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
                 <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
+                    alignItems: "center",
                     marginTop: 10,
                   }}
                 >
-                  <Text style={styles.label}>Urgently Required</Text>
+                  <Text style={styles.labelUrgent}>Urgently Required ?</Text>
                   <Switch
                     value={switchMode}
                     onChange={toggleSwitch}
                     color={Secondary}
-                    style={{ marginTop: 0 }}
+                    style={{
+                      marginTop: 0,
+                      marginRight: 15,
+                      transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+                    }}
                   />
                 </View>
                 {switchMode ? (
@@ -288,13 +282,89 @@ export default function SubmitDetails(props) {
                 ) : (
                   <View />
                 )}
+                {/* <Text>{forms.length} 0</Text> */}
               </View>
             </View>
           </View>
 
+          {/* <Text>Do you want to submit another copy form?</Text>
+          <FAB
+            style={styles.fab}
+            small
+            icon="plus"
+            onPress={() => props.navigation.navigate("CopyFormCase")}
+            color={"white"}
+          /> */}
+          <View style={{ width: 10, height: 50 }} />
+          {/* <View style={styles.reviewContainer}>
+            <Button
+              style={styles.review}
+              type="primary"
+              onPress={() => props.navigation.navigate("CopyFormHomePage")}
+            >
+              <Text>Another Form</Text>
+            </Button>
+          </View> */}
+
+          <PaperButton
+            color={Secondary}
+            icon="eye"
+            mode="contained"
+            onPress={reviewOrder}
+          >
+            Review Order
+          </PaperButton>
+          <View style={styles.deliveryInfoContainer}>
+            <Text style={styles.label}>Delivery Details</Text>
+            <View style={styles.addressContainer}>
+              <Image
+                style={{ height: 20, width: 20, marginRight: 10 }}
+                source={require("../../../../assets/images/static/phone.png")}
+              />
+              <TextInput
+                style={{
+                  width: "85%",
+                  borderColor: "gray",
+                  height: 40,
+                }}
+                placeholder="Enter Cell Number"
+                onChangeText={(text) => setCellNo({ ...cellNo, value: text })}
+                value={cellNo.value}
+                maxLength={11}
+                keyboardType="numeric"
+              />
+            </View>
+            <Text style={styles.error}>{cellNo.error}</Text>
+            <View style={styles.addressContainer}>
+              <Image
+                style={{ height: 25, width: 25, marginRight: 5 }}
+                source={require("../../../../assets/images/static/location.png")}
+              />
+              <TextInput
+                style={{
+                  width: "85%",
+                  borderColor: "gray",
+                }}
+                placeholder="Enter address"
+                onChangeText={(text) => setAddress({ ...address, value: text })}
+                value={address.value}
+                numberOfLines={2}
+                multiline={true}
+                maxLength={50}
+              />
+            </View>
+            <Text style={styles.error}>{address.error}</Text>
+          </View>
+          {/* <View style={styles.reviewContainer}>
+            
+            <Button style={styles.review} type="primary">
+              <Text style={{ fontSize: 12 }}>Review Order</Text>
+            </Button>
+          </View> */}
+
           <View style={styles.submitContainer}>
             <Button style={styles.submit} type="primary" onPress={onSubmit}>
-              <Text>Submit</Text>
+              <Text>SUBMIT</Text>
             </Button>
           </View>
         </View>
@@ -321,7 +391,6 @@ const styles = StyleSheet.create({
   sectionTitleContainer: {
     borderBottomColor: PrimaryText,
     borderBottomWidth: 1,
-    marginBottom: 20,
   },
   sctionTitle: {
     fontSize: 22,
@@ -332,9 +401,14 @@ const styles = StyleSheet.create({
   labelContainer: {
     marginTop: 20,
   },
+  labelUrgent: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
   label: {
     fontSize: 16,
     fontWeight: "bold",
+    padding:15,
   },
   valueContainer: {
     marginTop: 10,
@@ -365,17 +439,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   fab: {
-    position: "absolute",
+    alignSelf: "flex-end",
     backgroundColor: Secondary,
     marginRight: 16,
-    marginTop: 30,
-    right: 0,
+    marginTop: 10,
+    right: 20,
     bottom: 0,
   },
   submitContainer: {
-    margin: 30,
     flex: 1,
-    marginTop: '100%',
+    marginTop: height - 590,
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: "90%",
@@ -383,13 +456,23 @@ const styles = StyleSheet.create({
   submit: {
     width: "100%",
     minHeight: 60,
-    backgroundColor: Secondary,
+    backgroundColor: "#f44336",
     borderWidth: 0,
   },
-  stepsContainer: {
-    width: "120%",
-    alignItems: "center",
-    marginTop: 20,
+  reviewContainer: {
+    margin: 5,
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    width: "90%",
+  },
+  review: {
+    width: "50%",
+    height: 35,
+    backgroundColor: Secondary,
+    borderWidth: 0,
+    borderRadius: 30,
+    alignSelf: "center",
   },
   centeredView: {
     flex: 1,
@@ -433,7 +516,7 @@ const styles = StyleSheet.create({
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
-    marginTop: 30
+    marginTop: 30,
   },
   urgentMessage: {
     color: "red",
@@ -445,5 +528,17 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     marginTop: 10,
+  },
+  deliveryInfoContainer: {
+    marginTop: 20,
+  },
+  addressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "95%",
+  },
+  error: {
+    color: "red",
+    marginLeft: "10%",
   },
 });

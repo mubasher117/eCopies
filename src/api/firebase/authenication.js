@@ -36,6 +36,15 @@ export const getUserId = () =>
     resolve(storedUserId);
   });
 
+// Helper function to get notifications in ascending order
+function getAscending(a, b) {
+  if (a.createdOn > b.createdOn) {
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 // Get user's notification on login
 export const getNotifications = async () => {
   getUserId().then((userId) => {
@@ -51,24 +60,20 @@ export const getNotifications = async () => {
         for (var key of keys) {
           objArray.push({ id: key, ...data[key] });
         }
+        objArray.sort(getAscending)
         store.dispatch({
           type: "setNotifications",
-          payload: objArray.reverse(),
+          payload: objArray,
         });
       }
+      else{store.dispatch({
+             type: "setNotifications",
+             payload: [],
+           });}
     });
   });
 };
 
-// const callBackLogin = async (userData) => {
-//   // Storing user after login
-//   try {
-//     const jsonValue = JSON.stringify(userData);
-//     await AsyncStorage.setItem("@loggedUser", jsonValue);
-//   } catch (e) {
-//     console.log("Error in callBackLogin: ", e);
-//   }
-// };
 export const login = async (email, password, isDirect, callBackFn) => {
   console.log("IN LOGIN");
   firebase
@@ -82,26 +87,33 @@ export const login = async (email, password, isDirect, callBackFn) => {
       } catch (e) {
         console.log("Error in storing id: ", e);
       }
-      getUserData(user);
-      // if (!isDirect) {
-      //   registerPushNotifications(user);
-      //   callBackFn("success", user.user.uid);
-      // } else {
-      //   console.log("logged in after registration");
-      //   callBackFn("success", user.user.uid);
-      // }
+      getUserData(user.user);
+      if (callBackFn){
       callBackFn("success", user.user.uid);
+      }
     })
     .catch(function (error) {
       var errorCode = error.code;
       var errorMessage = error.message;
-      callBackFn("error", errorMessage);
+      if (callBackFn){
+        if (errorMessage.includes("no user record")){
+          errorMessage = "No user exists with this email"
+          callBackFn("error", errorMessage);
+        }
+        else if (errorMessage.includes("password is invalid")) {
+          errorMessage = "Password is incorrect";
+          callBackFn("error", errorMessage);
+        } else {
+          callBackFn("error", errorMessage);
+        }
+      }
     });
 };
-
 // Get additional userData
 export const getUserData = (user) => {
-  var dbRef = database.ref("/userData/" + user.user.uid);
+  console.log("In getUserData");
+  console.log(user);
+  var dbRef = database.ref("/userData/" + user.uid);
   dbRef.on("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
@@ -121,7 +133,7 @@ export const register = async (userInputDetails, callBackFn) => {
       userInputDetails.password
     )
     .then((user) => {
-      console.log(user.user.uid);
+      callBackFn("success", user.user.uid);
       let userDetails = {
         id: user.user.uid,
         ...userInputDetails,
@@ -134,13 +146,11 @@ export const register = async (userInputDetails, callBackFn) => {
         address: userDetails.address,
         balance: 0,
       };
-      console.log("ADDITIONAL DETAILS");
-      console.log(userDetails);
       addAddtionalUserDetails(
         additionalDetails,
         userInputDetails.email,
         userInputDetails.password,
-        callBackFn
+        null
       );
     })
     .catch(function (error) {
@@ -158,7 +168,7 @@ export const addAddtionalUserDetails = (
   password,
   callBackFn
 ) => {
-  database.ref("userData/" + userDetails.id).set(userDetails, (response) => {
+  database.ref("userData/" + userDetails.id).set({...userDetails, email: email}, (response) => {
     console.log(response);
     login(email, password, true, callBackFn);
   });
@@ -182,6 +192,7 @@ export const logout = async () => {
     .then(async () => {
       console.log("User logged out");
       await AsyncStorage.removeItem("@loggedUser");
+      await AsyncStorage.removeItem("@forms");
     })
     .catch(function (error) {
       console.log(error);
@@ -282,7 +293,8 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 };
 export function addForm(json, callbackfn) {
   console.log(json);
-  database.ref("pendingOrders/" + uuidv4()).set(json, () => {
+  database.ref("pendingOrders/" + uuidv4()).set(json, (res) => {
+    console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });
 }

@@ -15,6 +15,7 @@ export default function (state = initialState, action) {
       console.log("IN form REDUCER");
       return { ...state, currentForm: { ...state.currentForm, ...action.payload } };
     case 'clearForm':
+      console.log("IN clear form")
       return{...state, currentForm:{}}
     default:
       return { ...state };

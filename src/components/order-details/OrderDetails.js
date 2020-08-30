@@ -11,7 +11,7 @@ import {
   Keyboard,
   Picker,
   TouchableOpacity,
-  Image,
+  Image,Modal
 } from "react-native";
 import {
   InputItem,
@@ -31,44 +31,110 @@ import {
 } from "../../constants/colors";
 import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
-const Step = Steps.Step;
+import AsyncStorage from "@react-native-community/async-storage";
+import HighCourtFormDetails from '../child-components/HighCourtFormDetails'
+import RevenueCourtFormDetails from "../child-components/RevenueCourtFormDetails";
 const { height, width } = Dimensions.get("window");
-// Display words against db values
-const displayDictionary = {
-  copyForm : 'Copy Form',
-  highCourt: 'High Court'
-}
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
   const previousScreen = props.navigation.getParam("screen", "Orders");
-  useEffect(() => {
-    return () => {};
-  }, []);
+  const [refresh, setRefresh] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [containerOpacity, setcontainerOpacity] = useState(1);
+  const [formIndex, setFormIndex] = useState(0)
   // Function to be passed to Header
   const goBackFn = () => {
     props.navigation.navigate(previousScreen);
   };
-  const tabs = [{ title: "Orders" }, { title: "Urgent" }];
+  const removeFormFromStorage = () =>
+    new Promise(async (resolve, reject) => {
+      const jsonValue = JSON.stringify(details.forms);
+      await AsyncStorage.setItem("@forms", jsonValue);
+      resolve();
+    });
+  const removeOrder = async (index) => {
+    let previousTotal = details.totalAmount;
+    let totalOfSingleForm = previousTotal / details.forms.length;
+    let totalAfterFormDelete = details.totalAmount - totalOfSingleForm;
+    console.log(totalAfterFormDelete);
+    details.forms.splice(index, 1);
+    details.totalAmount = totalAfterFormDelete;
+    props.navigation.setParams("details", {details});
+    removeFormFromStorage().then(() => {
+      if (details.forms.length == 0){
+        props.navigation.navigate("CopyFormHomePage");
+      }
+      else{
+        setRefresh(1);
+      }
+    });
+  };
+  const hideModal = () => {
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
+  };
+
+  const showModal = (index) => {
+    setFormIndex(index)
+    setIsModalVisible(true);
+    setcontainerOpacity(0.2);
+  };
+  const deleteForm = () => {
+    setIsModalVisible(false);
+    setcontainerOpacity(1);
+    removeOrder(formIndex);
+  }
+
   return (
     <View style={styles.container}>
       <Header title="Details" backbutton goBackFn={goBackFn} />
-      <ScrollView>
-        <View style={styles.centeredView}>
-          <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
-          <View style={styles.orderDetails}>
-            <Text
-              style={{
-                fontWeight: "bold",
-                color: "white",
-                fontSize: 16,
-                backgroundColor: Secondary,
-                padding: 10,
-                borderRadius: 15,
-              }}
-            >
-              {details.status}
+      {/*Delete form modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          //alert("Modal has been closed.");
+        }}
+      >
+        <View style={styles.centeredViewModal}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              Do you want to delete this form?
             </Text>
+            {/* <Text style={styles.modalText}>
+              کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟
+            </Text> */}
+            <View style={styles.modalButtonsContainer}>
+              <Button
+                style={styles.buttonModalNo}
+                type="primary"
+                onPress={hideModal}
+              >
+                <Text style={{ color: Secondary }}>No</Text>
+              </Button>
+              <Button
+                style={styles.buttonModalYes}
+                type="primary"
+                onPress={deleteForm}
+              >
+                Yes
+              </Button>
+            </View>
           </View>
+        </View>
+      </Modal>
+      <ScrollView>
+        <View style={[styles.centeredView, { opacity: containerOpacity }]}>
+          {/* If navigated from Submit Order screen */}
+          {props.navigation.getParam("screen") != "SubmitDetails" && (
+            <View style={styles.centeredView}>
+              <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
+              <View style={styles.orderDetails}>
+                <Text style={styles.status}>{details.status}</Text>
+              </View>
+            </View>
+          )}
           <View
             style={[
               styles.detailsContainer,
@@ -88,89 +154,72 @@ export default function OrderDetails(props) {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <Text style={{ fontSize: 16 }}>Ordered on:</Text>
-              <Text style={{ fontSize: 18, width: "45%" }}>
-                {new Date(details.createdOn).toDateString()}
+              <Text style={{ fontSize: 16 }}>Total Copy Forms:</Text>
+              <Text style={{ fontWeight: "bold", fontSize: 18, width: "45%" }}>
+                {details.forms.length}
               </Text>
             </View>
-            {details.progress.postDetails ? (
-              <View style={{ marginTop: 10 }}>
-                <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 18,
-                    alignSelf: "center",
-                  }}
-                >
-                  {details.progress.postDetails.trackingId}
+            {props.navigation.getParam("screen") != "SubmitDetails" && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>Ordered on:</Text>
+                <Text style={{ fontSize: 18, width: "45%" }}>
+                  {new Date(details.createdOn).toDateString()}
                 </Text>
               </View>
-            ) : (
-              <View />
             )}
+            {props.navigation.getParam("screen") != "SubmitDetails" &&
+              (details.progress.postDetails ? (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 18,
+                      alignSelf: "center",
+                    }}
+                  >
+                    {details.progress.postDetails.trackingId}
+                  </Text>
+                </View>
+              ) : (
+                <View />
+              ))}
           </View>
           {details.forms.map((form, index) => {
-            return (
-              <View style={styles.detailsContainer}>
-                <View style={styles.orderInformation}>
-                  <Text style={styles.orderType}>
-                    {displayDictionary[details.orderType.name]} {index + 1}
-                  </Text>
-                  <Text style={styles.orderCourt}>
-                    {displayDictionary[details.orderType.court]}
-                  </Text>
-                </View>
-                <View style={styles.entityContainer}>
-                  <Text style={styles.label}>Case No: </Text>
-                  <Text style={styles.entityValue}>{form.caseNo}</Text>
-                </View>
-                <View style={styles.entityContainer}>
-                  <Text style={styles.label}>Date of decision: </Text>
-                  <Text style={styles.entityValue}>{form.decisionDate}</Text>
-                </View>
-                <View style={styles.caseEntitiesContainer}>
-                  <Text style={styles.caseEntity}>{form.plaintiff}</Text>
-                  <Text style={styles.vs}>VS</Text>
-                  <Text style={styles.caseEntity}>{form.defendant}</Text>
-                </View>
-                <View style={styles.loopContainer}>
-                  <Text style={styles.loopLabel}>Judges</Text>
-                  {form.judges.map((judge, index) => {
-                    return (
-                      <Text style={styles.entity}>
-                        {index + 1}- {judge}
-                      </Text>
-                    );
-                  })}
-                </View>
-                <View style={styles.loopContainer}>
-                  <Text style={styles.loopLabel}>Documents Required</Text>
-
-                  {form.documentDetails.map((document, index) => {
-                    return (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text style={[styles.entity, { width: "45%" }]}>
-                          {index + 1}- {document.type}
-                          {": "}
-                        </Text>
-                        <Text style={{ width: "45%" }}>
-                          {document.type == "Order Dated" ||
-                          document.type == "Petition"
-                            ? new Date(document.value).toDateString()
-                            : document.value}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            );
+            if (form.court == "highCourt") {
+              return (
+                <HighCourtFormDetails
+                  removeOrder={showModal}
+                  index={index}
+                  screen={
+                    props.navigation.getParam("screen") == "SubmitDetails"
+                      ? "SubmitDetails"
+                      : "other"
+                  }
+                  form={form}
+                  orderType={details.orderType.name}
+                />
+              );
+            } else {
+              return (
+                <RevenueCourtFormDetails
+                  removeOrder={showModal}
+                  index={index}
+                  screen={
+                    props.navigation.getParam("screen") == "SubmitDetails"
+                      ? "SubmitDetails"
+                      : "other"
+                  }
+                  form={form}
+                  orderType={details.orderType.name}
+                />
+              );
+            }
           })}
         </View>
         <View style={{ width: 10, height: 150 }} />
@@ -186,6 +235,11 @@ const styles = StyleSheet.create({
     minHeight: height,
   },
   centeredView: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  centeredViewModal: {
+    flex:1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -218,9 +272,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     width: "45%",
   },
-  entityValue: { 
-    fontSize: 16, 
-    alignSelf: "flex-end",
+  entityValue: {
+    fontSize: 16,
     width: "45%",
   },
   caseEntitiesContainer: {
@@ -229,7 +282,6 @@ const styles = StyleSheet.create({
   },
   caseEntity: {
     fontSize: 16,
-    borderBottomWidth: 0.5,
     textAlign: "center",
   },
   vs: {
@@ -253,7 +305,6 @@ const styles = StyleSheet.create({
   loopContainer: {
     marginTop: 10,
     marginBottom: 10,
-    borderWidth: 0.5,
     padding: 10,
   },
   loopLabel: {
@@ -266,5 +317,65 @@ const styles = StyleSheet.create({
     backgroundColor: "#E1EEE1",
     padding: "3%",
     marginTop: 30,
+  },
+  status: {
+    fontWeight: "bold",
+    color: "white",
+    fontSize: 16,
+    backgroundColor: Secondary,
+    padding: 10,
+    borderRadius: 15,
+  },
+  modalQuit: {
+    width: 30,
+    height: 30,
+  },
+  modalView: {
+    width: "90%",
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 35,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 15,
+  },
+  modalTextBold: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  modalButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 40,
+  },
+  modalSubtext: {
+    fontSize: 12,
+    color: "grey",
+    marginTop: -10,
+  },
+  buttonModalYes: {
+    width: "40%",
+    height: 45,
+    backgroundColor: Secondary,
+    borderWidth: 0,
+    alignSelf: "flex-end",
+  },
+  buttonModalNo: {
+    width: "40%",
+    height: 45,
+    backgroundColor: "#E6E6E6",
+    borderWidth: 0,
+    alignSelf: "flex-end",
   },
 });

@@ -13,7 +13,9 @@ import BackButton from "../child-components/BackButton";
 import {
   emailValidator,
   passwordValidator,
-  nameValidator,
+  nameValidator2,
+  cellNoValidator,
+  addressValidator,
 } from "../core/utils";
 import {
   Primary,
@@ -49,21 +51,25 @@ export default function RegisterScreen(props) {
       setName({ value: "", error: "" });
       setEmail({ value: "", error: "" });
       setPassword({ value: "", error: "" });
-      props.navigation.navigate("CopyFormCase");
+      props.navigation.navigate("CopyFormHomePage");
     } else {
       alert(message);
     }
   };
 
   const _onSignUpPressed = async () => {
-    const nameError = nameValidator(name.value);
+    const nameError = nameValidator2(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
-
-    if (emailError || passwordError || nameError) {
+    const cellNoError = cellNoValidator(cellNo.value);
+    const addressError = addressValidator(address.value)
+    if (emailError || passwordError || nameError || cellNoError || addressError) {
       setName({ ...name, error: nameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
+      setCellNo({...cellNo, error: cellNoError})
+      setAddress({...address, error: addressError})
+  
       return;
     } else {
       setshowLoading(true);
@@ -80,69 +86,64 @@ export default function RegisterScreen(props) {
   };
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={[styles.container, { opacity: containerOpacity }]}>
         <BackButton goBack={() => props.navigation.navigate("Home")} />
 
-        <Logo />
         <View style={{ width: "90%" }}>
           <Header>Create Account</Header>
-
           <TextInput
             label="Name"
             returnKeyType="next"
             value={name.value}
             onChangeText={(text) => setName({ value: text, error: "" })}
             error={!!name.error}
-            errorText={name.error}
-            style={{ marginBottom: 10 }}
+            maxLength={25}
           />
+          <Text style={styles.error}>{name.error}</Text>
           <TextInput
             label="Cell No"
             returnKeyType="next"
             onChangeText={(text) => setCellNo({ value: text, error: "" })}
-            error={!!email.error}
-            errorText={email.error}
+            error={!!cellNo.error}
             autoCapitalize="none"
             keyboardType="phone-pad"
-            style={{ marginBottom: 10 }}
+            maxLength={15}
           />
+          <Text style={styles.error}>{cellNo.error}</Text>
           <TextInput
             label="Email"
             returnKeyType="next"
             value={email.value}
             onChangeText={(text) => setEmail({ value: text, error: "" })}
             error={!!email.error}
-            errorText={email.error}
             autoCapitalize="none"
             autoCompleteType="email"
             textContentType="emailAddress"
             keyboardType="email-address"
-            style={{ marginBottom: 10 }}
           />
+          <Text style={styles.error}>{email.error}</Text>
           <TextInput
             label="Address"
             returnKeyType="next"
             value={address.value}
             onChangeText={(text) => setAddress({ value: text, error: "" })}
-            error={!!email.error}
-            errorText={email.error}
+            error={!!address.error}
             autoCapitalize="none"
-            autoCompleteType="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
-            style={{ marginBottom: 10 }}
+            keyboardType="default"
+            maxLength={50}
           />
-
+          <Text style={styles.error}>{address.error}</Text>
           <TextInput
             label="Password"
             returnKeyType="done"
             value={password.value}
             onChangeText={(text) => setPassword({ value: text, error: "" })}
             error={!!password.error}
-            errorText={password.error}
             secureTextEntry
+            maxLength={20}
           />
+          <Text style={styles.error}>{password.error}</Text>
 
           <Button
             onPress={_onSignUpPressed}
@@ -198,5 +199,10 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     marginTop: 24,
     marginBottom: 10,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
+    marginLeft: 5,
   },
 });

@@ -10,7 +10,8 @@ import {
   ScrollView,
   SafeAreaView,
   Keyboard,
-  Picker,Image,
+  Picker,
+  Image,
   Modal,
 } from "react-native";
 import {
@@ -45,11 +46,11 @@ import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 
-
 export default function CopyFormDocs(props) {
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDocument, setDocument] = useState({mode: false, value: ''});
+  const [checkModal, setCheckModal] = useState(false);
+  const [isDocument, setDocument] = useState({ mode: false, value: "" });
   const [isPetition, setPetition] = useState({
     mode: false,
     value: new Date(),
@@ -61,81 +62,79 @@ export default function CopyFormDocs(props) {
   const [isSOW, setSOW] = useState({ mode: false, value: "" });
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
-  useEffect(() => {
-    let state = store.getState();
-    console.log("FOUND STATE *******************");
-    let myOrders = state.ordersReducer.currentForm;
-    console.log(myOrders);
-  })
+  const [showLoading, setshowLoading] = useState(false);
+  useEffect(() => {});
   // Retreives previous parts of forms, merge it with this part and saves it.
-  const saveDetails = async() => {
-    setIsModalVisible(false);
-    setcontainerOpacity(1);
-    // Array to store order details to be saved in db
-    var documentDetails = [];
-    // Adding checked documents in array
-    if (isDocument.mode) {
-      documentDetails.push({type: "Document", value:isDocument.value});
-    }
-    if (isPetition.mode) {
-      documentDetails.push({type: "Petition", value:isPetition.value});
-    }
-    if (isSOW.mode) {
-      documentDetails.push({type: "Statement of witness", value:isSOW.value});
-    }
-    if (isOrderDated.mode) {
-      documentDetails.push({ type: "Order Dated", value: isOrderDated.value });
-    }
-    let state = store.getState();
-    let formDetails = state.ordersReducer.currentForm;
-    let copyFormDetails = {
-      ...formDetails,
-      documentDetails,
-    };
-    console.log("form : ", copyFormDetails);
-    let forms;
-    try {
-      // Retrieving previous forms from storage
-      const formsJson = await AsyncStorage.getItem("@forms");
-      if (formsJson){
-        forms = JSON.parse(formsJson);
-        forms.push(copyFormDetails)
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
-      }else{
-        forms = [copyFormDetails]
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
+  const saveDetails = () =>
+    new Promise(async (resolve, reject) => {
+      // Array to store order details to be saved in db
+      var documentDetails = [];
+      // Adding checked documents in array
+      if (isDocument.mode) {
+        documentDetails.push({ type: "Document", value: isDocument.value });
       }
-    } catch (e) {
-      // error reading value
-    }  
-    // Clear pervious form
-
-    store.dispatch({type: 'clearForm'})
-    setDocument({ mode: false, value: "" });
-    setPetition({
-      mode: false,
-      value: new Date(),
+      if (isPetition.mode) {
+        documentDetails.push({ type: "Petition", value: isPetition.value });
+      }
+      if (isSOW.mode) {
+        documentDetails.push({
+          type: "Statement of witness",
+          value: isSOW.value,
+        });
+      }
+      if (isOrderDated.mode) {
+        documentDetails.push({
+          type: "Order Dated",
+          value: isOrderDated.value,
+        });
+      }
+      let state = store.getState();
+      let formDetails = state.ordersReducer.currentForm;
+      let copyFormDetails = {
+        ...formDetails,
+        documentDetails,
+        court: "highCourt",
+      };
+      console.log("form : ", copyFormDetails);
+      let forms;
+      try {
+        // Retrieving previous forms from storage
+        const formsJson = await AsyncStorage.getItem("@forms");
+        if (formsJson) {
+          forms = JSON.parse(formsJson);
+          forms.push(copyFormDetails);
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        } else {
+          forms = [copyFormDetails];
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        }
+      } catch (e) {
+        // error reading value
+      }
+      // Clear pervious form
+      store.dispatch({ type: "clearForm" });
+      setDocument({ mode: false, value: "" });
+      setPetition({
+        mode: false,
+        value: new Date(),
+      });
+      setOrderDated({
+        mode: false,
+        value: new Date(),
+      });
+      setSOW({ mode: false, value: "" });
+      resolve();
     });
-    setOrderDated({
-      mode: false,
-      value: new Date(),
-    });
-    setSOW({ mode: false, value: "" });
-  }
   const onNext = async () => {
-    saveDetails();
-    let forms;
-    try {
-      const formsJson = await AsyncStorage.getItem("@forms");
-      formsJson != null
-        ? (forms = JSON.parse(formsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    props.navigation.navigate("SubmitDetails");
+    setshowLoading(true);
+    setIsModalVisible(false);
+    saveDetails().then(async () => {
+      setcontainerOpacity(1);
+      setshowLoading(false);
+      props.navigation.navigate("SubmitDetails");
+    });
   };
   const goBackFn = () => {
     props.navigation.navigate("CopyFormCase2");
@@ -146,35 +145,53 @@ export default function CopyFormDocs(props) {
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
-    console.log(isModalVisible);
   };
   const submitAnotherForm = () => {
-    saveDetails();
-    props.navigation.navigate("CopyFormCase");
+    setshowLoading(true);
+    setIsModalVisible(false);
+    saveDetails().then(() => {
+      setcontainerOpacity(1);
+      setshowLoading(false);
+      props.navigation.navigate("CopyFormCase");
+    });
   };
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || isOrderDated.value;
     setShowDate(Platform.OS === "ios");
-    setOrderDated({...isOrderDated, value: currentDate});
+    setOrderDated({ ...isOrderDated, value: currentDate });
   };
   const onChangePetitionDate = (event, selectedDate) => {
     const currentDate = selectedDate || isPetition.value;
     setPetitionDate(Platform.OS === "ios");
-    setPetition({...isPetition, value: currentDate});
+    setPetition({ ...isPetition, value: currentDate });
   };
   const hideModal = () => {
     setIsModalVisible(false);
+    setCheckModal(false);
     setcontainerOpacity(1);
   };
+  // Checks if form edit made to form or not
+  const checkForm = () => {
+    var isCleanForm = true;
+    if (isDocument.mode || isPetition.mode || isSOW.mode || isOrderDated.mode) {
+      isCleanForm = false;
+    }
+    if (isCleanForm) {
+      setcontainerOpacity(0.05);
+      setCheckModal(true);
+    } else {
+      showModal();
+    }
+  };
   return (
-    <KeyboardAwareScrollView>
-      <Header title="Copy Form" backbutton goBackFn={goBackFn} />
+    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
+      <Header title="High Court" backbutton goBackFn={goBackFn} />
       <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-          alert("Modal has been closed.");
+          //alert("Modal has been closed.");
         }}
       >
         <View style={styles.centeredView}>
@@ -191,8 +208,8 @@ export default function CopyFormDocs(props) {
             <Text style={styles.modalText}>
               Do you want to submit another copy form?
             </Text>
-            <Text style={styles.modalSubtext}>
-              If you want copy of another case, press Yes
+            <Text style={styles.modalText}>
+              کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟
             </Text>
             <View style={styles.modalButtonsContainer}>
               <Button
@@ -200,7 +217,7 @@ export default function CopyFormDocs(props) {
                 type="primary"
                 onPress={onNext}
               >
-                <Text style={{ color: "black" }}>No</Text>
+                <Text style={{ color: Secondary }}>No</Text>
               </Button>
               <Button
                 style={styles.buttonModalYes}
@@ -213,7 +230,42 @@ export default function CopyFormDocs(props) {
           </View>
         </View>
       </Modal>
-      <ScrollView>
+      {/* Modal if form is clean */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={checkModal}
+        onRequestClose={() => {
+          //alert("Modal has been closed.");
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
+              onPress={hideModal}
+            >
+              <Image
+                style={styles.modalQuit}
+                source={require("../../../../assets/images/static/quit.png")}
+              />
+            </TouchableOpacity>
+            <View style={{ height: 10, width: 5 }} />
+            <Text style={styles.modalText}>Select at least one document</Text>
+            <Text style={styles.modalText}>
+              کم از کم ایک دستاویز کا انتخاب کریں۔
+            </Text>
+            <Button
+              style={styles.buttonModalClose}
+              type="primary"
+              onPress={hideModal}
+            >
+              OK
+            </Button>
+          </View>
+        </View>
+      </Modal>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
             alignItems: "center",
@@ -257,10 +309,11 @@ export default function CopyFormDocs(props) {
                   borderColor: "gray",
                   opacity: isDocument.mode ? 1 : 0.3,
                 }}
-                placeholder="Sales deed"
+                placeholder="Enter document name"
                 onChangeText={(text) =>
                   setDocument({ ...isDocument, value: text })
                 }
+                value={isDocument.value}
                 editable={isDocument.mode}
               />
 
@@ -325,9 +378,10 @@ export default function CopyFormDocs(props) {
                   borderColor: "gray",
                   opacity: isSOW.mode ? 1 : 0.3,
                 }}
-                placeholder="PWs or DWs"
+                placeholder="Enter PWs or DWs"
                 editable={isSOW.mode}
                 onChangeText={(text) => setSOW({ ...isSOW, value: text })}
+                value={isSOW.value}
               />
 
               <View style={styles.documemntsContainer}>
@@ -377,13 +431,18 @@ export default function CopyFormDocs(props) {
             </View>
           </View>
 
-          <View style={styles.nextContainer}>
-            <Button style={styles.next} type="primary" onPress={showModal}>
-              <Text>Next</Text>
+          <View style={styles.buttonsContainer}>
+            <Button style={styles.previous} type="primary" onPress={goBackFn}>
+              <Text style={{ color: Secondary }}>Previous</Text>
+            </Button>
+
+            <Button style={styles.next} type="primary" onPress={checkForm}>
+              Next
             </Button>
           </View>
         </View>
       </ScrollView>
+      <ActivityIndicator animating={showLoading} toast size="large" />
     </KeyboardAwareScrollView>
   );
 }
@@ -453,17 +512,24 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  nextContainer: {
+  buttonsContainer: {
     margin: 30,
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "flex-end",
     width: "90%",
+    flexDirection: "row",
   },
   next: {
     width: "40%",
     height: 50,
     backgroundColor: Secondary,
+    borderWidth: 0,
+  },
+  previous: {
+    width: "40%",
+    height: 50,
+    backgroundColor: "#E6E6E6",
     borderWidth: 0,
   },
   stepsContainer: {
@@ -525,14 +591,14 @@ const styles = StyleSheet.create({
     marginTop: -10,
   },
   buttonModalYes: {
-    width: "30%",
+    width: "40%",
     height: 45,
     backgroundColor: Secondary,
     borderWidth: 0,
     alignSelf: "flex-end",
   },
   buttonModalNo: {
-    width: "30%",
+    width: "40%",
     height: 45,
     backgroundColor: "#E6E6E6",
     borderWidth: 0,
@@ -549,5 +615,13 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     marginTop: 10,
+  },
+  buttonModalClose: {
+    width: "100%",
+    height: 40,
+    backgroundColor: Secondary,
+    borderWidth: 0,
+    alignSelf: "flex-end",
+    marginTop: 30,
   },
 });

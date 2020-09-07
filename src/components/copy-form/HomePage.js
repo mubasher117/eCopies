@@ -69,15 +69,15 @@ export default function HomPage(props) {
     props.navigation.toggleDrawer();
   };
   const navigateTo = (screen) => {
-    getUserId().then((userId) => {
-      database.ref("/userData/" + userId).once("value", (snapshot) => {
-        if (snapshot.val().balance == 0) {
-          console.log(snapshot.val());
-          props.navigation.navigate(screen);
-        } else {
-          showModal();
-        }
-      });
+    let state = store.getState();
+    let user = state.userReducer.user;
+    database.ref("/userData/" + user.id).once("value", (snapshot) => {
+      if (snapshot.val().balance == 0) {
+        console.log(snapshot.val());
+        props.navigation.navigate(screen);
+      } else {
+        showModal();
+      }
     });
   };
   const showModal = () => {

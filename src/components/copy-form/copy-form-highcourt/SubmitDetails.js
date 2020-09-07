@@ -121,13 +121,6 @@ export default function SubmitDetails(props) {
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
-    let storedUser = await AsyncStorage.getItem("@loggedUser");
-    try {
-      storedUser = JSON.parse(storedUser);
-    } catch (error) {
-      console.log("Error in parsing userId ");
-    }
-    let storedUserId = storedUser.user.uid;
     // Final details ready to be posted
     let orderDetails = {
       applicantName: user.name,
@@ -139,7 +132,7 @@ export default function SubmitDetails(props) {
       progress: {
         pending: Date.now(),
       },
-      customerId: storedUserId,
+      customerId: user.id,
       createdOn: Date.now(),
       orderNo: orderNo,
       totalAmount: totalAmount,

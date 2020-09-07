@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-community/async-storage";
+import store from '../../redux/store'
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
 
@@ -15,8 +16,9 @@ export const passwordValidator = (password) => {
 };
 export const cellNoValidator = (cellNo) => {
   if (!cellNo || cellNo.length <= 0) return "* Cell Number cannot be empty."; 
-  if (cellNo[0] != "0" || cellNo[1] != "3" || cellNo.length != 11){
-  return "* Format should be 03XXXXXXXXX"
+  // cellNo[0] != "0" || cellNo[1] != "3" || 
+  if (cellNo.length < 11){
+  return "* Format should be +923XXXXXXXXX"
   }
   return "";
 };
@@ -41,14 +43,13 @@ export const nameValidator2 = (name) => {
 
 export const getUserId = () =>
   new Promise(async (resolve, reject) => {
-    let storedUser = await AsyncStorage.getItem("@loggedUser");
-    try {
-      storedUser = JSON.parse(storedUser);
-    } catch (error) {
-      console.log("Error in parsing userId ");
-    }
+    var state = store.getState();
+    var storedUser = state.userReducer.user;
     if (storedUser) {
       console.log("STORED ID FOUND:   ", storedUser.user.uid);
       resolve(storedUser.user.uid);
+    }
+    else{
+      console.log("NO user found");
     }
   });

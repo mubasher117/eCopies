@@ -83,29 +83,15 @@ function Payments(props) {
   const [totalPayment, setTotalPayment] = useState(0);
   const [isPendingPayment, setPendingPayment] = useState(false);
 
-  // Retrieve user id from storage
-  let getUserId = () =>
-    new Promise(async (resolve, reject) => {
-      // retrieving user data
-      let storedUser = await AsyncStorage.getItem("@loggedUser");
-      try {
-        storedUser = JSON.parse(storedUser);
-      } catch (error) {
-        console.log("Error in parsing userId ");
-      }
-      let storedUserId = storedUser.user.uid;
-      resolve(storedUserId);
-    });
+  
 
   useEffect(() => {
-    getUserId().then((userId) => {
-      console.log("STORED USER ID in Payments:  ", userId);
-      database
-        .ref("userData/" + userId + "/balance")
-        .on("value", (snapshot) => {
-          console.log(snapshot.val());
-          setTotalPayment(snapshot.val());
-        });
+    // retrieving user data
+    let state = store.getState();
+    let user = state.userReducer.user;
+    database.ref("userData/" + user.id + "/balance").on("value", (snapshot) => {
+      console.log(snapshot.val());
+      setTotalPayment(snapshot.val());
     });
   }, []);
   // Show pending payment modal

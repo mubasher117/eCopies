@@ -26,10 +26,9 @@ const AuthenticationComponent = (props) => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         console.log(user.uid)
-        getUserData(user);
+        getUserData(user.uid);
         registerForPushNotificationsAsync(user.uid);
         props.navigation.navigate("main");
-
       } else {
         props.navigation.navigate("auth");
       }

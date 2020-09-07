@@ -1,4 +1,4 @@
-class RevenueCourtForm {
+export default class RevenueCourtForm {
   constructor(town, documentNumber, bahiNumber, volume, registerDate) {
     this.town = town;
     this.documentNumber = documentNumber;

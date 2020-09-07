@@ -39,11 +39,14 @@ import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 var index = 0;
 const towns = [
-  { key: index++, section: true, label: "Towns" },
-  { key: index++, label: "Data Gunj Bakhs town" },
-  { key: index++, label: "Lahore" },
-  { key: index++, label: "Faisalabad" },
-  { key: index++, label: "Sheikhupura" },
+  {key: index++, section: true, label: "Select Town", value:"-1"},
+  {key: index++, label: "Model Town", value:"Model Town"},
+  {key: index++, label: "Allama Iqbal Town", value:"Allama Iqbal Town"},
+  {key: index++, label: "Ravi Town", value:"Ravi Town"},
+  {key: index++, label: "Gulberg", value:"Gulberg"},
+  {key: index++, label: "Nishter Town", value:"Nishter Town"},
+  {key: index++, label: "Aziz Bhatti Town", value:"Aziz Bhatti Town"},
+  {key: index++, label: "Data Gunj Bakhs Town", value:"Data Gunj Bakhs Town"},  
 ];
 export default function CopyForm2(props) {
   const [date, setDate] = useState(new Date());
@@ -213,7 +216,7 @@ export default function CopyForm2(props) {
                     data={towns}
                     initValue="Select Town"
                     onChange={(option) => {
-                      setTown(option);
+                      setTown(option.value);
                     }}
                   />
                 ) : (

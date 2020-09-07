@@ -10,7 +10,7 @@ import Logo from "../child-components/Logo";
 import Header from "../child-components/Header";
 import { TextInput, Chip } from "react-native-paper";
 import BackButton from "../child-components/BackButton";
-import firebase from './firebase'
+import firebase from "./firebase";
 import {
   emailValidator,
   passwordValidator,
@@ -36,80 +36,90 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { register } from "../../api/firebase/authenication";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import { database } from "../../api/firebase/authenication";
+import { addAdditionalDetails } from "../../api/firebase/backend";
 const { height, width } = Dimensions.get("window");
 export default function RegisterScreen(props) {
   const recaptchaVerifier = useRef(null);
   const [name, setName] = useState({ value: "", error: "" });
-  const [email, setEmail] = useState({ value: "", error: "" });
-  const [password, setPassword] = useState({ value: "", error: "" });
+  // const [email, setEmail] = useState({ value: "", error: "" });
+  // const [password, setPassword] = useState({ value: "", error: "" });
   const [cellNo, setCellNo] = useState({ value: "", error: "" });
   const [address, setAddress] = useState({ value: "", error: "" });
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [showLoading, setshowLoading] = useState(false);
   const [verificationId, setVerificationId] = useState(null);
+  const [otpCode, setOtpCode] = useState(0);
   const sendVerification = () => {
-    console.log('cell nmber',cellNo)
+    console.log("cell nmber", cellNo);
     const phoneProvider = new firebase.auth.PhoneAuthProvider();
-    console.log('phoneprovider',phoneProvider)
+    console.log("phoneprovider", phoneProvider);
     phoneProvider
       .verifyPhoneNumber(cellNo.value, recaptchaVerifier.current)
-      .then(setVerificationId);
+      .then(setVerificationId)
+      .catch((error) => {
+        console.log(error);
+      });
   };
   const confirmCode = () => {
     const credential = firebase.auth.PhoneAuthProvider.credential(
       verificationId,
-      code
+      otpCode
     );
     firebase
       .auth()
       .signInWithCredential(credential)
       .then((result) => {
+        var additionalDetails = {
+          id: result.user?.uid,
+          name: name.value,
+          cellNo: cellNo.value,
+          address: address.value,
+          balance: 0,
+        };
+        addAdditionalDetails(additionalDetails);
         // Do something with the results here
         console.warn(result);
+      })
+      .catch((error) => {
+        console.log(error);
       });
-  }
+  };
   const callBackSubmit = async (type, message) => {
     setcontainerOpacity(1);
     setshowLoading(false);
     if (type == "success") {
       setName({ value: "", error: "" });
-      setEmail({ value: "", error: "" });
+      // setEmail({ value: "", error: "" });
       setPassword({ value: "", error: "" });
       props.navigation.navigate("CopyFormHomePage");
     } else {
       alert(message);
     }
   };
-
   const _onSignUpPressed = async () => {
     const nameError = nameValidator2(name.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
-    // const cellNoError = cellNoValidator(cellNo.value);
-    const addressError = addressValidator(address.value)
-    if (emailError || passwordError || nameError
-      //  || cellNoError 
-       || addressError) {
+    // const emailError = emailValidator(email.value);
+    // const passwordError = passwordValidator(password.value);
+    const cellNoError = cellNoValidator(cellNo.value);
+    const addressError = addressValidator(address.value);
+    if (
+      nameError ||
+      // || emailError
+      cellNoError ||
+      addressError
+    ) {
       setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      // setCellNo({...cellNo, error: cellNoError})
-      setAddress({...address, error: addressError})
-  
+      // setEmail({ ...email, error: emailError });
+      // setPassword({ ...password, error: passwordError });
+      setCellNo({ ...cellNo, error: cellNoError });
+      setAddress({ ...address, error: addressError });
+
       return;
     } else {
-      setshowLoading(true);
-      setcontainerOpacity(0.3);
-      const userDetails = {
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        cellNo: cellNo.value,
-        address: address.value
-      }
-      sendVerification()
-      
-      // register(userDetails, callBackSubmit);
+      //setshowLoading(true);
+      //setcontainerOpacity(0.3);
+      sendVerification();
     }
   };
 
@@ -121,9 +131,11 @@ export default function RegisterScreen(props) {
         <View style={{ width: "90%" }}>
           <Header>Create Account</Header>
           <FirebaseRecaptchaVerifierModal
-          ref={recaptchaVerifier}
-          firebaseConfig={firebase.app().options}
-        />
+            ref={recaptchaVerifier}
+            firebaseConfig={firebase.app().options}
+          />
+          <TextInput onChangeText={(text) => setOtpCode(text)} />
+          <Button onPress={confirmCode}>Verify</Button>
           <TextInput
             label="Name"
             returnKeyType="next"
@@ -143,7 +155,7 @@ export default function RegisterScreen(props) {
             maxLength={15}
           />
           <Text style={styles.error}>{cellNo.error}</Text>
-          <TextInput
+          {/* <TextInput
             label="Email"
             returnKeyType="next"
             value={email.value}
@@ -154,7 +166,7 @@ export default function RegisterScreen(props) {
             textContentType="emailAddress"
             keyboardType="email-address"
           />
-          <Text style={styles.error}>{email.error}</Text>
+          <Text style={styles.error}>{email.error}</Text> */}
           <TextInput
             label="Address"
             returnKeyType="next"
@@ -166,7 +178,7 @@ export default function RegisterScreen(props) {
             maxLength={50}
           />
           <Text style={styles.error}>{address.error}</Text>
-          <TextInput
+          {/* <TextInput
             label="Password"
             returnKeyType="done"
             value={password.value}
@@ -175,7 +187,7 @@ export default function RegisterScreen(props) {
             secureTextEntry
             maxLength={20}
           />
-          <Text style={styles.error}>{password.error}</Text>
+          <Text style={styles.error}>{password.error}</Text> */}
 
           <Button
             onPress={_onSignUpPressed}

@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import store from "../../redux/store";
 import AsyncStorage from "@react-native-community/async-storage";
+import User from "../../models/User";
 const firebaseConfig = {
   apiKey: "AIzaSyDa5BINSpVo4SasALNaZ8CbmXmMJOQZORI",
   authDomain: "services-72908.firebaseapp.com",
@@ -23,19 +24,6 @@ if (!firebase.apps.length) {
 
 export var database = firebase.database();
 
-export const getUserId = () =>
-  new Promise(async (resolve, reject) => {
-    // retrieving user data
-    let storedUser = await AsyncStorage.getItem("@loggedUser");
-    try {
-      storedUser = JSON.parse(storedUser);
-    } catch (error) {
-      console.log("Error in parsing userId ");
-    }
-    let storedUserId = storedUser.user.uid;
-    resolve(storedUserId);
-  });
-
 // Helper function to get notifications in ascending order
 function getAscending(a, b) {
   if (a.createdOn > b.createdOn) {
@@ -47,78 +35,96 @@ function getAscending(a, b) {
 
 // Get user's notification on login
 export const getNotifications = async () => {
-  getUserId().then((userId) => {
-    var dbRef = database
-      .ref("notifications")
-      .orderByChild("userId")
-      .equalTo(userId);
-    dbRef.on("value", (snapshot) => {
-      if (snapshot.val()) {
-        let objArray = [];
-        let data = snapshot.val();
-        let keys = Object.keys(data);
-        for (var key of keys) {
-          objArray.push({ id: key, ...data[key] });
-        }
-        objArray.sort(getAscending)
-        store.dispatch({
-          type: "setNotifications",
-          payload: objArray,
-        });
+  // retrieving user data
+  let state = store.getState();
+  let user = state.userReducer.user;
+  var dbRef = database
+    .ref("notifications")
+    .orderByChild("userId")
+    .equalTo(user.id);
+  dbRef.on("value", (snapshot) => {
+    if (snapshot.val()) {
+      let objArray = [];
+      let data = snapshot.val();
+      let keys = Object.keys(data);
+      for (var key of keys) {
+        objArray.push({ id: key, ...data[key] });
       }
-      else{store.dispatch({
-             type: "setNotifications",
-             payload: [],
-           });}
-    });
+      objArray.sort(getAscending);
+      store.dispatch({
+        type: "setNotifications",
+        payload: objArray,
+      });
+    } else {
+      store.dispatch({
+        type: "setNotifications",
+        payload: [],
+      });
+    }
   });
 };
 
-export const login = async (email, password, isDirect, callBackFn) => {
+// export const login = async (email, password, isDirect, callBackFn) => {
+//   console.log("IN LOGIN");
+//   firebase
+//     .auth()
+//     .signInWithEmailAndPassword(email, password)
+//     .then(async (user) => {
+//       // Getting addtional user data
+//       try {
+//         const jsonValue = JSON.stringify(user);
+//         await AsyncStorage.setItem("@loggedUser", jsonValue);
+//       } catch (e) {
+//         console.log("Error in storing id: ", e);
+//       }
+//       getUserData(user.user);
+//       if (callBackFn) {
+//         callBackFn("success", user.user.uid);
+//       }
+//     })
+//     .catch(function (error) {
+//       var errorCode = error.code;
+//       var errorMessage = error.message;
+//       if (callBackFn) {
+//         if (errorMessage.includes("no user record")) {
+//           errorMessage = "No user exists with this email";
+//           callBackFn("error", errorMessage);
+//         } else if (errorMessage.includes("password is invalid")) {
+//           errorMessage = "Password is incorrect";
+//           callBackFn("error", errorMessage);
+//         } else {
+//           callBackFn("error", errorMessage);
+//         }
+//       }
+//     });
+// };
+
+export const login = (cellNo, password) => new Promise((resolve, reject) => {
   console.log("IN LOGIN");
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)
-    .then(async (user) => {
-      // Getting addtional user data
-      try {
-        const jsonValue = JSON.stringify(user);
-        await AsyncStorage.setItem("@loggedUser", jsonValue);
-      } catch (e) {
-        console.log("Error in storing id: ", e);
-      }
-      getUserData(user.user);
-      if (callBackFn){
-      callBackFn("success", user.user.uid);
-      }
-    })
-    .catch(function (error) {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      if (callBackFn){
-        if (errorMessage.includes("no user record")){
-          errorMessage = "No user exists with this email"
-          callBackFn("error", errorMessage);
-        }
-        else if (errorMessage.includes("password is invalid")) {
-          errorMessage = "Password is incorrect";
-          callBackFn("error", errorMessage);
-        } else {
-          callBackFn("error", errorMessage);
-        }
-      }
-    });
-};
+
+  firebase.auth().signInWithPhoneNumber(cellNo, password)
+  .then(res => console.log(res))
+})
 // Get additional userData
-export const getUserData = (user) => {
-  console.log("In getUserData");
-  console.log(user);
-  var dbRef = database.ref("/userData/" + user.uid);
-  dbRef.on("value", (snapshot) => {
+export const getUserData = (userId) => {
+  // console.log(user);
+  var dbRef = database.ref("/userData/" + userId);
+  dbRef.once("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
-      user = { user, ...data };
-      store.dispatch({ type: "setUser", payload: user });
+      // user = { user, ...data };
+      // user = User(user.user.uid, )
+      console.log("*****  USER ADDITIONAL DATA ***** ");
+      var user = new User(
+        data.id,
+        data.name,
+        data.address,
+        data.cellNo,
+        data.expoToken,
+        data.balance
+      );
+      console.log("***********TILL HERE **************");
+        store.dispatch({ type: "setUser", payload: user.getUser() });
     } else {
       console.log("user data not found");
     }
@@ -126,7 +132,6 @@ export const getUserData = (user) => {
 };
 
 export const register = async (userInputDetails, callBackFn) => {
-
   // firebase
   //   .auth()
   //   .createUserWithEmailAndPassword(
@@ -170,10 +175,12 @@ export const addAddtionalUserDetails = (
   password,
   callBackFn
 ) => {
-  database.ref("userData/" + userDetails.id).set({...userDetails, email: email}, (response) => {
-    console.log(response);
-    login(email, password, true, callBackFn);
-  });
+  database
+    .ref("userData/" + userDetails.id)
+    .set({ ...userDetails, email: email }, (response) => {
+      console.log(response);
+      // login(email, password, true, callBackFn);
+    });
 };
 
 export const checkSignedIn = async () => {
@@ -250,8 +257,7 @@ export const registerForPushNotificationsAsync = async (userID) => {
       .database()
       .ref("/userData/" + userID)
       .update(updates)
-      .then(() => {
-      });
+      .then(() => {});
   });
 
   // POST the token to our backend so we can use it to send pushes from there
@@ -295,21 +301,26 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 };
 export function addForm(json, callbackfn) {
   console.log(json);
-  database.ref("pendingOrders/" + uuidv4()).set(json, (res) => {
+  var date = Date.now()
+  var newId = date + "-" +uuidv4();
+  database.ref("pendingOrders/" + newId).set(json, (res) => {
     console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });
 }
-export function updateUserDetails(user, callBackFn){
-  let updates = {}
-  updates['/name'] = user.name
+export function updateUserDetails(user, callBackFn) {
+  let updates = {};
+  updates["/name"] = user.name;
   updates["/id"] = user.id;
   updates["/address"] = user.address;
   updates["/cellNo"] = user.cellNo;
   database
     .ref("userData/")
     .child(user.id)
-    .update(updates, (data) => {
+    .update(updates, async (data) => {
       console.log("IN USER DATA");
-      console.log(data); callBackFn()});
+      console.log(data);
+      callBackFn();
+      await getUserData(user.id);
+    });
 }

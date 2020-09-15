@@ -16,10 +16,10 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 export default firebase;
-
+export var database = firebase.database();
 export const logout = async () => {
-  console.log("************ LOGGED USER ************* ")
-  console.log(firebase.auth().currentUser)
+  console.log("************ LOGGED USER ************* ");
+  console.log(firebase.auth().currentUser);
   firebase
     .auth()
     .signOut()
@@ -32,3 +32,18 @@ export const logout = async () => {
       console.log(error);
     });
 };
+
+export const checkAlreadyUser = (cellNo) =>
+  new Promise((resolve, reject) => {
+    database
+      .ref("/userData")
+      .orderByChild("cellNo")
+      .equalTo(cellNo)
+      .once("value", (snapshot) => {
+        if (snapshot.val()) {
+          resolve(snapshot.val());
+        } else {
+          reject();
+        }
+      });
+  });

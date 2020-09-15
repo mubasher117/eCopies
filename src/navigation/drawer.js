@@ -19,7 +19,8 @@ import OrderOptions from "../components/copy-form/OrderOptions";
 import SubmitDetails from "../components/copy-form/copy-form-highcourt/SubmitDetails";
 import Payments from "../components/payments/Payments";
 import Notifications from "../components/notifications/Notifications";
-import { logout, getNotifications } from "../api/firebase/authenication";
+import { getNotifications } from "../api/firebase/authenication";
+import { logout } from "../services/auth/AuthService";
 import MyOrders from "../components/my-orders/MyOrders";
 import { getMyOrders } from "../api/firebase/backend";
 import OrderDetails from "../components/order-details/OrderDetails";
@@ -33,7 +34,7 @@ const CustomDrawerContentComponent = (props) => {
       <View style={styles.drawerHeader}>
         <Image
           style={styles.logoImage}
-          source={require("../../assets/images/static/app-logo.png")}
+          source={require("../../assets/images/static/logo-white.png")}
         />
       </View>
       <View>

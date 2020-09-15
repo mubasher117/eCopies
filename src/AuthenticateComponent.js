@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { View, Text } from "react-native";
-
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import {Secondary } from './constants/colors'
 import * as firebase from "firebase/app";
+import {centerScreen} from './styles/General'
 import "firebase/auth";
 import {
   registerForPushNotificationsAsync,
@@ -17,7 +18,6 @@ const firebaseConfig = {
   appId: "1:287376725533:web:e980de492f7d3971e6d8f4",
   measurementId: "G-T45YZ4652P",
 };
-
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -38,9 +38,9 @@ const AuthenticationComponent = (props) => {
     auth();
   }, []);
   return (
-    <View>
-      <Text>Loading</Text>
-    </View>
+    <View style={centerScreen}>
+    <ActivityIndicator size="large" color={Secondary} />
+  </View>
   );
 };
 export default AuthenticationComponent;

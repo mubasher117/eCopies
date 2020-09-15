@@ -253,7 +253,7 @@ export default function SubmitDetails(props) {
                     marginTop: 10,
                   }}
                 >
-                  <Text style={styles.labelUrgent}>Urgently Required ?</Text>
+                  <Text style={styles.labelUrgent}>Urgently Required</Text>
                   <Switch
                     value={switchMode}
                     onChange={toggleSwitch}
@@ -323,8 +323,7 @@ export default function SubmitDetails(props) {
                 placeholder="Enter Cell Number"
                 onChangeText={(text) => setCellNo({ ...cellNo, value: text })}
                 value={cellNo.value}
-                maxLength={11}
-                keyboardType="numeric"
+                disabled
               />
             </View>
             <Text style={styles.error}>{cellNo.error}</Text>

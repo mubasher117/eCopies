@@ -112,9 +112,6 @@ export const getUserData = (userId) => {
   dbRef.once("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
-      // user = { user, ...data };
-      // user = User(user.user.uid, )
-      console.log("*****  USER ADDITIONAL DATA ***** ");
       var user = new User(
         data.id,
         data.name,
@@ -123,7 +120,6 @@ export const getUserData = (userId) => {
         data.expoToken,
         data.balance
       );
-      console.log("***********TILL HERE **************");
         store.dispatch({ type: "setUser", payload: user.getUser() });
     } else {
       console.log("user data not found");

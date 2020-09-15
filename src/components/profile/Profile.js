@@ -69,7 +69,7 @@ export default function Profile(props) {
         user.id,
         name.value,
         address.value,
-        cellNo.value,
+        user.cellNo,
         user.expoToken,
         user.balance
       );
@@ -81,10 +81,12 @@ export default function Profile(props) {
     let user = state.userReducer.user;
     console.log(user);
     setName({ ...name, value: user.name });
-    setCellNo({ ...cellNo, value: user.cellNo });
     setAddress({ ...address, value: user.address });
+    // Convert cell number in form of 03
+    var cellNoWithoutZero = user.cellNo.substring(3);
+    var refinedCellNo = "0" + cellNoWithoutZero;
+    setCellNo({ ...cellNo, value:  refinedCellNo});
   }, []);
-
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <View style={[styles.container, { opacity: containerOpacity }]}>
@@ -112,6 +114,7 @@ export default function Profile(props) {
             keyboardType="phone-pad"
             maxLength={15}
             value={cellNo.value}
+            disabled
           />
           <Text style={styles.error}>{cellNo.error}</Text>
 

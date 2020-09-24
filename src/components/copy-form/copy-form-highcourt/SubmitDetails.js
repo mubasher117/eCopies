@@ -19,7 +19,7 @@ import {
   Tag,
   ActivityIndicator,
   Steps,
-  Button
+  Button,
 } from "@ant-design/react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -30,7 +30,13 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../../constants/colors";
-import { TextInput, FAB, Switch, Checkbox, Button as PaperButton } from "react-native-paper";
+import {
+  TextInput,
+  FAB,
+  Switch,
+  Checkbox,
+  Button as PaperButton,
+} from "react-native-paper";
 import {
   addForm,
   login,
@@ -63,7 +69,7 @@ export default function SubmitDetails(props) {
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
-    setAddress({value: user.address, error: ""});
+    setAddress({ value: user.address, error: "" });
     setCellNo({ value: user.cellNo, error: "" });
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
@@ -93,57 +99,54 @@ export default function SubmitDetails(props) {
   }
   // Submits details to firebase
   const onSubmit = async () => {
-    var isNotValidCellNo = cellNoValidator(cellNo.value);
     var isNotValidAddress = addressValidator(address.value);
-    if (isNotValidCellNo || isNotValidAddress){
-      setCellNo({ ...cellNo, error: isNotValidCellNo });
-      setAddress({...address, error:isNotValidAddress})
+    if (isNotValidAddress) {
+      setAddress({ ...address, error: isNotValidAddress });
+    } else {
+      var totalAmount = 0;
+      setshowLoading(true);
+      setcontainerOpacity(0.3);
+      //Geerates an order no ranging between the parameters
+      var orderNo = getRandomArbitrary(1000000, 9999999);
+      // Retrieving forms from storage
+      let forms;
+      try {
+        const formsJson = await AsyncStorage.getItem("@forms");
+        formsJson != null
+          ? (forms = JSON.parse(formsJson))
+          : console.log("Error");
+      } catch (e) {
+        // error reading value
+      }
+      totalAmount = switchMode
+        ? paymentObject.urgentFee * forms.length
+        : paymentObject.normalFee * forms.length;
+      // retrieving user data
+      let state = store.getState();
+      let user = state.userReducer.user;
+      // Final details ready to be posted
+      let orderDetails = {
+        applicantName: user.name,
+        cellNo: cellNo.value,
+        address: address.value,
+        forms: forms,
+        isUrgent: switchMode,
+        status: "Pending",
+        progress: {
+          pending: Date.now(),
+        },
+        customerId: user.id,
+        createdOn: Date.now(),
+        orderNo: orderNo,
+        totalAmount: totalAmount,
+        orderType: {
+          name: "copyForm",
+        },
+      };
+      console.log(orderDetails);
+      addForm(orderDetails, addFormCallBack);
+      setOrderTotal(totalAmount);
     }
-    else{
-    var totalAmount = 0;
-    setshowLoading(true);
-    setcontainerOpacity(0.3);
-    //Geerates an order no ranging between the parameters
-    var orderNo = getRandomArbitrary(1000000, 9999999);
-    // Retrieving forms from storage
-    let forms;
-    try {
-      const formsJson = await AsyncStorage.getItem("@forms");
-      formsJson != null
-        ? (forms = JSON.parse(formsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    totalAmount = switchMode
-      ? paymentObject.urgentFee * forms.length
-      : paymentObject.normalFee * forms.length;
-    // retrieving user data
-    let state = store.getState();
-    let user = state.userReducer.user;
-    // Final details ready to be posted
-    let orderDetails = {
-      applicantName: user.name,
-      cellNo: cellNo.value,
-      address: address.value,
-      forms: forms,
-      isUrgent: switchMode,
-      status: "Pending",
-      progress: {
-        pending: Date.now(),
-      },
-      customerId: user.id,
-      createdOn: Date.now(),
-      orderNo: orderNo,
-      totalAmount: totalAmount,
-      orderType: {
-        name: "copyForm",
-      },
-    };
-    console.log(orderDetails);
-    addForm(orderDetails, addFormCallBack);
-    setOrderTotal(totalAmount);
-  }
   };
   const showModal = () => {
     setIsModalVisible(true);
@@ -163,7 +166,7 @@ export default function SubmitDetails(props) {
     props.navigation.toggleDrawer();
   };
   // Passes the current order details to Order Details page
-  const reviewOrder = async() => {
+  const reviewOrder = async () => {
     let forms;
     try {
       const formsJson = await AsyncStorage.getItem("@forms");
@@ -173,7 +176,7 @@ export default function SubmitDetails(props) {
     } catch (e) {
       // error reading value
     }
-    console.log(forms)
+    console.log(forms);
     let order = {
       totalAmount: switchMode
         ? paymentObject.urgentFee * forms.length
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "bold",
-    padding:15,
+    padding: 15,
   },
   valueContainer: {
     marginTop: 10,

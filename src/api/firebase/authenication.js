@@ -178,7 +178,6 @@ export const addAddtionalUserDetails = (
       // login(email, password, true, callBackFn);
     });
 };
-
 export const checkSignedIn = async () => {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
@@ -299,7 +298,7 @@ export function addForm(json, callbackfn) {
   console.log(json);
   var date = Date.now()
   var newId = date + "-" +uuidv4();
-  database.ref("pendingOrders/" + newId).set(json, (res) => {
+  database.ref("orders/" + newId).set(json, (res) => {
     console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });

@@ -34,9 +34,8 @@ import {
 import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
-import { getUserId } from "../core/utils";
 import store from "../../redux/store";
-const Step = Steps.Step;
+import Modal2 from '../child-components/Modal'
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
   return (
@@ -60,6 +59,15 @@ const FormType = (props) => {
     </TouchableOpacity>
   );
 };
+
+const forms = [
+  {
+    title: "High Court",
+    titleUrdu: "ہائی کورٹ",
+    imgSource: require("../../../assets/images/static/highcourt.jpeg"),
+    navigateTo: "CopyFormCase",
+  },
+];
 
 export default function HomPage(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -92,7 +100,7 @@ export default function HomPage(props) {
   return (
     <View style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
@@ -126,9 +134,30 @@ export default function HomPage(props) {
             </Button>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
+      <Modal2
+        visible={isModalVisible}
+        text="Please pay the remaining dues before submitting another form."
+        urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"
+        buttonOkText="OK"
+        hideModal={hideModal}
+        handleOkay = {hideModal}
+        quitButton
+      />
       <ScrollView>
         <View style={styles.optionsContainer}>
+          {/* {forms.map((form, index) => {return (
+            <FormType
+              title={form.title}
+              titleUrdu={form.titleUrdu}
+              imgSource={form.imgSource}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase");
+              }}
+            />
+          );})} */}
           <FormType
             title="High Court"
             titleUrdu="ہائی کورٹ"
@@ -140,20 +169,20 @@ export default function HomPage(props) {
             }}
           />
           <FormType
-            title="District Court"
+            title="Lower Courts"
             titleUrdu="ضلعی عدالت"
             imgSource={require("../../../assets/images/static/district_court.jpg")}
             navigateTo={() => {
               // Clear pervious form
               store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
+              navigateTo("LowerCourtsSelectCourt");
             }}
           />
         </View>
         <View style={styles.optionsContainer}>
           <FormType
-            title="Revenue Court"
-            titleUrdu="ریونیو کورٹ"
+            title="Revenue"
+            titleUrdu="ریونیو"
             imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
             navigateTo={() => {
               // Clear pervious form

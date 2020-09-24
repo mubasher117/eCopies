@@ -27,6 +27,7 @@ import OrderDetails from "../components/order-details/OrderDetails";
 import Profile from "../components/profile/Profile";
 import RevenueCopyForm from "../components/copy-form/revenue-court/CopyForm";
 import RevenueCopyForm2 from "../components/copy-form/revenue-court/CopyForm2";
+import LowerCourtsSelectCourt from '../screens/copy-forms/copy-form-lower-courts/SelectCourt'
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
   return (
@@ -385,6 +386,7 @@ const Drawer = createDrawerNavigator(
     },
     RevenueCopyForm: RevenueCopyForm,
     RevenueCopyForm2: RevenueCopyForm2,
+    LowerCourtsSelectCourt: LowerCourtsSelectCourt,
   },
   {
     initialRouteName: "CopyFormHomePage",

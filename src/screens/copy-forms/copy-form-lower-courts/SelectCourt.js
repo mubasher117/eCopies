@@ -40,7 +40,7 @@ const { height, width } = Dimensions.get("window");
 var index = 0;
 const courts = [
   { key: index++, section: true, label: "Select Court", value: "-1" },
-  { key: index++, label: "Civil Court", value: "Model Court" },
+  { key: index++, label: "Civil Court", value: "Civil Court" },
   { key: index++, label: "Banking Court", value: "Banking Court" },
   { key: index++, label: "Ravi Court", value: "Ravi Court" },
   { key: index++, label: "Gulberg", value: "Gulberg" },
@@ -74,8 +74,9 @@ export default function SelectCourt(props) {
     if (court == "-1") {
       setCourtError(true);
     } else {
-      store.dispatch({ type: "setCurrentFormItem", payload: court });
-      props.navigation.navigate("");
+      console.log(court)
+      store.dispatch({ type: "setCurrentFormItem", payload: {court: court} });
+      props.navigation.navigate("LoweCourtsForm1");
     }
   }
   const saveDetails = () =>

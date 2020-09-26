@@ -79,7 +79,8 @@ export default function HomPage(props) {
   const navigateTo = (screen) => {
     let state = store.getState();
     let user = state.userReducer.user;
-    database.ref("/userData/" + user.id).once("value", (snapshot) => {
+    database.ref("userData/" + user.id).once("value", (snapshot) => {
+      console.log(user.id);
       if (snapshot.val().balance == 0) {
         console.log(snapshot.val());
         props.navigation.navigate(screen);

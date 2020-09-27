@@ -59,21 +59,24 @@ export default function CopyFormDocs(props) {
     mode: false,
     value: new Date(),
   });
-  const [isSOW, setSOW] = useState({ mode: false, value: "" });
+  const [isOther, setOther] = useState({ mode: false, value: "" });
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
   const [showLoading, setshowLoading] = useState(false);
-  
+
   const [headerTitle, setHeaderTitle] = useState("");
   useEffect(() => {
     let state = store.getState();
     // Getting selected court name to display on header
     let title = state.ordersReducer.currentForm.court;
+    console.log(state.ordersReducer.currentForm);
     setHeaderTitle(title);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let title = state.ordersReducer.currentForm.court;
       setHeaderTitle(title);
+
+      console.log(state.ordersReducer.currentForm);
     });
     return () => unsubscribe;
   }, []);
@@ -89,10 +92,10 @@ export default function CopyFormDocs(props) {
       if (isPetition.mode) {
         documentDetails.push({ type: "Petition", value: isPetition.value });
       }
-      if (isSOW.mode) {
+      if (isOther.mode) {
         documentDetails.push({
-          type: "Statement of witness",
-          value: isSOW.value,
+          type: "Other",
+          value: isOther.value,
         });
       }
       if (isOrderDated.mode) {
@@ -105,8 +108,7 @@ export default function CopyFormDocs(props) {
       let formDetails = state.ordersReducer.currentForm;
       let copyFormDetails = {
         ...formDetails,
-        documentDetails,
-        court: "highCourt",
+        documentDetails
       };
       console.log("form : ", copyFormDetails);
       let forms;
@@ -137,7 +139,7 @@ export default function CopyFormDocs(props) {
         mode: false,
         value: new Date(),
       });
-      setSOW({ mode: false, value: "" });
+      setOther({ mode: false, value: "" });
       resolve();
     });
   const onNext = async () => {
@@ -186,7 +188,7 @@ export default function CopyFormDocs(props) {
   // Checks if form edit made to form or not
   const checkForm = () => {
     var isCleanForm = true;
-    if (isDocument.mode || isPetition.mode || isSOW.mode || isOrderDated.mode) {
+    if (isDocument.mode || isPetition.mode || isOther.mode || isOrderDated.mode) {
       isCleanForm = false;
     }
     if (isCleanForm) {
@@ -375,30 +377,6 @@ export default function CopyFormDocs(props) {
 
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isSOW.mode ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setSOW({ ...isSOW, mode: !isSOW.mode });
-                  }}
-                  color={Secondary}
-                />
-                <Text>Statement of Witness</Text>
-              </View>
-              <TextInput
-                style={{
-                  marginLeft: "10%",
-                  height: 40,
-                  width: "80%",
-                  borderColor: "gray",
-                  opacity: isSOW.mode ? 1 : 0.3,
-                }}
-                placeholder="Enter PWs or DWs"
-                editable={isSOW.mode}
-                onChangeText={(text) => setSOW({ ...isSOW, value: text })}
-                value={isSOW.value}
-              />
-
-              <View style={styles.documemntsContainer}>
-                <Checkbox
                   status={isOrderDated.mode ? "checked" : "unchecked"}
                   onPress={() => {
                     setOrderDated({
@@ -441,6 +419,30 @@ export default function CopyFormDocs(props) {
                   />
                 )}
               </TouchableOpacity>
+
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isOther.mode ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setOther({ ...isOther, mode: !isOther.mode });
+                  }}
+                  color={Secondary}
+                />
+                <Text>Other</Text>
+              </View>
+              <TextInput
+                style={{
+                  marginLeft: "10%",
+                  height: 40,
+                  width: "80%",
+                  borderColor: "gray",
+                  opacity: isOther.mode ? 1 : 0.3,
+                }}
+                placeholder="Document Name"
+                editable={isOther.mode}
+                onChangeText={(text) => setOther({ ...isOther, value: text })}
+                value={isOther.value}
+              />
             </View>
           </View>
 

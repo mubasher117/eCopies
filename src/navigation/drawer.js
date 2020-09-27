@@ -28,9 +28,9 @@ import Profile from "../components/profile/Profile";
 import RevenueCopyForm from "../components/copy-form/revenue-court/CopyForm";
 import RevenueCopyForm2 from "../components/copy-form/revenue-court/CopyForm2";
 import LowerCourtsSelectCourt from '../screens/copy-forms/copy-form-lower-courts/SelectCourt'
-import LoweCourtsForm1 from '../screens/copy-forms/copy-form-lower-courts/CopyForm1'
-import LoweCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
-import LoweCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
+import LowerCourtsForm1 from '../screens/copy-forms/copy-form-lower-courts/CopyForm1'
+import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
+import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
   return (
@@ -390,9 +390,9 @@ const Drawer = createDrawerNavigator(
     RevenueCopyForm: RevenueCopyForm,
     RevenueCopyForm2: RevenueCopyForm2,
     LowerCourtsSelectCourt: LowerCourtsSelectCourt,
-    LoweCourtsForm1: LoweCourtsForm1,
-    LoweCourtsForm2: LoweCourtsForm2,
-    LoweCourtsForm3: LoweCourtsForm3,
+    LowerCourtsForm1: LowerCourtsForm1,
+    LowerCourtsForm2: LowerCourtsForm2,
+    LowerCourtsForm3: LowerCourtsForm3,
   },
   {
     initialRouteName: "CopyFormHomePage",

@@ -53,7 +53,7 @@ export const getNotifications = async () => {
       objArray.sort(getAscending);
       store.dispatch({
         type: "setNotifications",
-        payload: objArray,
+        payload: objArray.reverse(),
       });
     } else {
       store.dispatch({
@@ -122,7 +122,7 @@ export const getUserData = (userId) => {
       );
         store.dispatch({ type: "setUser", payload: user.getUser() });
     } else {
-      console.log("user data not found");
+      alert("user data not found");
     }
   });
 };

@@ -37,19 +37,19 @@ import Header from "../../../components/header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import store from "../../../redux/store";
 import { Parties } from "../../../components/child-components/Parties";
-import { styles } from "../../../styles/CopyForm";
 import DateOfDecision from "../../../components/child-components/DateOfDecision";
+import BottomButtonsNav from "../../../components/child-components/BottomButtonsNav";
+import { nameValidator2 } from "../../../components/core/utils";
 const { height, width } = Dimensions.get("window");
 var index = 0;
 export default function CopyForm1(props) {
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
-  const [court, setCourt] = useState("-1");
-  const [courtError, setCourtError] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [containerOpacity, setcontainerOpacity] = useState(1);
-  const [showLoading, setshowLoading] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("");
+  const [plaintiff, setPlaintiff] = useState({ value: "", error: "" });
+  const [defendant, setDefendant] = useState({ value: "", error: "" });
+  const [dateOfDecision, setDateOfDecision] = useState({
+    value: "",
+    error: "",
+  });
   useEffect(() => {
     let state = store.getState();
     // Getting selected court name to display on header
@@ -62,113 +62,52 @@ export default function CopyForm1(props) {
     });
     return () => unsubscribe;
   }, []);
-  var registerDate = date.toDateString().toString();
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-  };
-  const showDatepicker = () => {
-    setShow(!show);
-  };
-  // Retreives previous parts of forms, merge it with this part and saves it.
   const _handleNext = () => {
-    // if (court == "-1") {
-    //   setCourtError(true);
-    // } else {
-    //   store.dispatch({ type: "setCurrentFormItem", payload: court });
-    props.navigation.navigate("LoweCourtsForm3");
-    // }
-  };
-  const saveDetails = () =>
-    new Promise(async (resolve, reject) => {
-      let state = store.getState();
-      let formDetails = state.ordersReducer.currentForm;
-      let copyFormDetails = {
-        ...formDetails,
-        court: court,
-      };
-      console.log("form : ", copyFormDetails);
-      let forms;
-      try {
-        // Retrieving previous forms from storage
-        const formsJson = await AsyncStorage.getItem("@forms");
-        if (formsJson) {
-          forms = JSON.parse(formsJson);
-          forms.push(copyFormDetails);
-          const jsonValue = JSON.stringify(forms);
-          await AsyncStorage.setItem("@forms", jsonValue);
-        } else {
-          forms = [copyFormDetails];
-          const jsonValue = JSON.stringify(forms);
-          await AsyncStorage.setItem("@forms", jsonValue);
-        }
-      } catch (e) {
-        // error reading value
-      }
-      // Clear pervious form
-      store.dispatch({
-        type: "clearForm",
-      });
-      setCourt("-1");
-      resolve();
-    });
-  // Function triggered on pressing next button
-  const onNext = async () => {
-    setshowLoading(true);
-    setIsModalVisible(false);
-    saveDetails().then(async () => {
-      setcontainerOpacity(1);
-      setshowLoading(false);
-      props.navigation.navigate("SubmitDetails");
-    });
-  };
-  const goBackFn = () => {
-    props.navigation.navigate("RevenueCopyForm");
-  };
-  const hideModal = () => {
-    setIsModalVisible(false);
-    setcontainerOpacity(1);
-  };
-  const showModal = () => {
-    if (court == "-1") {
-      setCourtError(true);
+    var plaintiffError = nameValidator2(plaintiff.value);
+    var defendantError = nameValidator2(defendant.value);
+    if (plaintiffError || defendantError) {
+      setPlaintiff({ ...plaintiff, error: plaintiffError });
+      setDefendant({ ...defendant, error: defendantError });
     } else {
-      setIsModalVisible(true);
-      setcontainerOpacity(0.05);
+      var details = {
+        plaintiff: plaintiff.value,
+        defendant: defendant.value,
+        decisionDate: dateOfDecision,
+      };
+      store.dispatch({ type: "setCurrentFormItem", payload: details });
+      props.navigation.navigate("LowerCourtsForm3");
     }
+  };
+  const _handlePrevious = () => {
+    props.navigation.navigate("RevenueCopyForm");
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title={headerTitle} backbutton goBackFn={goBackFn} />
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          opacity: containerOpacity,
-          marginTop: 15,
-        }}
-      >
-        <Parties
-          plaintiff={{ value: "test", error: "" }}
-          defendant={{ value: "teste", error: "" }}
-        />
-        <DateOfDecision />
-
+      <Header title={headerTitle} backbutton goBackFn={_handlePrevious} />
+      <View style={styles.container}>
         <View
           style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-            width: "90%",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 15,
           }}
         >
-          <Button style={styles.next} type="primary" onPress={_handleNext}>
-            Next
-          </Button>
+          <Parties
+            plaintiff={plaintiff}
+            setPlaintiff={(p) => setPlaintiff(p)}
+            defendant={defendant}
+            setDefendant={(d) => setDefendant(d)}
+          />
+          <DateOfDecision setDate={(date) => setDateOfDecision(date)} />
         </View>
+        <BottomButtonsNav next={_handleNext} previous={_handlePrevious} />
       </View>
-      <ActivityIndicator animating={showLoading} toast size="large" />
     </KeyboardAwareScrollView>
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    width: "90%",
+    alignSelf: "center",
+  },
+});

@@ -8,16 +8,17 @@ const { height, width } = Dimensions.get("window");
 export default function DateOfDecision(props){
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-
   const showDatepicker = () => {
     setShow(!show);
   };
+  var decisionDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
     setDate(currentDate);
+    props.setDate(decisionDate);
+    console.log(decisionDate)
   };
-  var decisionDate = date.toDateString().toString();
     return (
       <View style={styles.infoContainer}>
         <View
@@ -64,7 +65,7 @@ export default function DateOfDecision(props){
 const styles = StyleSheet.create({
   infoContainer: {
     backgroundColor: PrimaryLight,
-    width: "90%",
+    width: "100%",
   },
   labelContainer: {
     marginTop: 20,

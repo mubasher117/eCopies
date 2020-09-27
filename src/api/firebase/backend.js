@@ -18,7 +18,7 @@ export async function getMyOrders() {
         for (var key of keys) {
           tempMyOrders.push({ id: key, ...data[key] });
         }
-        store.dispatch({ type: "setMyOrders", payload: tempMyOrders });
+        store.dispatch({ type: "setMyOrders", payload: tempMyOrders.reverse() });
       } else {
         store.dispatch({ type: "setMyOrders", payload: [] });
       }

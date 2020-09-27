@@ -34,6 +34,7 @@ import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
 import HighCourtFormDetails from '../child-components/HighCourtFormDetails'
 import RevenueCourtFormDetails from "../child-components/RevenueCourtFormDetails";
+import LowerCourtsFormDetails from '../child-components/LowerCourtsFormDetails'
 const { height, width } = Dimensions.get("window");
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
@@ -205,7 +206,7 @@ export default function OrderDetails(props) {
                   orderType={details.orderType.name}
                 />
               );
-            } else {
+            } else if (form.court == "revenueCourt") {
               return (
                 <RevenueCourtFormDetails
                   removeOrder={showModal}
@@ -217,6 +218,21 @@ export default function OrderDetails(props) {
                   }
                   form={form}
                   orderType={details.orderType.name}
+                />
+              );
+            }
+            else{
+              return (
+                <LowerCourtsFormDetails
+                  form={form}
+                  orderType={details.orderType.name}
+                  index={index}
+                  removeOrder={showModal}
+                  screen={
+                    props.navigation.getParam("screen") == "SubmitDetails"
+                      ? "SubmitDetails"
+                      : "other"
+                  }
                 />
               );
             }

@@ -6,4 +6,4 @@ export const Secondary = "#21B06C";
 export const SecondaryLight = "#ADC8BB";
 export const SecondaryText = "#000000";
 export const InputBackground = "#E9E9E9";
-"3d405b";
+("3d405b");

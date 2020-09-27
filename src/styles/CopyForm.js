@@ -13,7 +13,7 @@ const { height, width } = Dimensions.get("window");
 export const styles = StyleSheet.create({
   infoContainer: {
     backgroundColor: PrimaryLight,
-    width: '90%',
+    width: '100%',
   },
   sectionContainer: {
     width: "90%",

@@ -76,7 +76,7 @@ export default function SelectCourt(props) {
     } else {
       console.log(court)
       store.dispatch({ type: "setCurrentFormItem", payload: {court: court} });
-      props.navigation.navigate("LoweCourtsForm1");
+      props.navigation.navigate("LowerCourtsForm1");
     }
   }
   const saveDetails = () =>

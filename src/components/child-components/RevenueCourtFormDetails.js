@@ -86,6 +86,10 @@ export default function RevenueCourtFormDetails(props) {
         <Text style={styles.label}>Date of register: </Text>
         <Text style={styles.entityValue}>{props.form.registerDate}</Text>
       </View>
+      <View style={styles.entityContainer}>
+        <Text style={styles.label}>Form Fee: </Text>
+        <Text style={styles.entityValue}>Rs. {props.form.formFee}</Text>
+      </View>
     </View>
   );
 }

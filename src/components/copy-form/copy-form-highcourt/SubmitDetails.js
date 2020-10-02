@@ -50,22 +50,18 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { database } from "../../../api/firebase/authenication";
 import { cellNoValidator, addressValidator } from "../../core/utils";
 const { height, width } = Dimensions.get("window");
-
+import { getFormPrices } from "../../../api/firebase/backend";
 import store from "../../../redux/store";
-
+import OptionButtons from "../../child-components/OptionButtons";
 export default function SubmitDetails(props) {
   const [showLoading, setshowLoading] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [switchMode, setSwitchMode] = useState(false);
-  const [paymentObject, setpaymentObject] = useState();
   const [orderTotal, setOrderTotal] = useState(0);
   const [cellNo, setCellNo] = useState({ error: "", value: "" });
   const [address, setAddress] = useState({ error: "", value: "" });
   useEffect(() => {
-    database.ref("prices/copyForm").once("value", (snapshot) => {
-      setpaymentObject(snapshot.val());
-    });
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
@@ -98,12 +94,17 @@ export default function SubmitDetails(props) {
     return parseInt(Math.random() * (max - min) + min);
   }
   // Submits details to firebase
-  const onSubmit = async () => {
+  const onSubmit = () => {
+    getFormPrices().then((prices) => {
+      console.log("PRICES:   ", prices);
+      _handleRemainingSubmit(prices);
+    });
+  };
+  const _handleRemainingSubmit = async (prices) => {
     var isNotValidAddress = addressValidator(address.value);
     if (isNotValidAddress) {
       setAddress({ ...address, error: isNotValidAddress });
     } else {
-      var totalAmount = 0;
       setshowLoading(true);
       setcontainerOpacity(0.3);
       //Geerates an order no ranging between the parameters
@@ -118,9 +119,35 @@ export default function SubmitDetails(props) {
       } catch (e) {
         // error reading value
       }
-      totalAmount = switchMode
-        ? paymentObject.urgentFee * forms.length
-        : paymentObject.normalFee * forms.length;
+      // Calculating fee per form and total amount
+      var totalAmount = 0;
+      if (forms) {
+        forms.map((form, index) => {
+          try {
+            if (switchMode) {
+              console.log(prices);
+              totalAmount = totalAmount + parseInt(prices[form.court].urgent);
+              form["formFee"] = parseInt(prices[form.court].urgent);
+            } else {
+              totalAmount = totalAmount + parseInt(prices[form.court].normal);
+              form["formFee"] = parseInt(prices[form.court].normal);
+            }
+          } catch (error) {
+            if (switchMode) {
+              console.log(prices);
+              totalAmount =
+                totalAmount + parseInt(prices["Lower Courts"].urgent);
+              form["formFee"] = parseInt(prices["Lower Courts"].urgent);
+            } else {
+              totalAmount =
+                totalAmount + parseInt(prices["Lower Courts"].normal);
+              form["formFee"] = parseInt(prices["Lower Courts"].normal);
+            }
+          }
+        });
+      }
+      console.log("ORDER TOTAL:   ", totalAmount);
+
       // retrieving user data
       let state = store.getState();
       let user = state.userReducer.user;
@@ -166,7 +193,14 @@ export default function SubmitDetails(props) {
     props.navigation.toggleDrawer();
   };
   // Passes the current order details to Order Details page
-  const reviewOrder = async () => {
+  const reviewOrder = () => {
+    getFormPrices().then((prices) => {
+      console.log("PRICES:   ", prices);
+      _handleRemainingReview(prices);
+    });
+  };
+  const _handleRemainingReview = async (prices) => {
+    var orderTotal = 0;
     let forms;
     try {
       const formsJson = await AsyncStorage.getItem("@forms");
@@ -177,10 +211,33 @@ export default function SubmitDetails(props) {
       // error reading value
     }
     console.log(forms);
+    // Calculating fee per form and total amount
+    if (forms) {
+      forms.map((form, index) => {
+        try {
+          if (switchMode) {
+            console.log(prices);
+            orderTotal = orderTotal + parseInt(prices[form.court].urgent);
+            form["formFee"] = parseInt(prices[form.court].urgent);
+          } else {
+            orderTotal = orderTotal + parseInt(prices[form.court].normal);
+            form["formFee"] = parseInt(prices[form.court].normal);
+          }
+        } catch (error) {
+          if (switchMode) {
+            console.log(prices);
+            orderTotal = orderTotal + parseInt(prices["Lower Courts"].urgent);
+            form["formFee"] = parseInt(prices["Lower Courts"].urgent);
+          } else {
+            orderTotal = orderTotal + parseInt(prices["Lower Courts"].normal);
+            form["formFee"] = parseInt(prices["Lower Courts"].normal);
+          }
+        }
+      });
+    }
+    console.log("ORDER TOTAL:   ", orderTotal);
     let order = {
-      totalAmount: switchMode
-        ? paymentObject.urgentFee * forms.length
-        : paymentObject.normalFee * forms.length,
+      totalAmount: orderTotal,
       forms: forms,
       orderType: { name: "copyForm" },
     };
@@ -190,7 +247,14 @@ export default function SubmitDetails(props) {
     });
   };
   return (
-    <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
+    <KeyboardAwareScrollView
+      contentContainerStyle={{
+        height: height,
+        flex: 1,
+        opacity: containerOpacity,
+      }}
+      keyboardShouldPersistTaps="always"
+    >
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
         animationType="slide"
@@ -248,7 +312,7 @@ export default function SubmitDetails(props) {
                   چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
                 </Text> */}
                 {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
-                <View
+                {/* <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -257,6 +321,7 @@ export default function SubmitDetails(props) {
                   }}
                 >
                   <Text style={styles.labelUrgent}>Urgently Required</Text>
+
                   <Switch
                     value={switchMode}
                     onChange={toggleSwitch}
@@ -267,40 +332,33 @@ export default function SubmitDetails(props) {
                       transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
                     }}
                   />
-                </View>
+                </View> */}
+                <OptionButtons
+                  option1="Normal"
+                  option2="Urgent"
+                  _handleOption1={() => setSwitchMode(false)}
+                  _handleOption2={() => setSwitchMode(true)}
+                />
                 {switchMode ? (
                   <View style={styles.urgentMessageContainer}>
                     <Text style={styles.urgentMessage}>
-                      * Your document will be delivered within 24 hours with
-                      additional charges.
+                      * Your document will be delivered the next with additional
+                      charges.
                     </Text>
                   </View>
                 ) : (
-                  <View />
+                  <View style={styles.urgentMessageContainer}>
+                    <Text style={[styles.urgentMessage, {color:'white'}]}>
+                      * Your document will be delivered the next with additional
+                      charges.
+                    </Text>
+                  </View>
                 )}
                 {/* <Text>{forms.length} 0</Text> */}
               </View>
             </View>
           </View>
-
-          {/* <Text>Do you want to submit another copy form?</Text>
-          <FAB
-            style={styles.fab}
-            small
-            icon="plus"
-            onPress={() => props.navigation.navigate("CopyFormCase")}
-            color={"white"}
-          /> */}
           <View style={{ width: 10, height: 50 }} />
-          {/* <View style={styles.reviewContainer}>
-            <Button
-              style={styles.review}
-              type="primary"
-              onPress={() => props.navigation.navigate("CopyFormHomePage")}
-            >
-              <Text>Another Form</Text>
-            </Button>
-          </View> */}
 
           <PaperButton
             color={Secondary}
@@ -356,12 +414,6 @@ export default function SubmitDetails(props) {
               <Text style={{ fontSize: 12 }}>Review Order</Text>
             </Button>
           </View> */}
-
-          <View style={styles.submitContainer}>
-            <Button style={styles.submit} type="primary" onPress={onSubmit}>
-              <Text>SUBMIT</Text>
-            </Button>
-          </View>
         </View>
       </ScrollView>
       <ActivityIndicator
@@ -370,6 +422,12 @@ export default function SubmitDetails(props) {
         size="large"
         text="Submitting..."
       />
+
+      <View style={styles.submitContainer}>
+        <Button style={styles.submit} type="primary" onPress={onSubmit}>
+          <Text>SUBMIT</Text>
+        </Button>
+      </View>
     </KeyboardAwareScrollView>
   );
 }
@@ -397,7 +455,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   labelUrgent: {
-    fontSize: 20,
     fontWeight: "bold",
   },
   label: {
@@ -443,16 +500,17 @@ const styles = StyleSheet.create({
   },
   submitContainer: {
     flex: 1,
-    marginTop: height - 590,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    width: "90%",
+    alignSelf:'flex-end',
+    alignContent:'center',justifyContent:'center',
+    width: "100%",
+    marginBottom: 20,
   },
   submit: {
-    width: "100%",
+    width: "90%",
     minHeight: 60,
     backgroundColor: "#f44336",
     borderWidth: 0,
+    alignSelf:'center',
   },
   reviewContainer: {
     margin: 5,

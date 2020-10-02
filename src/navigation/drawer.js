@@ -114,10 +114,10 @@ const CustomDrawerContentComponent = (props) => {
                 setisActive("currentOrder");
                 props.navigation.navigate("SubmitDetails");
               } else {
-                alert("You don't have any unsubmitted form.");
+                alert("You don't have any form in cart.");
               }
             } else {
-              alert("You don't have any unsubmitted form.");
+              alert("You don't have any form in cart.");
             }
           }}
         >
@@ -141,7 +141,7 @@ const CustomDrawerContentComponent = (props) => {
                   : styles.pageLabel
               }
             >
-              Unsubmitted Forms
+              Cart
             </Text>
           </View>
         </TouchableOpacity>

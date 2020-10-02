@@ -11,7 +11,8 @@ import {
   Keyboard,
   Picker,
   TouchableOpacity,
-  Image,Modal
+  Image,
+  Modal,
 } from "react-native";
 import {
   InputItem,
@@ -32,9 +33,9 @@ import {
 import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
-import HighCourtFormDetails from '../child-components/HighCourtFormDetails'
+import HighCourtFormDetails from "../child-components/HighCourtFormDetails";
 import RevenueCourtFormDetails from "../child-components/RevenueCourtFormDetails";
-import LowerCourtsFormDetails from '../child-components/LowerCourtsFormDetails'
+import LowerCourtsFormDetails from "../child-components/LowerCourtsFormDetails";
 const { height, width } = Dimensions.get("window");
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
@@ -42,7 +43,7 @@ export default function OrderDetails(props) {
   const [refresh, setRefresh] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
-  const [formIndex, setFormIndex] = useState(0)
+  const [formIndex, setFormIndex] = useState(0);
   // Function to be passed to Header
   const goBackFn = () => {
     props.navigation.navigate(previousScreen);
@@ -60,12 +61,11 @@ export default function OrderDetails(props) {
     console.log(totalAfterFormDelete);
     details.forms.splice(index, 1);
     details.totalAmount = totalAfterFormDelete;
-    props.navigation.setParams("details", {details});
+    props.navigation.setParams("details", { details });
     removeFormFromStorage().then(() => {
-      if (details.forms.length == 0){
+      if (details.forms.length == 0) {
         props.navigation.navigate("CopyFormHomePage");
-      }
-      else{
+      } else {
         setRefresh(1);
       }
     });
@@ -76,7 +76,7 @@ export default function OrderDetails(props) {
   };
 
   const showModal = (index) => {
-    setFormIndex(index)
+    setFormIndex(index);
     setIsModalVisible(true);
     setcontainerOpacity(0.2);
   };
@@ -84,7 +84,7 @@ export default function OrderDetails(props) {
     setIsModalVisible(false);
     setcontainerOpacity(1);
     removeOrder(formIndex);
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -192,7 +192,7 @@ export default function OrderDetails(props) {
               ))}
           </View>
           {details.forms.map((form, index) => {
-            if (form.court == "highCourt") {
+            if (form.court == "High Court" || form.court == "Supreme Court") {
               return (
                 <HighCourtFormDetails
                   removeOrder={showModal}
@@ -220,8 +220,7 @@ export default function OrderDetails(props) {
                   orderType={details.orderType.name}
                 />
               );
-            }
-            else{
+            } else {
               return (
                 <LowerCourtsFormDetails
                   form={form}
@@ -255,7 +254,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   centeredViewModal: {
-    flex:1,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -35,7 +35,7 @@ import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
 import store from "../../redux/store";
-import Modal2 from '../child-components/Modal'
+import Modal2 from "../child-components/Modal";
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
   return (
@@ -76,16 +76,20 @@ export default function HomPage(props) {
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
-  const navigateTo = (screen) => {
-    let state = store.getState();
+  const navigateTo = async (screen, currentScreen = "N/A") => {
+    let state = await store.getState();
     let user = state.userReducer.user;
     database.ref("userData/" + user.id).once("value", (snapshot) => {
       console.log(user.id);
-      if (snapshot.val().balance == 0) {
-        console.log(snapshot.val());
-        props.navigation.navigate(screen);
+      if (snapshot.val()) {
+        if (snapshot.val().balance == 0) {
+          console.log(snapshot.val());
+          props.navigation.navigate(screen, { screen: currentScreen });
+        } else {
+          showModal();
+        }
       } else {
-        showModal();
+        navigateTo(screen, currentScreen);
       }
     });
   };
@@ -142,7 +146,7 @@ export default function HomPage(props) {
         urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"
         buttonOkText="OK"
         hideModal={hideModal}
-        handleOkay = {hideModal}
+        handleOkay={hideModal}
         quitButton
       />
       <ScrollView>
@@ -160,15 +164,27 @@ export default function HomPage(props) {
             />
           );})} */}
           <FormType
+            title="Supreme Court"
+            titleUrdu="سپریم کورٹ"
+            imgSource={require("../../../assets/images/static/supremeCourt.jpeg")}
+            navigateTo={() => {
+              // Clear pervious form
+              store.dispatch({ type: "clearForm" });
+              navigateTo("CopyFormCase", "Supreme Court");
+            }}
+          />
+          <FormType
             title="High Court"
             titleUrdu="ہائی کورٹ"
             imgSource={require("../../../assets/images/static/highcourt.jpeg")}
             navigateTo={() => {
               // Clear pervious form
               store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
+              navigateTo("CopyFormCase", "High Court");
             }}
           />
+        </View>
+        <View style={styles.optionsContainer}>
           <FormType
             title="Lower Courts"
             titleUrdu="ضلعی عدالت"
@@ -179,10 +195,8 @@ export default function HomPage(props) {
               navigateTo("LowerCourtsSelectCourt");
             }}
           />
-        </View>
-        <View style={styles.optionsContainer}>
           <FormType
-            title="Revenue"
+            title="Revenue / Sub Registrar"
             titleUrdu="ریونیو"
             imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
             navigateTo={() => {
@@ -192,7 +206,7 @@ export default function HomPage(props) {
             }}
           />
 
-          <FormType
+          {/* <FormType
             title="DC Office"
             titleUrdu="ڈی سی آفس"
             imgSource={require("../../../assets/images/static/dcoffice.jpeg")}
@@ -201,7 +215,7 @@ export default function HomPage(props) {
               store.dispatch({ type: "clearForm" });
               navigateTo("CopyFormCase");
             }}
-          />
+          /> */}
         </View>
         <View style={{ width: "100%", height: 150 }} />
       </ScrollView>

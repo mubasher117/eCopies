@@ -65,15 +65,15 @@ export default function Profile(props) {
     } else {
       setshowLoading(true);
       setcontainerOpacity(0.3);
-      const userDetails = new User(
-        user.id,
-        name.value,
-        address.value,
-        user.cellNo,
-        user.expoToken,
-        user.balance
-      );
-      updateUserDetails(userDetails.getUser(), callBackUpdate);
+      const userDetails = {
+        id: user.id,
+        name: name.value,
+        address: address.value,
+        cellNo: user.cellNo,
+        expoToken: user.expoToken,
+        balance: user.balance,
+      };
+      updateUserDetails(userDetails, callBackUpdate);
     }
   };
   useEffect(() => {

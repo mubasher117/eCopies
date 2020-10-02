@@ -1,28 +1,28 @@
 import { database, getUserId } from "./authenication";
 import store from "../../redux/store";
-import {registerForPushNotificationsAsync} from './authenication'
+import { registerForPushNotificationsAsync } from "./authenication";
 export async function getMyOrders() {
   // retrieving user data
   let state = store.getState();
   let user = state.userReducer.user;
-    console.log("MY ORDERS USERID:   ", user.id);
-    var dbRef = database
-      .ref("/orders")
-      .orderByChild("customerId")
-      .equalTo(user.id);
-    dbRef.on("value", (snapshot) => {
-      let data = snapshot.val();
-      if (data) {
-        let keys = Object.keys(data);
-        let tempMyOrders = [];
-        for (var key of keys) {
-          tempMyOrders.push({ id: key, ...data[key] });
-        }
-        store.dispatch({ type: "setMyOrders", payload: tempMyOrders.reverse() });
-      } else {
-        store.dispatch({ type: "setMyOrders", payload: [] });
+  console.log("MY ORDERS USERID:   ", user.id);
+  var dbRef = database
+    .ref("/orders")
+    .orderByChild("customerId")
+    .equalTo(user.id);
+  dbRef.on("value", (snapshot) => {
+    let data = snapshot.val();
+    if (data) {
+      let keys = Object.keys(data);
+      let tempMyOrders = [];
+      for (var key of keys) {
+        tempMyOrders.push({ id: key, ...data[key] });
       }
-    });
+      store.dispatch({ type: "setMyOrders", payload: tempMyOrders.reverse() });
+    } else {
+      store.dispatch({ type: "setMyOrders", payload: [] });
+    }
+  });
 }
 
 export async function seeNotification(notification) {
@@ -35,8 +35,35 @@ export const addAdditionalDetails = (userDetails) => {
   console.log("IN Add details", userDetails.id);
   database
     .ref("userData/" + userDetails.id)
-    .set(userDetails,async (response) => {
+    .set(userDetails, async (response) => {
       console.log(response);
       await registerForPushNotificationsAsync(userDetails.id);
     });
 };
+
+// export const getFormPrice = (court, type) => new Promise((resolve, reject) => {
+//   database.ref(`prices/copyForm/${court}/${type}`).once('value', (snapshot) => {
+//     console.log("PRICE IS:   ", snapshot.val())
+//     resolve(snapshot.val())
+//   })
+// })
+export const getFormPrice = (court, type) => {
+  database.ref(`prices/copyForm/${court}/${type}`).once("value", (snapshot) => {
+    console.log("PRICE IS:   ", snapshot.val());
+    return snapshot.val();
+  });
+};
+
+export const getFormPrices = () =>
+  new Promise((resolve, reject) => {
+    database.ref('prices/copyForm').once('value',(snapshot) => {
+      if (snapshot.val())
+      {resolve(snapshot.val())}
+      else{
+        reject()
+      }
+    })
+  });
+
+
+ 

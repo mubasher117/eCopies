@@ -44,6 +44,7 @@ import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
+import {getFormPrice} from '../../../api/firebase/backend'
 const { height, width } = Dimensions.get("window");
 
 export default function CopyFormDocs(props) {
@@ -90,10 +91,11 @@ export default function CopyFormDocs(props) {
       }
       let state = store.getState();
       let formDetails = state.ordersReducer.currentForm;
+      let formFee = await getFormPrice(formDetails.court, 'urgent');
       let copyFormDetails = {
         ...formDetails,
         documentDetails,
-        court: "highCourt",
+        formFee : formFee
       };
       console.log("form : ", copyFormDetails);
       let forms;

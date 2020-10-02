@@ -46,18 +46,28 @@ export default function CopyForm1(props) {
   const [headerTitle, setHeaderTitle] = useState("");
   const [plaintiff, setPlaintiff] = useState({ value: "", error: "" });
   const [defendant, setDefendant] = useState({ value: "", error: "" });
-  const [dateOfDecision, setDateOfDecision] = useState({
-    value: "",
-    error: "",
-  });
+  const [dateOfDecision, setDateOfDecision] = useState(new Date());
   useEffect(() => {
     let state = store.getState();
     // Getting selected court name to display on header
     let title = state.ordersReducer.currentForm.court;
     setHeaderTitle(title);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
-      let state = store.getState();
-      let title = state.ordersReducer.currentForm.court;
+       let state = store.getState();
+       let form = state.ordersReducer.currentForm;
+       let title = form.court;
+
+      setPlaintiff(
+        form.plaintiff
+          ? { value: form.plaintiff, error: "" }
+          : { value: "", error: "" }
+      );
+      setDefendant(
+        form.defendant
+          ? { value: form.defendant, error: "" }
+          : { value: "", error: "" }
+      );
+      setDateOfDecision()
       setHeaderTitle(title);
     });
     return () => unsubscribe;
@@ -78,8 +88,23 @@ export default function CopyForm1(props) {
       props.navigation.navigate("LowerCourtsForm3");
     }
   };
+  const _handleChange = () => {
+    var plaintiffError = nameValidator2(plaintiff.value);
+    var defendantError = nameValidator2(defendant.value);
+    if (plaintiffError || defendantError) {
+      setPlaintiff({ ...plaintiff, error: plaintiffError });
+      setDefendant({ ...defendant, error: defendantError });
+    } else {
+      var details = {
+        plaintiff: plaintiff.value,
+        defendant: defendant.value,
+        decisionDate: dateOfDecision,
+      };
+      store.dispatch({ type: "setCurrentFormItem", payload: details });
+    }
+  };
   const _handlePrevious = () => {
-    props.navigation.navigate("RevenueCopyForm");
+    props.navigation.navigate("LowerCourtsForm1");
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
@@ -94,7 +119,7 @@ export default function CopyForm1(props) {
         >
           <Parties
             plaintiff={plaintiff}
-            setPlaintiff={(p) => setPlaintiff(p)}
+            setPlaintiff={(p) => {setPlaintiff(p);}}
             defendant={defendant}
             setDefendant={(d) => setDefendant(d)}
           />

@@ -5,7 +5,7 @@ import {
   Text,
   View,
   Platform,
-  Dimensions,
+  Dimensions, BackHandler,
   ScrollView,
   SafeAreaView,
   Keyboard,
@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+
 } from "react-native";
 import {
   InputItem,
@@ -55,7 +56,7 @@ export default function CopyForm1(props) {
     value: "",
     error: "",
   });
-  const [category, setCategory] = useState("civil");
+  const [category, setCategory] = useState("Civil");
   const [headerTitle, setHeaderTitle] = useState("");
   useEffect(() => {
     let state = store.getState();
@@ -79,14 +80,26 @@ export default function CopyForm1(props) {
       );
       setHeaderTitle(title);
     });
-    return () => unsubscribe;
+    //  const backHandler = BackHandler.addEventListener(
+    //    "hardwareBackPress",
+    //    backAction
+    //  );
+    return () => {unsubscribe;
+      //  backHandler.remove();
+      };
   }, []);
+
+const backAction = () => {
+  console.log("IN BACK HANDLER");
+  _handlePrevious();
+  return true;
+}
   // Retreives previous parts of forms, merge it with this part and saves it.
   const _handleNext = () => {
     var judgeError = nameValidator2(judge.value);
     var psError = "";
     var firError = "";
-    if (category != "civil") {
+    if (category != "Civil") {
       psError =
         policeStation.value == ""
           ? "* Police Station name cannot be empty"
@@ -98,12 +111,20 @@ export default function CopyForm1(props) {
       setFirno({ ...firNo, error: firError });
       setPoliceStation({ ...policeStation, error: psError });
     } else {
-      let details = {
-        judge: judge.value,
-        category: category,
-        policeStation: policeStation.value,
-        firNo: firNo.value,
-      };
+      let details = {};
+      if (category != "Civil") {
+        details = {
+          judge: judge.value,
+          category: category,
+          policeStation: policeStation.value,
+          firNo: firNo.value,
+        };
+      } else {
+        details = {
+          judge: judge.value,
+          category: category,
+        };
+      }
       store.dispatch({ type: "setCurrentFormItem", payload: details });
       props.navigation.navigate("LowerCourtsForm2");
     }
@@ -119,9 +140,10 @@ export default function CopyForm1(props) {
         <OptionButtons
           option1="Civil"
           option2="Criminal"
-          setCategory={(cat) => setCategory(cat)}
+          _handleOption1={() => setCategory("Civil")}
+          _handleOption2={() => setCategory("Criminal")}
         />
-        {category != "civil" && (
+        {category != "Civil" && (
           <View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
@@ -170,7 +192,7 @@ export default function CopyForm1(props) {
         )}
         <View style={styles.infoContainer}>
           <View style={styles.labelContainer}>
-            <Text style={styles.label}>کیس نمبر</Text>
+            <Text style={styles.label}></Text>
           </View>
           <View style={styles.valueContainer}>
             <TextInput
@@ -186,6 +208,7 @@ export default function CopyForm1(props) {
               error={judge.error}
               maxLength={20}
             />
+            <Text style={styles.error}>{judge.error}</Text>
           </View>
         </View>
         <BottomButtonsNav next={_handleNext} previous={_handlePrevious} />
@@ -219,5 +242,9 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: Secondary,
     borderWidth: 0,
+  },
+  error: {
+    color: "red",
+    marginLeft: 5,
   },
 });

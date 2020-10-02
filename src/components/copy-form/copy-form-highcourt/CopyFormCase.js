@@ -34,6 +34,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import store from '../../../redux/store'
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase(props) {
+  const previousScreen = props.navigation.getParam("screen", "N/A");
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [caseNo, setcaseNo] = useState({ value: "", error: false });
@@ -62,7 +63,8 @@ export default function CopyFormCase(props) {
     const details = {
       caseNo: caseNo.value,
       decisionDate: decisionDate,
-    }
+      court: previousScreen,
+    };
     store.dispatch({ type: "setCurrentFormItem", payload: details });
     props.navigation.navigate("CopyFormCase2");
   }

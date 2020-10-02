@@ -31,15 +31,26 @@ const formDetailsFields = [
   { field: "plaintiff", displayName: "Plaintiff" },
   { field: "defendant", displayName: "Defendant" },
   { field: "decisionDate", displayName: "Decision Date" },
+  { field: "formFee", displayName: "Form Fee" },
 ];
 
+// Display Form Fields
 const FormValues = ({ field, value }) => {
-  return (
-    <View style={styles.entityContainer}>
-      <Text style={styles.label}>{field} : </Text>
-      <Text style={styles.entityValue}>{value}</Text>
-    </View>
-  );
+  // If value is present then display it
+  if (value) {
+    return (
+      <View style={styles.entityContainer}>
+        <Text style={styles.label}>{field} : </Text>
+        {field == "Form Fee" ? (
+          <Text style={styles.entityValue}>Rs. {value}</Text>
+        ) : (
+          <Text style={styles.entityValue}>{value}</Text>
+        )}
+      </View>
+    );
+  } else {
+    return <View />;
+  }
 };
 export default function LowerCourtsFormDetails(props) {
   return (

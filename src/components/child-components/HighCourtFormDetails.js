@@ -34,11 +34,11 @@ import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
 const { height, width } = Dimensions.get("window");
 // Display words against db values
-const displayDictionary = {
-  copyForm: "Copy Form",
-  highCourt: "High Court",
-  revenueCourt: "Revenue Court",
-};
+// const displayDictionary = {
+//   copyForm: "Copy Form",
+//   highCourt: "High Court",
+//   revenueCourt: "Revenue Court",
+// };
 
 export default function HighCourtFormDetails(props) {
   return (
@@ -59,12 +59,8 @@ export default function HighCourtFormDetails(props) {
         </TouchableOpacity>
       )}
       <View style={styles.orderInformation}>
-        <Text style={styles.orderType}>
-          {displayDictionary[props.orderType]} {props.index + 1}
-        </Text>
-        <Text style={styles.orderCourt}>
-          {displayDictionary[props.form.court]}
-        </Text>
+        <Text style={styles.orderType}>Copy Form {props.index + 1}</Text>
+        <Text style={styles.orderCourt}>{props.form.court}</Text>
       </View>
       <View style={styles.entityContainer}>
         <Text style={styles.label}>Case No: </Text>
@@ -73,6 +69,10 @@ export default function HighCourtFormDetails(props) {
       <View style={styles.entityContainer}>
         <Text style={styles.label}>Date of decision: </Text>
         <Text style={styles.entityValue}>{props.form.decisionDate}</Text>
+      </View>
+      <View style={styles.entityContainer}>
+        <Text style={styles.label}>Form Fee: </Text>
+        <Text style={styles.entityValue}>Rs. {props.form.formFee}</Text>
       </View>
       <View style={styles.caseEntitiesContainer}>
         <Text style={styles.caseEntity}>{props.form.plaintiff}</Text>

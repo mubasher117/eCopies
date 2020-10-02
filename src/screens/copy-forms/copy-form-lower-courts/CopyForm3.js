@@ -152,7 +152,7 @@ export default function CopyFormDocs(props) {
     });
   };
   const goBackFn = () => {
-    props.navigation.navigate("CopyFormCase2");
+    props.navigation.navigate("LowerCourtsForm2");
   };
   // Converts date to string to display on screen
   var decisionDate = isOrderDated.value.toDateString().toString();
@@ -167,7 +167,7 @@ export default function CopyFormDocs(props) {
     saveDetails().then(() => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("CopyFormCase");
+      props.navigation.navigate("LowerCourtsSelectCourt");
     });
   };
   const onChangeDate = (event, selectedDate) => {

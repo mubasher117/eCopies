@@ -20,13 +20,13 @@ export default function OptionButtons(props) {
   const _handleOption1 = () => {
     if (!active1) {
       setActive1(true);
-      props.setCategory("civil");
+      props._handleOption1();
     }
   };
   const _handleOption2 = () => {
     if (active1) {
       setActive1(false);
-      props.setCategory("criminal");
+      props._handleOption2();
     }
   };
   return (

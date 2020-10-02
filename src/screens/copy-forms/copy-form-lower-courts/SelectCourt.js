@@ -41,16 +41,23 @@ var index = 0;
 const courts = [
   { key: index++, section: true, label: "Select Court", value: "-1" },
   { key: index++, label: "Civil Court", value: "Civil Court" },
+  { key: index++, label: "Session Court", value: "Session Court" },
   { key: index++, label: "Banking Court", value: "Banking Court" },
-  { key: index++, label: "Ravi Court", value: "Ravi Court" },
-  { key: index++, label: "Gulberg", value: "Gulberg" },
-  { key: index++, label: "Nishter Court", value: "Nishter Court" },
-  { key: index++, label: "Aziz Bhatti Court", value: "Aziz Bhatti Court" },
   {
     key: index++,
-    label: "Data Gunj Bakhs Court",
-    value: "Data Gunj Bakhs Court",
+    label: "Anti Terrorist Court",
+    value: "Anti Terrorist Court",
   },
+  {
+    key: index++,
+    label: "Anti Corruption Court",
+    value: "Anti Corruption Court",
+  },
+  { key: index++, label: "Magistrate Court", value: "Magistrate Court" },
+  { key: index++, label: "NAB Court", value: "NAB Court" },
+  { key: index++, label: "Labour Court", value: "Labour Court" },
+  { key: index++, label: "Consumer Court", value: "Consumer Court" },
+  { key: index++, label: "Drug Court", value: "Drug Court" }
 ];
 export default function SelectCourt(props) {
   const [date, setDate] = useState(new Date());
@@ -123,7 +130,7 @@ export default function SelectCourt(props) {
     });
   };
   const goBackFn = () => {
-    props.navigation.navigate("RevenueCopyForm");
+    props.navigation.navigate("CopyFormHomePage");
   };
   const hideModal = () => {
     setIsModalVisible(false);
@@ -143,7 +150,7 @@ export default function SelectCourt(props) {
     saveDetails().then(() => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("RevenueCopyForm");
+      props.navigation.navigate("CopyFormHomePage");
     });
   };
   const courtList = () => {

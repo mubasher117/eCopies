@@ -16,8 +16,7 @@ export default function DateOfDecision(props){
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
     setDate(currentDate);
-    props.setDate(decisionDate);
-    console.log(decisionDate)
+    props.setDate(selectedDate.toDateString().toString());
   };
     return (
       <View style={styles.infoContainer}>

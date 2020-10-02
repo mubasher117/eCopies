@@ -99,12 +99,15 @@ export const getNotifications = async () => {
 //     });
 // };
 
-export const login = (cellNo, password) => new Promise((resolve, reject) => {
-  console.log("IN LOGIN");
+export const login = (cellNo, password) =>
+  new Promise((resolve, reject) => {
+    console.log("IN LOGIN");
 
-  firebase.auth().signInWithPhoneNumber(cellNo, password)
-  .then(res => console.log(res))
-})
+    firebase
+      .auth()
+      .signInWithPhoneNumber(cellNo, password)
+      .then((res) => console.log(res));
+  });
 // Get additional userData
 export const getUserData = (userId) => {
   // console.log(user);
@@ -112,15 +115,15 @@ export const getUserData = (userId) => {
   dbRef.once("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
-      var user = new User(
-        data.id,
-        data.name,
-        data.address,
-        data.cellNo,
-        data.expoToken,
-        data.balance
-      );
-        store.dispatch({ type: "setUser", payload: user.getUser() });
+      var user = {
+        id: data.id,
+        name: data.name,
+        address: data.address,
+        cellNo: data.cellNo,
+        expoToken: data.expoToken,
+        balance: data.balance,
+      };
+      store.dispatch({ type: "setUser", payload: user });
     } else {
       alert("user data not found");
     }
@@ -296,8 +299,8 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 };
 export function addForm(json, callbackfn) {
   console.log(json);
-  var date = Date.now()
-  var newId = date + "-" +uuidv4();
+  var date = Date.now();
+  var newId = date + "-" + uuidv4();
   database.ref("orders/" + newId).set(json, (res) => {
     console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);

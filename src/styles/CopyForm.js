@@ -33,9 +33,6 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     color: PrimaryText,
   },
-  labelContainer: {
-    marginTop: 20,
-  },
   label: {
     fontSize: 16,
     fontWeight: "bold",

@@ -60,22 +60,10 @@ const courts = [
   { key: index++, label: "Drug Court", value: "Drug Court" }
 ];
 export default function SelectCourt(props) {
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
   const [court, setCourt] = useState("-1");
   const [courtError, setCourtError] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [showLoading, setshowLoading] = useState(false);
-  var registerDate = date.toDateString().toString();
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-  };
-  const showDatepicker = () => {
-    setShow(!show);
-  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const _handleNext = () => {
     if (court == "-1") {
@@ -86,72 +74,8 @@ export default function SelectCourt(props) {
       props.navigation.navigate("LowerCourtsForm1");
     }
   }
-  const saveDetails = () =>
-    new Promise(async (resolve, reject) => {
-      let state = store.getState();
-      let formDetails = state.ordersReducer.currentForm;
-      let copyFormDetails = {
-        ...formDetails,
-        court: court,
-      };
-      console.log("form : ", copyFormDetails);
-      let forms;
-      try {
-        // Retrieving previous forms from storage
-        const formsJson = await AsyncStorage.getItem("@forms");
-        if (formsJson) {
-          forms = JSON.parse(formsJson);
-          forms.push(copyFormDetails);
-          const jsonValue = JSON.stringify(forms);
-          await AsyncStorage.setItem("@forms", jsonValue);
-        } else {
-          forms = [copyFormDetails];
-          const jsonValue = JSON.stringify(forms);
-          await AsyncStorage.setItem("@forms", jsonValue);
-        }
-      } catch (e) {
-        // error reading value
-      }
-      // Clear pervious form
-      store.dispatch({
-        type: "clearForm",
-      });
-      setCourt("-1");
-      resolve();
-    });
-  // Function triggered on pressing next button
-  const onNext = async () => {
-    setshowLoading(true);
-    setIsModalVisible(false);
-    saveDetails().then(async () => {
-      setcontainerOpacity(1);
-      setshowLoading(false);
-      props.navigation.navigate("SubmitDetails");
-    });
-  };
   const goBackFn = () => {
     props.navigation.navigate("CopyFormHomePage");
-  };
-  const hideModal = () => {
-    setIsModalVisible(false);
-    setcontainerOpacity(1);
-  };
-  const showModal = () => {
-    if (court == "-1") {
-      setCourtError(true);
-    } else {
-      setIsModalVisible(true);
-      setcontainerOpacity(0.05);
-    }
-  };
-  const submitAnotherForm = () => {
-    setshowLoading(true);
-    setIsModalVisible(false);
-    saveDetails().then(() => {
-      setcontainerOpacity(1);
-      setshowLoading(false);
-      props.navigation.navigate("CopyFormHomePage");
-    });
   };
   const courtList = () => {
     return courts.map((x, i) => {

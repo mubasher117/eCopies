@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     borderBottomColor: PrimaryText,
     borderBottomWidth: 1,
     marginTop: 20,
-    marginBottom: 60,
+    marginBottom: 20,
   },
   sctionTitle: {
     fontSize: 22,

@@ -40,6 +40,7 @@ import { Parties } from "../../../components/child-components/Parties";
 import DateOfDecision from "../../../components/child-components/DateOfDecision";
 import BottomButtonsNav from "../../../components/child-components/BottomButtonsNav";
 import { nameValidator2 } from "../../../components/core/utils";
+import SectionTitle from "../../../components/child-components/SectionTitle";
 const { height, width } = Dimensions.get("window");
 var index = 0;
 export default function CopyForm1(props) {
@@ -110,11 +111,11 @@ export default function CopyForm1(props) {
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title={headerTitle} backbutton goBackFn={_handlePrevious} />
       <View style={styles.container}>
+        <SectionTitle title="Case Details" /> 
         <View
           style={{
             justifyContent: "center",
             alignItems: "center",
-            marginTop: 15,
           }}
         >
           <Parties

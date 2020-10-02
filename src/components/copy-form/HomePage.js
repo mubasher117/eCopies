@@ -79,6 +79,7 @@ export default function HomPage(props) {
   const navigateTo = async (screen, currentScreen = "N/A") => {
     let state = await store.getState();
     let user = state.userReducer.user;
+    store.dispatch({ type: "setCurrentFormItem", payload: { court: currentScreen } });
     database.ref("userData/" + user.id).once("value", (snapshot) => {
       console.log(user.id);
       if (snapshot.val()) {

@@ -38,10 +38,18 @@ export default function CopyFormCase(props) {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [caseNo, setcaseNo] = useState({ value: "", error: false });
+  const [headerTitle, setHeaderTitle] = useState("");
   useEffect(() => {
+    let state = store.getState();
+    // Getting selected court name to display on header
+    let title = state.ordersReducer.currentForm.court;
+    console.log(state.ordersReducer.currentForm);
+    setHeaderTitle(title);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
     let state = store.getState();
     let form = state.ordersReducer.currentForm;
+    let title = state.ordersReducer.currentForm.court;
+    setHeaderTitle(title);
     console.log("FOUND FORM IN REDUCER:   ", form)
       setcaseNo(form.caseNo ? { value: form.caseNo, error:false } : { value: "", error: false });
       setDate(form.decisionDate ? new Date(form.decisionDate) : new Date());
@@ -78,7 +86,7 @@ export default function CopyFormCase(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="High Court" openDrawerFn={openDrawerFn} />
+      <Header title={headerTitle} openDrawerFn={openDrawerFn} />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{

@@ -38,11 +38,18 @@ export default function CopyFormCase2(props) {
   const [defendant, setDefendant] = useState({ value: "", error: "" });
   const [judges, setJudges] = useState([{ value: "", error: "" }]);
   const [isVisibleFab, setIsVisibleFab] = useState(true);
+  const [headerTitle, setHeaderTitle] = useState("");
 
-  useEffect(() => {
+  useEffect(() => {let state = store.getState();
+  // Getting selected court name to display on header
+  let title = state.ordersReducer.currentForm.court;
+  console.log(state.ordersReducer.currentForm);
+  setHeaderTitle(title);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
+      let title = state.ordersReducer.currentForm.court;
+      setHeaderTitle(title);
       console.log("FOCUSED ON");
       console.log(form);
       setPlaintiff(
@@ -118,7 +125,7 @@ export default function CopyFormCase2(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="High Court" backbutton goBackFn={goBackFn} />
+      <Header title={headerTitle} backbutton goBackFn={goBackFn} />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{

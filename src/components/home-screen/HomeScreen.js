@@ -49,7 +49,7 @@ useEffect(() => {
     <View style={styles.container}>
       <Logo />
       <Header>eCopies</Header>
-      <Paragraph>Get certified copies at doorstep.</Paragraph>
+      <Paragraph>Certified copies at doorstep.</Paragraph>
       <View style={{width:'90%'}}>
         <Button
           style={styles.button}

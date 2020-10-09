@@ -12,7 +12,7 @@ import {
   Keyboard,
   Picker,
   Image,
-  Modal,
+  BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -45,6 +45,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
 import { getFormPrice } from "../../../api/firebase/backend";
+import Modal from '../../child-components/Modal'
 const { height, width } = Dimensions.get("window");
 
 export default function CopyFormDocs(props) {
@@ -73,15 +74,37 @@ export default function CopyFormDocs(props) {
     let title = state.ordersReducer.currentForm.court;
     console.log(state.ordersReducer.currentForm);
     setHeaderTitle(title);
+
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let title = state.ordersReducer.currentForm.court;
       setHeaderTitle(title);
 
       console.log(state.ordersReducer.currentForm);
+
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, []);
+
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    goBackFn();
+    return true;
+  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = () =>
     new Promise(async (resolve, reject) => {
@@ -205,7 +228,7 @@ export default function CopyFormDocs(props) {
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title={headerTitle} backbutton goBackFn={goBackFn} />
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
@@ -248,9 +271,28 @@ export default function CopyFormDocs(props) {
             </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
+      <Modal
+        visible={isModalVisible}
+        text="Do you want to submit another copy form?"
+        urduText=" کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟"
+        hideModal={hideModal}
+        optionsYes
+        quitButton
+        handleYes={submitAnotherForm}
+        handleNo={onNext}
+      />
       {/* Modal if form is clean */}
       <Modal
+        visible={checkModal}
+        text="Select at least one document"
+        urduText="کم از کم ایک دستاویز کا انتخاب کریں"
+        hideModal={hideModal}
+        quitButton
+        buttonOkText="OK"
+        handleOkay={hideModal}
+      />
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={checkModal}
@@ -283,7 +325,7 @@ export default function CopyFormDocs(props) {
             </Button>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{

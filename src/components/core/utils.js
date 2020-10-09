@@ -33,6 +33,7 @@ export const nameValidator = name => {
   return '';
 };
 export const nameValidator2 = (name) => {
+  name = name.trim()
   if (!name || name.length <= 0) return "* Name cannot be empty.";
   else if (/^[a-zA-Z .]*$/.test(name) == false)
          return "* Name shlould be alphabets only";

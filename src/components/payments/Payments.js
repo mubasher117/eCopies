@@ -208,16 +208,16 @@ function Payments(props) {
           }}
         >
           <TotalCard total={totalPayment} width={"85%"} />
-          <View style={styles.paymentLabelContainer}>
+          {/* <View style={styles.paymentLabelContainer}>
             <Image
               style={styles.paymentLabelImage}
               source={require("../../../assets/images/static/payment.png")}
             />
             <Text style={styles.paymentLabel}>Payment Methods</Text>
-          </View>
+          </View> */}
 
-          <View style={styles.divider} />
-          {paymentMethods.map((method, index) => {
+          {/* <View style={styles.divider} /> */}
+          {/* {paymentMethods.map((method, index) => {
             return (
               <PaymentMethod
                 key={index}
@@ -234,7 +234,7 @@ function Payments(props) {
                 }
               />
             );
-          })}
+          })} */}
         </View>
         <View
           style={{

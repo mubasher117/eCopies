@@ -266,7 +266,7 @@ export default function SubmitDetails(props) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>
+            {/* <Text style={styles.modalText}>
               Your details have been submitted. Please make a payment of Rs.
               <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> through
               Easypaisa to account#{" "}
@@ -277,6 +277,12 @@ export default function SubmitDetails(props) {
               <Text style={{ fontWeight: "bold" }}> 03134243117 </Text> میں{" "}
               <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> .Rs جمع
               کروائیں۔
+            </Text> */}
+            <Text style={styles.modalText}>
+              Your details have been submitted. Amount would be charged at delivery time.
+            </Text>
+            <Text style={styles.modalText}>
+              
             </Text>
             <Button
               style={styles.buttonModalClose}
@@ -342,14 +348,14 @@ export default function SubmitDetails(props) {
                 {switchMode ? (
                   <View style={styles.urgentMessageContainer}>
                     <Text style={styles.urgentMessage}>
-                      * Your document will be delivered the next with additional
+                      * Your document will be delivered the next day with additional
                       charges.
                     </Text>
                   </View>
                 ) : (
                   <View style={styles.urgentMessageContainer}>
-                    <Text style={[styles.urgentMessage, {color:'white'}]}>
-                      * Your document will be delivered the next with additional
+                    <Text style={[styles.urgentMessage, { color: "white" }]}>
+                      * Your document will be delivered on the next with additional
                       charges.
                     </Text>
                   </View>

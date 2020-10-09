@@ -12,7 +12,6 @@ import {
   Picker,
   TouchableOpacity,
   Image,
-  Modal,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -35,7 +34,7 @@ import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
 import store from "../../redux/store";
-import Modal2 from "../child-components/Modal";
+import Modal from "../child-components/Modal";
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
   return (
@@ -141,7 +140,7 @@ export default function HomPage(props) {
           </View>
         </View>
       </Modal> */}
-      <Modal2
+      <Modal
         visible={isModalVisible}
         text="Please pay the remaining dues before submitting another form."
         urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"

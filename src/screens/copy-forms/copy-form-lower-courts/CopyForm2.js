@@ -6,13 +6,7 @@ import {
   View,
   Platform,
   Dimensions,
-  ScrollView,
-  SafeAreaView,
-  Keyboard,
-  Picker,
-  TouchableOpacity,
-  Image,
-  Modal,
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -53,10 +47,15 @@ export default function CopyForm1(props) {
     // Getting selected court name to display on header
     let title = state.ordersReducer.currentForm.court;
     setHeaderTitle(title);
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
-       let state = store.getState();
-       let form = state.ordersReducer.currentForm;
-       let title = form.court;
+      let state = store.getState();
+      let form = state.ordersReducer.currentForm;
+      let title = form.court;
 
       setPlaintiff(
         form.plaintiff
@@ -68,11 +67,25 @@ export default function CopyForm1(props) {
           ? { value: form.defendant, error: "" }
           : { value: "", error: "" }
       );
-      setDateOfDecision()
+      setDateOfDecision();
       setHeaderTitle(title);
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, []);
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    _handlePrevious();
+    return true;
+  };
   const _handleNext = () => {
     var plaintiffError = nameValidator2(plaintiff.value);
     var defendantError = nameValidator2(defendant.value);
@@ -87,21 +100,6 @@ export default function CopyForm1(props) {
       };
       store.dispatch({ type: "setCurrentFormItem", payload: details });
       props.navigation.navigate("LowerCourtsForm3");
-    }
-  };
-  const _handleChange = () => {
-    var plaintiffError = nameValidator2(plaintiff.value);
-    var defendantError = nameValidator2(defendant.value);
-    if (plaintiffError || defendantError) {
-      setPlaintiff({ ...plaintiff, error: plaintiffError });
-      setDefendant({ ...defendant, error: defendantError });
-    } else {
-      var details = {
-        plaintiff: plaintiff.value,
-        defendant: defendant.value,
-        decisionDate: dateOfDecision,
-      };
-      store.dispatch({ type: "setCurrentFormItem", payload: details });
     }
   };
   const _handlePrevious = () => {

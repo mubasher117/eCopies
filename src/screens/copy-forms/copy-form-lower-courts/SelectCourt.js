@@ -48,11 +48,11 @@ const courts = [
     label: "Anti Terrorist Court",
     value: "Anti Terrorist Court",
   },
-  {
-    key: index++,
-    label: "Anti Corruption Court",
-    value: "Anti Corruption Court",
-  },
+  // {
+  //   key: index++,
+  //   label: "Anti Corruption Court",
+  //   value: "Anti Corruption Court",
+  // },
   { key: index++, label: "Magistrate Court", value: "Magistrate Court" },
   { key: index++, label: "NAB Court", value: "NAB Court" },
   { key: index++, label: "Labour Court", value: "Labour Court" },
@@ -103,8 +103,8 @@ export default function SelectCourt(props) {
                 { flexDirection: "row", justifyContent: "space-between" },
               ]}
             >
-              <Text style={styles.label}>Courts</Text>
-              <Text style={styles.label}>ٹاؤن</Text>
+              <Text style={styles.label}>Court</Text>
+              <Text style={styles.label}>عدالت</Text>
             </View>
             <View
               style={[

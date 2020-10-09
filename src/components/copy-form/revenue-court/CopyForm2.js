@@ -12,7 +12,7 @@ import {
   Picker,
   TouchableOpacity,
   Image,
-  Modal,
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -31,75 +31,93 @@ import {
 } from "../../../constants/colors";
 import AsyncStorage from "@react-native-community/async-storage";
 import ModalPicker from "react-native-modal-picker";
-import { TextInput, Chip, FAB } from "react-native-paper";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import store from "../../../redux/store";
+import Modal from "../../child-components/Modal";
 const { height, width } = Dimensions.get("window");
 var index = 0;
 const towns = [
-  {key: index++, section: true, label: "Select Town", value:"-1"},
-  {key: index++, label: "Model Town", value:"Model Town"},
-  {key: index++, label: "Allama Iqbal Town", value:"Allama Iqbal Town"},
-  {key: index++, label: "Ravi Town", value:"Ravi Town"},
-  {key: index++, label: "Gulberg", value:"Gulberg"},
-  {key: index++, label: "Nishter Town", value:"Nishter Town"},
-  {key: index++, label: "Aziz Bhatti Town", value:"Aziz Bhatti Town"},
-  {key: index++, label: "Data Gunj Bakhs Town", value:"Data Gunj Bakhs Town"},  
+  { key: index++, section: true, label: "Select Town", value: "-1" },
+  { key: index++, label: "Model Town", value: "Model Town" },
+  { key: index++, label: "Allama Iqbal Town", value: "Allama Iqbal Town" },
+  { key: index++, label: "Ravi Town", value: "Ravi Town" },
+  { key: index++, label: "Gulberg", value: "Gulberg" },
+  { key: index++, label: "Nishter Town", value: "Nishter Town" },
+  { key: index++, label: "Aziz Bhatti Town", value: "Aziz Bhatti Town" },
+  {
+    key: index++,
+    label: "Data Gunj Bakhs Town",
+    value: "Data Gunj Bakhs Town",
+  },
 ];
 export default function CopyForm2(props) {
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
   const [town, setTown] = useState("-1");
   const [townError, setTownError] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [showLoading, setshowLoading] = useState(false);
-  var registerDate = date.toDateString().toString();
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-  };
-  const showDatepicker = () => {
-    setShow(!show);
+
+  useEffect(() => {
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+    });
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
+  }, []);
+
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    goBackFn();
+    return true;
   };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = () =>
     new Promise(async (resolve, reject) => {
-    let state = store.getState();
-    let formDetails = state.ordersReducer.currentForm;
-    let copyFormDetails = {
-      ...formDetails,
-      town: town,
-      court: "revenueCourt",
-    };
-    console.log("form : ", copyFormDetails);
-    let forms;
-    try {
-      // Retrieving previous forms from storage
-      const formsJson = await AsyncStorage.getItem("@forms");
-      if (formsJson) {
-        forms = JSON.parse(formsJson);
-        forms.push(copyFormDetails);
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
-      } else {
-        forms = [copyFormDetails];
-        const jsonValue = JSON.stringify(forms);
-        await AsyncStorage.setItem("@forms", jsonValue);
+      let state = store.getState();
+      let formDetails = state.ordersReducer.currentForm;
+      let copyFormDetails = {
+        ...formDetails,
+        town: town,
+        court: "revenueCourt",
+      };
+      console.log("form : ", copyFormDetails);
+      let forms;
+      try {
+        // Retrieving previous forms from storage
+        const formsJson = await AsyncStorage.getItem("@forms");
+        if (formsJson) {
+          forms = JSON.parse(formsJson);
+          forms.push(copyFormDetails);
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        } else {
+          forms = [copyFormDetails];
+          const jsonValue = JSON.stringify(forms);
+          await AsyncStorage.setItem("@forms", jsonValue);
+        }
+      } catch (e) {
+        // error reading value
       }
-    } catch (e) {
-      // error reading value
-    }
-    // Clear pervious form
-    store.dispatch({
-      type: "clearForm",
+      // Clear pervious form
+      store.dispatch({
+        type: "clearForm",
+      });
+      setTown("-1");
+      resolve();
     });
-    setTown("-1");
-    resolve();
-  });
   // Function triggered on pressing next button
   const onNext = async () => {
     setshowLoading(true);
@@ -138,49 +156,15 @@ export default function CopyForm2(props) {
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
       <Header title="Revenue Court" backbutton goBackFn={goBackFn} />
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => {
-          //alert("Modal has been closed.");
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity
-              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
-              onPress={hideModal}
-            >
-              <Image
-                style={styles.modalQuit}
-                source={require("../../../../assets/images/static/quit.png")}
-              />
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              Do you want to submit another copy form?
-            </Text>
-            <Text style={styles.modalText}>
-              کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟
-            </Text>
-            <View style={styles.modalButtonsContainer}>
-              <Button
-                style={styles.buttonModalNo}
-                type="primary"
-                onPress={onNext}
-              >
-                <Text style={{ color: Secondary }}>No</Text>
-              </Button>
-              <Button
-                style={styles.buttonModalYes}
-                type="primary"
-                onPress={submitAnotherForm}
-              >
-                Yes
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        text="Do you want to submit another copy form?"
+        urduText=" کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟"
+        hideModal={hideModal}
+        optionsYes
+        quitButton
+        handleYes={submitAnotherForm}
+        handleNo={onNext}
+      />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{

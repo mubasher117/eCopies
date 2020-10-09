@@ -41,7 +41,7 @@ import { ImagePropTypes } from "react-native";
 import { not } from "react-native-reanimated";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import store from "../../redux/store";
-import { seeNotification } from "../../api/firebase/backend";
+import { seeNotification, getMyOrders } from "../../api/firebase/backend";
 import { database } from "../../api/firebase/authenication";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
@@ -108,14 +108,19 @@ export default function Notifications(props) {
     console.log(notification);
     let state = store.getState();
     let myOrders = state.ordersReducer.myOrders;
-    console.log(myOrders);
-    seeNotification(notification);
-    let index = myOrders.findIndex(obj => obj.id == notification.orderId)
-    console.log(index)
-    props.navigation.navigate("OrderDetails", {
-      details: myOrders[index],
-      screen: "Notifications",
-    });
+    let index = myOrders.findIndex((obj) => obj.id == notification.orderId);
+    if (index != -1) {
+      console.log("my orders:  ", myOrders);
+      seeNotification(notification);
+      console.log(index);
+      props.navigation.navigate("OrderDetails", {
+        details: myOrders[index],
+        screen: "Notifications",
+      });
+    } else {
+      getMyOrders();
+      setTimeout(() => openNotification(notification), 200);
+    }
   };
   return (
     <SafeAreaView

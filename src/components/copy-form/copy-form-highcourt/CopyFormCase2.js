@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import {
+  BackHandler,
   StyleSheet,
   Text,
   View,
@@ -40,11 +41,18 @@ export default function CopyFormCase2(props) {
   const [isVisibleFab, setIsVisibleFab] = useState(true);
   const [headerTitle, setHeaderTitle] = useState("");
 
-  useEffect(() => {let state = store.getState();
-  // Getting selected court name to display on header
-  let title = state.ordersReducer.currentForm.court;
-  console.log(state.ordersReducer.currentForm);
-  setHeaderTitle(title);
+  useEffect(() => {
+    let state = store.getState();
+    // Getting selected court name to display on header
+    let title = state.ordersReducer.currentForm.court;
+    console.log(state.ordersReducer.currentForm);
+    setHeaderTitle(title);
+
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
@@ -66,9 +74,23 @@ export default function CopyFormCase2(props) {
         setJudges([{ value: "", error: "" }]);
         setIsVisibleFab(true);
       }
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, [props.navigation]);
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    goBackFn();
+    return true;
+  };
   const addJudge = () => {
     if (judges.length < 2) {
       // Deep Copy of documents

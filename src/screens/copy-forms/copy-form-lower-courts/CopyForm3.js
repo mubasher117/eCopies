@@ -13,6 +13,7 @@ import {
   Picker,
   Image,
   Modal,
+  BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -71,15 +72,33 @@ export default function CopyFormDocs(props) {
     let title = state.ordersReducer.currentForm.court;
     console.log(state.ordersReducer.currentForm);
     setHeaderTitle(title);
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let title = state.ordersReducer.currentForm.court;
       setHeaderTitle(title);
-
+      BackHandler.addEventListener("hardwareBackPress", backAction);
       console.log(state.ordersReducer.currentForm);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, []);
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    _handlePrevious();
+    return true;
+  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = () =>
     new Promise(async (resolve, reject) => {
@@ -151,7 +170,7 @@ export default function CopyFormDocs(props) {
       props.navigation.navigate("SubmitDetails");
     });
   };
-  const goBackFn = () => {
+  const _handlePrevious = () => {
     props.navigation.navigate("LowerCourtsForm2");
   };
   // Converts date to string to display on screen
@@ -200,7 +219,7 @@ export default function CopyFormDocs(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title={headerTitle} backbutton goBackFn={goBackFn} />
+      <Header title={headerTitle} backbutton goBackFn={_handlePrevious} />
       <Modal
         animationType="slide"
         transparent={true}
@@ -447,7 +466,7 @@ export default function CopyFormDocs(props) {
           </View>
 
           <View style={styles.buttonsContainer}>
-            <Button style={styles.previous} type="primary" onPress={goBackFn}>
+            <Button style={styles.previous} type="primary" onPress={_handlePrevious}>
               <Text style={{ color: Secondary }}>Previous</Text>
             </Button>
 

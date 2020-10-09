@@ -95,15 +95,42 @@ export default function (props){
                 {props.buttonSuccessText}
               </Button>
             )}
-            {/* If 'options' props is provided */}
-            {props.options && (
+            {/* If Yes/No Buttons are required */}
+            {props.optionsYes && (
               <View style={Styles.modalButtonsContainer}>
-                <Button style={Styles.optionButtons} type="primary">
-                  <Text style={Styles.textButtonNo}>No</Text>
-                </Button>
-                <Button style={Styles.optionButtons} type="primary">
-                  <Text style={Styles.textButtonYes}>Yes</Text>
-                </Button>
+                <TouchableOpacity
+                  style={Styles.optionButtons}
+                  type="primary"
+                  onPress={props.handleNo}
+                >
+                  <Text style={Styles.textButtonOption}>No</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={Styles.optionButtons}
+                  type="primary"
+                  onPress={props.handleYes}
+                >
+                  <Text style={Styles.textButtonOption}>Yes</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {/* If Okay/Cancel Buttons are required */}
+            {props.optionsOk && (
+              <View style={Styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={Styles.optionButtons}
+                  type="primary"
+                  onPress={props.handleCancel}
+                >
+                  <Text style={Styles.textButtonOption}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={Styles.optionButtons}
+                  type="primary"
+                  onPress={props.handleOk}
+                >
+                  <Text style={Styles.textButtonOption}>Ok</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>

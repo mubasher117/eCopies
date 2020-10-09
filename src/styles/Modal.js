@@ -46,14 +46,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   optionButtons: {
-    width: "25%",
+    width: "30%",
     height: 45,
-    backgroundColor: "white",
     color: "black",
     borderWidth: 0,
     alignSelf: "flex-end",
+    alignItems:'flex-end',
   },
-  textButtonYes: { color: Secondary },
+  textButtonOption: { fontSize: 18, color: Secondary, fontWeight: "bold" },
   buttonModalNo: {
     width: "25%",
     height: 45,
@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     alignSelf: "flex-end",
   },
-  textButtonNo: { color: 'grey' },
+  textButtonNo: { fontSize: 16, color: Secondary, fontWeight: "bold" },
   modalButtonsContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 15
+    marginTop: 15,
   },
 });
 export default styles;

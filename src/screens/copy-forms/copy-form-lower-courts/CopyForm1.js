@@ -63,6 +63,14 @@ export default function CopyForm1(props) {
     // Getting selected court name to display on header
     let title = state.ordersReducer.currentForm.court;
     setHeaderTitle(title);
+
+
+    //Back Handler
+     const backHandler = BackHandler.addEventListener(
+       "hardwareBackPress",
+       backAction
+     );
+
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
@@ -79,13 +87,16 @@ export default function CopyForm1(props) {
         form.firNo ? { value: form.firNo, error: "" } : { value: "", error: "" }
       );
       setHeaderTitle(title);
+      BackHandler.addEventListener("hardwareBackPress",  backAction );
     });
-    //  const backHandler = BackHandler.addEventListener(
-    //    "hardwareBackPress",
-    //    backAction
-    //  );
-    return () => {unsubscribe;
-      //  backHandler.remove();
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
       };
   }, []);
 
@@ -147,14 +158,14 @@ const backAction = () => {
           <View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>کیس نمبر</Text>
+                <Text style={styles.label}>تھانہ</Text>
               </View>
               <View style={styles.valueContainer}>
                 <TextInput
                   label="Police Station"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
-                  placeholder="CP14580/2020"
+                  placeholder="Name of Police Station"
                   value={policeStation.value}
                   onChange={(e) =>
                     setPoliceStation({
@@ -170,14 +181,14 @@ const backAction = () => {
             </View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
-                <Text style={styles.label}>کیس نمبر</Text>
+                <Text style={styles.label}>ایف آئی آر نمبر</Text>
               </View>
               <View style={styles.valueContainer}>
                 <TextInput
                   label="FIR Number"
                   selectionColor={Primary}
                   underlineColor={PrimaryText}
-                  placeholder="CP14580/2020"
+                  placeholder="Enter FIR Number"
                   value={firNo.value}
                   onChange={(e) =>
                     setFirno({ value: e.nativeEvent.text, error: "" })
@@ -192,14 +203,14 @@ const backAction = () => {
         )}
         <View style={styles.infoContainer}>
           <View style={styles.labelContainer}>
-            <Text style={styles.label}></Text>
+            <Text style={styles.label}>جج</Text>
           </View>
           <View style={styles.valueContainer}>
             <TextInput
               label="Judge"
               selectionColor={Primary}
               underlineColor={PrimaryText}
-              placeholder="CP14580/2020"
+              placeholder="Mr. Justice"
               value={judge.value}
               onChange={(e) =>
                 setJudge({ value: e.nativeEvent.text, error: "" })

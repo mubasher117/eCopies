@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -44,6 +45,32 @@ export default function OrderDetails(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [formIndex, setFormIndex] = useState(0);
+  useEffect(() => {
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+    });
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
+  }, []);
+
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    var previousScreen = props.navigation.getParam("screen", "Orders");
+    props.navigation.navigate(previousScreen);
+    return true;
+  };
   // Function to be passed to Header
   const goBackFn = () => {
     props.navigation.navigate(previousScreen);

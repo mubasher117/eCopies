@@ -247,6 +247,7 @@ export default function SubmitDetails(props) {
     });
   };
   return (
+    <>
     <KeyboardAwareScrollView
       contentContainerStyle={{
         height: height,
@@ -422,12 +423,6 @@ export default function SubmitDetails(props) {
           </View> */}
         </View>
       </ScrollView>
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-        text="Submitting..."
-      />
 
       <View style={styles.submitContainer}>
         <Button style={styles.submit} type="primary" onPress={onSubmit}>
@@ -435,6 +430,14 @@ export default function SubmitDetails(props) {
         </Button>
       </View>
     </KeyboardAwareScrollView>
+
+      <ActivityIndicator
+        animating={showLoading}
+        toast
+        size="large"
+        text="Submitting..."
+      />
+      </>
   );
 }
 

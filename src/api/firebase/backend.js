@@ -1,7 +1,7 @@
 import { database, getUserId } from "./authenication";
 import store from "../../redux/store";
 import { registerForPushNotificationsAsync } from "./authenication";
-export async function getMyOrders() {
+export const getMyOrders = () => new Promise((resolve, reject) => {
   // retrieving user data
   let state = store.getState();
   let user = state.userReducer.user;
@@ -9,7 +9,7 @@ export async function getMyOrders() {
   var dbRef = database
     .ref("/orders")
     .orderByChild("customerId")
-    .equalTo(user.id);
+    .equalTo(user.id).limitToLast(20);
   dbRef.on("value", (snapshot) => {
     let data = snapshot.val();
     if (data) {
@@ -19,12 +19,14 @@ export async function getMyOrders() {
         tempMyOrders.push({ id: key, ...data[key] });
       }
       store.dispatch({ type: "setMyOrders", payload: tempMyOrders.reverse() });
+      resolve(tempMyOrders.reverse());
     } else {
       store.dispatch({ type: "setMyOrders", payload: [] });
+      resolve([]);
     }
-  });
+  })
 }
-
+)
 export async function seeNotification(notification) {
   let seenNotification = { ...notification, isSeen: true };
   database.ref("notifications/" + notification.id).set(seenNotification);

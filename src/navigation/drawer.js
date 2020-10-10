@@ -429,12 +429,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   pageLogoContainer: {
-    backgroundColor: SecondaryLight,
-    borderRadius: 50,
-    height: 33,
-    width: 33,
-    alignItems: "center",
-    justifyContent: "center",
+    
   },
   pageLogo: {
     height: 25,

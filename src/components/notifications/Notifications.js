@@ -108,18 +108,21 @@ export default function Notifications(props) {
     console.log(notification);
     let state = store.getState();
     let myOrders = state.ordersReducer.myOrders;
-    let index = myOrders.findIndex((obj) => obj.id == notification.orderId);
-    if (index != -1) {
-      console.log("my orders:  ", myOrders);
-      seeNotification(notification);
-      console.log(index);
-      props.navigation.navigate("OrderDetails", {
-        details: myOrders[index],
-        screen: "Notifications",
-      });
+    if (myOrders.length != 0) {
+      let index = myOrders.findIndex((obj) => obj.id == notification.orderId);
+      if (index != -1) {
+        seeNotification(notification);
+        console.log(index);
+        props.navigation.navigate("OrderDetails", {
+          details: myOrders[index],
+          screen: "Notifications",
+        });
+      } else {
+        seeNotification(notification);
+        props.navigation.navigate("CopyFormHomePage");
+      }
     } else {
-      getMyOrders();
-      setTimeout(() => openNotification(notification), 200);
+      getMyOrders().then((data) => openNotification(notification));
     }
   };
   return (
@@ -175,7 +178,10 @@ export default function Notifications(props) {
         )}
         {notifications.map((notification, index) => {
           return (
-            <TouchableOpacity key={index} onPress={() => openNotification(notification)}>
+            <TouchableOpacity
+              key={index}
+              onPress={() => openNotification(notification)}
+            >
               <Item
                 thumb={
                   <Image

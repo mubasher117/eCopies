@@ -141,7 +141,7 @@ export default function Notifications(props) {
         transparent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-          alert("Modal has been closed.");
+          // alert("Modal has been closed.");
         }}
       >
         <View style={styles.centeredView}>

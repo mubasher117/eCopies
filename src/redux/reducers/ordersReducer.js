@@ -3,6 +3,7 @@ let initialState = {
   notifications: [],
   currentForm:{},
   currentCourt: '',
+  isUrgent: false,
 };
 export default function (state = initialState, action) {
   switch (action.type) {
@@ -19,11 +20,13 @@ export default function (state = initialState, action) {
         currentForm: { ...state.currentForm, ...action.payload },
       };
     case "setCurrentCourt":
-      console.log("IN clear form");
       return { ...state, currentCourt: action.payload };
     case "clearForm":
       console.log("IN clear form");
       return { ...state, currentForm: {} };
+    case "setUrgent":
+      console.log("IN setUrgent form");
+      return { ...state, isUrgent: action.payload };
     default:
       return { ...state };
   }

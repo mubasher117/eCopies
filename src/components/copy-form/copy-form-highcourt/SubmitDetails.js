@@ -13,6 +13,7 @@ import {
   List,
   Modal,
   Image,
+  BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -57,7 +58,6 @@ export default function SubmitDetails(props) {
   const [showLoading, setshowLoading] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [switchMode, setSwitchMode] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const [cellNo, setCellNo] = useState({ error: "", value: "" });
   const [address, setAddress] = useState({ error: "", value: "" });
@@ -67,14 +67,33 @@ export default function SubmitDetails(props) {
     let user = state.userReducer.user;
     setAddress({ value: user.address, error: "" });
     setCellNo({ value: user.cellNo, error: "" });
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let user = state.userReducer.user;
       setAddress({ value: user.address, error: "" });
       setCellNo({ value: user.cellNo, error: "" });
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {unsubscribe;
+    onBlurScreen;
+    backHandler.remove();}
   }, []);
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    _handlePrevious();
+    return true;
+  };
+  const _handlePrevious = () => {
+    props.navigation.navigate("DeliveryDetails");
+  }
   // Callback function after adding order
   const addFormCallBack = async (error) => {
     if (error) {
@@ -119,12 +138,16 @@ export default function SubmitDetails(props) {
       } catch (e) {
         // error reading value
       }
+      let state = store.getState();
+      // retrieving user data
+      let user = state.userReducer.user;
+      let isUrgent = state.ordersReducer.isUrgent;
       // Calculating fee per form and total amount
       var totalAmount = 0;
       if (forms) {
         forms.map((form, index) => {
           try {
-            if (switchMode) {
+            if (isUrgent) {
               console.log(prices);
               totalAmount = totalAmount + parseInt(prices[form.court].urgent);
               form["formFee"] = parseInt(prices[form.court].urgent);
@@ -133,7 +156,7 @@ export default function SubmitDetails(props) {
               form["formFee"] = parseInt(prices[form.court].normal);
             }
           } catch (error) {
-            if (switchMode) {
+            if (isUrgent) {
               console.log(prices);
               totalAmount =
                 totalAmount + parseInt(prices["Lower Courts"].urgent);
@@ -148,16 +171,13 @@ export default function SubmitDetails(props) {
       }
       console.log("ORDER TOTAL:   ", totalAmount);
 
-      // retrieving user data
-      let state = store.getState();
-      let user = state.userReducer.user;
       // Final details ready to be posted
       let orderDetails = {
         applicantName: user.name,
         cellNo: cellNo.value,
         address: address.value,
         forms: forms,
-        isUrgent: switchMode,
+        isUrgent: isUrgent,
         status: "Pending",
         progress: {
           pending: Date.now(),
@@ -183,10 +203,7 @@ export default function SubmitDetails(props) {
   const hideModal = () => {
     setIsModalVisible(false);
     setcontainerOpacity(1);
-    props.navigation.navigate("Payments", { isUrgent: switchMode });
-  };
-  const toggleSwitch = () => {
-    setSwitchMode(!switchMode);
+    props.navigation.navigate("Payments");
   };
   // Function to be passed to Header
   const openDrawerFn = () => {
@@ -202,6 +219,8 @@ export default function SubmitDetails(props) {
   const _handleRemainingReview = async (prices) => {
     var orderTotal = 0;
     let forms;
+    let state = store.getState();
+    let isUrgent = state.ordersReducer.isUrgent;
     try {
       const formsJson = await AsyncStorage.getItem("@forms");
       formsJson != null
@@ -215,7 +234,7 @@ export default function SubmitDetails(props) {
     if (forms) {
       forms.map((form, index) => {
         try {
-          if (switchMode) {
+          if (isUrgent) {
             console.log(prices);
             orderTotal = orderTotal + parseInt(prices[form.court].urgent);
             form["formFee"] = parseInt(prices[form.court].urgent);
@@ -224,7 +243,7 @@ export default function SubmitDetails(props) {
             form["formFee"] = parseInt(prices[form.court].normal);
           }
         } catch (error) {
-          if (switchMode) {
+          if (isUrgent) {
             console.log(prices);
             orderTotal = orderTotal + parseInt(prices["Lower Courts"].urgent);
             form["formFee"] = parseInt(prices["Lower Courts"].urgent);
@@ -248,26 +267,26 @@ export default function SubmitDetails(props) {
   };
   return (
     <>
-    <KeyboardAwareScrollView
-      contentContainerStyle={{
-        height: height,
-        flex: 1,
-        opacity: containerOpacity,
-      }}
-      keyboardShouldPersistTaps="always"
-    >
-      <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          alert("Modal has been closed.");
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          height: height,
+          flex: 1,
+          opacity: containerOpacity,
         }}
+        keyboardShouldPersistTaps="always"
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            {/* <Text style={styles.modalText}>
+        <Header title="Copy Form" backbutton goBackFn={_handlePrevious} />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => {
+            // alert("Modal has been closed.");
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              {/* <Text style={styles.modalText}>
               Your details have been submitted. Please make a payment of Rs.
               <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> through
               Easypaisa to account#{" "}
@@ -279,38 +298,40 @@ export default function SubmitDetails(props) {
               <Text style={{ fontWeight: "bold" }}>{orderTotal}</Text> .Rs جمع
               کروائیں۔
             </Text> */}
-            <Text style={styles.modalText}>
-              Your details have been submitted. Amount would be charged at delivery time.
-            </Text>
-            <Text style={styles.modalText}>
-              
-            </Text>
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
-          </View>
-        </View>
-      </Modal>
-
-      <ScrollView keyboardShouldPersistTaps="always">
-        <View
-          style={{
-            alignItems: "center",
-            opacity: containerOpacity,
-            marginTop: 15,
-          }}
-        >
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sctionTitle}>Submit Details</Text>
+              <Text style={styles.modalText}>
+                Your details have been submitted. Amount would be charged at
+                delivery time.
+              </Text>
+              <Text style={styles.modalText}>
+                آپ کی تفصیلات جمع کر لی گئی ہیں. ترسیل کے وقت رقم وصول کی جائے
+                گی.
+              </Text>
+              <Button
+                style={styles.buttonModalClose}
+                type="primary"
+                onPress={hideModal}
+              >
+                OK
+              </Button>
             </View>
-            <View style={styles.infoContainer}>
-              <View style={styles.labelContainer}>
-                {/* <Text>
+          </View>
+        </Modal>
+
+        <ScrollView keyboardShouldPersistTaps="always">
+          <View
+            style={{
+              alignItems: "center",
+              opacity: containerOpacity,
+              marginTop: 15,
+            }}
+          >
+            <View style={styles.sectionContainer}>
+              <View style={styles.sectionTitleContainer}>
+                <Text style={styles.sctionTitle}>Submit Details</Text>
+              </View>
+              <View style={styles.infoContainer}>
+                <View style={styles.labelContainer}>
+                  {/* <Text>
                   Copy form would be delivered within 2 days. If you want to get
                   it today, then please tap on the urgent button.
                 </Text>
@@ -318,8 +339,8 @@ export default function SubmitDetails(props) {
                   نقل فارم 2 دن میں فراہم کیا جائے گا۔ اگر آپ اسے ابھی حاصل کرنا
                   چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
                 </Text> */}
-                {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
-                {/* <View
+                  {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
+                  {/* <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -330,7 +351,7 @@ export default function SubmitDetails(props) {
                   <Text style={styles.labelUrgent}>Urgently Required</Text>
 
                   <Switch
-                    value={switchMode}
+                    value={isUrgent}
                     onChange={toggleSwitch}
                     color={Secondary}
                     style={{
@@ -340,96 +361,78 @@ export default function SubmitDetails(props) {
                     }}
                   />
                 </View> */}
-                <OptionButtons
-                  option1="Normal"
-                  option2="Urgent"
-                  _handleOption1={() => setSwitchMode(false)}
-                  _handleOption2={() => setSwitchMode(true)}
-                />
-                {switchMode ? (
-                  <View style={styles.urgentMessageContainer}>
-                    <Text style={styles.urgentMessage}>
-                      * Your document will be delivered the next day with additional
-                      charges.
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.urgentMessageContainer}>
-                    <Text style={[styles.urgentMessage, { color: "white" }]}>
-                      * Your document will be delivered on the next with additional
-                      charges.
-                    </Text>
-                  </View>
-                )}
-                {/* <Text>{forms.length} 0</Text> */}
+
+                  {/* <Text>{forms.length} 0</Text> */}
+                </View>
               </View>
             </View>
-          </View>
-          <View style={{ width: 10, height: 50 }} />
+            <View style={{ width: 10, height: 50 }} />
 
-          <PaperButton
-            color={Secondary}
-            icon="eye"
-            mode="contained"
-            onPress={reviewOrder}
-          >
-            Review Order
-          </PaperButton>
-          <View style={styles.deliveryInfoContainer}>
-            <Text style={styles.label}>Delivery Details</Text>
-            <View style={styles.addressContainer}>
-              <Image
-                style={{ height: 20, width: 20, marginRight: 10 }}
-                source={require("../../../../assets/images/static/phone.png")}
-              />
-              <TextInput
-                style={{
-                  width: "85%",
-                  borderColor: "gray",
-                  height: 40,
-                }}
-                placeholder="Enter Cell Number"
-                onChangeText={(text) => setCellNo({ ...cellNo, value: text })}
-                value={cellNo.value}
-                disabled
-              />
+            <PaperButton
+              color={Secondary}
+              icon="eye"
+              mode="contained"
+              onPress={reviewOrder}
+            >
+              Review Order
+            </PaperButton>
+            <View style={styles.deliveryInfoContainer}>
+              <Text style={styles.label}>Delivery Details</Text>
+              <View style={styles.addressContainer}>
+                <Image
+                  style={{ height: 20, width: 20, marginRight: 10 }}
+                  source={require("../../../../assets/images/static/phone.png")}
+                />
+                <TextInput
+                  style={{
+                    width: "85%",
+                    borderColor: "gray",
+                    height: 40,
+                  }}
+                  placeholder="Enter Cell Number"
+                  onChangeText={(text) => setCellNo({ ...cellNo, value: text })}
+                  value={cellNo.value}
+                  disabled
+                />
+              </View>
+              <Text style={styles.error}>{cellNo.error}</Text>
+              <View style={styles.addressContainer}>
+                <Image
+                  style={{ height: 25, width: 25, marginRight: 5 }}
+                  source={require("../../../../assets/images/static/location.png")}
+                />
+                <TextInput
+                  style={{
+                    width: "85%",
+                    borderColor: "gray",
+                  }}
+                  placeholder="Enter address"
+                  onChangeText={(text) =>
+                    setAddress({ ...address, value: text })
+                  }
+                  value={address.value}
+                  numberOfLines={2}
+                  multiline={true}
+                  maxLength={50}
+                />
+              </View>
+              <Text style={styles.error}>{address.error}</Text>
             </View>
-            <Text style={styles.error}>{cellNo.error}</Text>
-            <View style={styles.addressContainer}>
-              <Image
-                style={{ height: 25, width: 25, marginRight: 5 }}
-                source={require("../../../../assets/images/static/location.png")}
-              />
-              <TextInput
-                style={{
-                  width: "85%",
-                  borderColor: "gray",
-                }}
-                placeholder="Enter address"
-                onChangeText={(text) => setAddress({ ...address, value: text })}
-                value={address.value}
-                numberOfLines={2}
-                multiline={true}
-                maxLength={50}
-              />
-            </View>
-            <Text style={styles.error}>{address.error}</Text>
-          </View>
-          {/* <View style={styles.reviewContainer}>
+            {/* <View style={styles.reviewContainer}>
             
             <Button style={styles.review} type="primary">
               <Text style={{ fontSize: 12 }}>Review Order</Text>
             </Button>
           </View> */}
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
 
-      <View style={styles.submitContainer}>
-        <Button style={styles.submit} type="primary" onPress={onSubmit}>
-          <Text>SUBMIT</Text>
-        </Button>
-      </View>
-    </KeyboardAwareScrollView>
+        <View style={styles.submitContainer}>
+          <Button style={styles.submit} type="primary" onPress={onSubmit}>
+            <Text>SUBMIT</Text>
+          </Button>
+        </View>
+      </KeyboardAwareScrollView>
 
       <ActivityIndicator
         animating={showLoading}
@@ -437,7 +440,7 @@ export default function SubmitDetails(props) {
         size="large"
         text="Submitting..."
       />
-      </>
+    </>
   );
 }
 

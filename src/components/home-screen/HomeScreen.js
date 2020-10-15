@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react';
-import Background from '../child-components/Background';
-import Logo from '../child-components/Logo';
-import Header from '../child-components/Header';
-import Paragraph from '../child-components/Paragraph';
+import React, { useEffect } from "react";
+import Background from "../child-components/Background";
+import Logo from "../child-components/Logo";
+import Header from "../child-components/Header";
+import Paragraph from "../child-components/Paragraph";
 import AsyncStorage from "@react-native-community/async-storage";
 import {
   StyleSheet,
@@ -32,8 +32,8 @@ import {
 } from "@ant-design/react-native";
 const { height, width } = Dimensions.get("window");
 import * as firebase from "firebase";
-export default function HomeScreen(props){
-useEffect(() => {
+export default function HomeScreen(props) {
+  useEffect(() => {
     // var user = firebase.auth().currentUser;
     // console.log("USER AUTH");
     // console.log(user);
@@ -43,14 +43,13 @@ useEffect(() => {
     // setTimeout(() => {getUserId().then(() => {
     //                   props.navigation.navigate("CopyFormHomePage");
     //                 });}, 500)
-  
-});
+  });
   return (
     <View style={styles.container}>
       <Logo />
       <Header>eCopies</Header>
       <Paragraph>Certified copies at doorstep.</Paragraph>
-      <View style={{width:'90%'}}>
+      <View style={{ width: "90%" }}>
         <Button
           style={styles.button}
           type="primary"
@@ -73,8 +72,6 @@ useEffect(() => {
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {

@@ -60,7 +60,7 @@ export default function RevenueCourtFormDetails(props) {
       )}
       <View style={styles.orderInformation}>
         <Text style={styles.orderType}>
-          {displayDictionary[props.orderType]} {props.index + 1}
+          Form {props.index + 1}
         </Text>
         <Text style={styles.orderCourt}>
           {displayDictionary[props.form.court]}

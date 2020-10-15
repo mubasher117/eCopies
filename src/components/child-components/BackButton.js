@@ -6,7 +6,7 @@ const BackButton = ({ goBack }) => (
   <TouchableOpacity onPress={goBack} style={styles.container}>
     <Image
       style={styles.image}
-      source={require("../../../assets/images/static//arrow_back.png")}
+      source={require("../../../assets/images/static/back-arrow-green.png")}
     />
   </TouchableOpacity>
 );

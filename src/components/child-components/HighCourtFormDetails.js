@@ -59,7 +59,7 @@ export default function HighCourtFormDetails(props) {
         </TouchableOpacity>
       )}
       <View style={styles.orderInformation}>
-        <Text style={styles.orderType}>Copy Form {props.index + 1}</Text>
+        <Text style={styles.orderType}>Form {props.index + 1}</Text>
         <Text style={styles.orderCourt}>{props.form.court}</Text>
       </View>
       <View style={styles.entityContainer}>

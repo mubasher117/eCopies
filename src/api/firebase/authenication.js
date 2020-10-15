@@ -7,6 +7,7 @@ import * as Permissions from "expo-permissions";
 import store from "../../redux/store";
 import AsyncStorage from "@react-native-community/async-storage";
 import User from "../../models/User";
+import { db } from "../../services/auth/AuthService";
 const firebaseConfig = {
   apiKey: "AIzaSyDa5BINSpVo4SasALNaZ8CbmXmMJOQZORI",
   authDomain: "services-72908.firebaseapp.com",
@@ -63,6 +64,12 @@ export const getNotifications = async () => {
     }
   });
 };
+
+export const makeUserActive = (userId) => {
+  const ref = database.ref(`onlineUsers/${userId}`);
+  ref.set(true).then(() => console.log('Online presenvce set '))
+  ref.onDisconnect().remove().then(() => console.log("Disconnected"))
+}
 
 // export const login = async (email, password, isDirect, callBackFn) => {
 //   console.log("IN LOGIN");

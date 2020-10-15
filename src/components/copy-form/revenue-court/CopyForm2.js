@@ -125,7 +125,7 @@ export default function CopyForm2(props) {
     saveDetails().then(async () => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("SubmitDetails");
+      props.navigation.navigate("DeliveryDetails");
     });
   };
   const goBackFn = () => {

@@ -4,6 +4,7 @@ import {Secondary } from './constants/colors'
 import * as firebase from "firebase/app";
 import {centerScreen} from './styles/General'
 import "firebase/auth";
+import { makeUserActive } from "./api/firebase/authenication";
 import {
   registerForPushNotificationsAsync,
   getUserData,
@@ -28,7 +29,9 @@ const AuthenticationComponent = (props) => {
         console.log(user.uid)
         getUserData(user.uid);
         registerForPushNotificationsAsync(user.uid);
+        makeUserActive(user.uid);
         props.navigation.navigate("main");
+        
       } else {
         props.navigation.navigate("auth");
       }

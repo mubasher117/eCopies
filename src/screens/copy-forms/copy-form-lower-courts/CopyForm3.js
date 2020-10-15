@@ -13,7 +13,7 @@ import {
   Picker,
   Image,
   Modal,
-  BackHandler
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -127,7 +127,7 @@ export default function CopyFormDocs(props) {
       let formDetails = state.ordersReducer.currentForm;
       let copyFormDetails = {
         ...formDetails,
-        documentDetails
+        documentDetails,
       };
       console.log("form : ", copyFormDetails);
       let forms;
@@ -167,7 +167,7 @@ export default function CopyFormDocs(props) {
     saveDetails().then(async () => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("SubmitDetails");
+      props.navigation.navigate("DeliveryDetails");
     });
   };
   const _handlePrevious = () => {
@@ -207,7 +207,12 @@ export default function CopyFormDocs(props) {
   // Checks if form edit made to form or not
   const checkForm = () => {
     var isCleanForm = true;
-    if (isDocument.mode || isPetition.mode || isOther.mode || isOrderDated.mode) {
+    if (
+      isDocument.mode ||
+      isPetition.mode ||
+      isOther.mode ||
+      isOrderDated.mode
+    ) {
       isCleanForm = false;
     }
     if (isCleanForm) {
@@ -466,7 +471,11 @@ export default function CopyFormDocs(props) {
           </View>
 
           <View style={styles.buttonsContainer}>
-            <Button style={styles.previous} type="primary" onPress={_handlePrevious}>
+            <Button
+              style={styles.previous}
+              type="primary"
+              onPress={_handlePrevious}
+            >
               <Text style={{ color: Secondary }}>Previous</Text>
             </Button>
 

@@ -35,6 +35,8 @@ import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
 import store from "../../redux/store";
 import Modal from "../child-components/Modal";
+
+import { getStatusBarHeight } from "react-native-status-bar-height";
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
   return (
@@ -42,11 +44,11 @@ const FormType = (props) => {
       onPress={() => props.navigateTo()}
       style={{
         borderRadius: 5,
-        width: "45%",
+        width: "47.3%",
         backgroundColor: "#E6E6E6",
         minHeight: 160,
         padding: 10,
-        margin: 10,
+        margin: 5 ,
       }}
     >
       <Image
@@ -105,41 +107,6 @@ export default function HomPage(props) {
   return (
     <View style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          alert("Modal has been closed.");
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity
-              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
-              onPress={hideModal}
-            >
-              <Image
-                style={styles.modalQuit}
-                source={require("../../../assets/images/static/quit.png")}
-              />
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              Please pay the remaining dues before submitting another form.
-            </Text>
-            <Text style={styles.modalText}>
-              براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔
-            </Text>
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
-          </View>
-        </View>
-      </Modal> */}
       <Modal
         visible={isModalVisible}
         text="Please pay the remaining dues before submitting another form."
@@ -150,8 +117,14 @@ export default function HomPage(props) {
         quitButton
       />
       <ScrollView>
-        <View style={styles.optionsContainer}>
-          {/* {forms.map((form, index) => {return (
+        <View
+          style={[
+            styles.centeredView,
+            { height: height - (getStatusBarHeight() + 50) },
+          ]}
+        >
+          <View style={styles.optionsContainer}>
+            {/* {forms.map((form, index) => {return (
             <FormType
               title={form.title}
               titleUrdu={form.titleUrdu}
@@ -163,61 +136,50 @@ export default function HomPage(props) {
               }}
             />
           );})} */}
-          <FormType
-            title="Supreme Court"
-            titleUrdu="سپریم کورٹ"
-            imgSource={require("../../../assets/images/static/supremeCourt.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase", "Supreme Court");
-            }}
-          />
-          <FormType
-            title="High Court"
-            titleUrdu="ہائی کورٹ"
-            imgSource={require("../../../assets/images/static/highcourt.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase", "High Court");
-            }}
-          />
+            <FormType
+              title="Supreme Court"
+              titleUrdu="سپریم کورٹ"
+              imgSource={require("../../../assets/images/static/supremeCourt.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase", "Supreme Court");
+              }}
+            />
+            <FormType
+              title="High Court"
+              titleUrdu="ہائی کورٹ"
+              imgSource={require("../../../assets/images/static/highcourt.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase", "High Court");
+              }}
+            />
+          </View>
+          <View style={styles.optionsContainer}>
+            <FormType
+              title="Lower Courts"
+              titleUrdu="ضلعی عدالت"
+              imgSource={require("../../../assets/images/static/district_court.jpg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("LowerCourtsSelectCourt");
+              }}
+            />
+            <FormType
+              title="Revenue / Sub Registrar"
+              titleUrdu="ریونیو"
+              imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("RevenueCopyForm");
+              }}
+            />
+          </View>
         </View>
-        <View style={styles.optionsContainer}>
-          <FormType
-            title="Lower Courts"
-            titleUrdu="ضلعی عدالت"
-            imgSource={require("../../../assets/images/static/district_court.jpg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("LowerCourtsSelectCourt");
-            }}
-          />
-          <FormType
-            title="Revenue / Sub Registrar"
-            titleUrdu="ریونیو"
-            imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("RevenueCopyForm");
-            }}
-          />
-
-          {/* <FormType
-            title="DC Office"
-            titleUrdu="ڈی سی آفس"
-            imgSource={require("../../../assets/images/static/dcoffice.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
-            }}
-          /> */}
-        </View>
-        <View style={{ width: "100%", height: 150 }} />
       </ScrollView>
     </View>
   );
@@ -236,7 +198,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     flexDirection: "row",
-    margin: "7%",
     marginBottom: 0,
   },
   modalView: {

@@ -1,0 +1,20 @@
+#21B06C
+
+
+
+Prop types error
+node_modules/react-native-modal-picker/index.js
+
+
+Input Field label color:
+
+line 150
+node_modules/react-native-paper/src/components/TextInput/TextInputFlat.tsx 
+
+
+Button Highlight
+#286747
+node_modules/@ant-design/react-native/lib/button/style/index.js
+
+
+

@@ -174,8 +174,10 @@ export default function CopyFormDocs(props) {
     props.navigation.navigate("LowerCourtsForm2");
   };
   // Converts date to string to display on screen
-  var decisionDate = isOrderDated.value.toDateString().toString();
-  var petitionDate = isPetition.value.toDateString().toString();
+  var decisionDate = isOrderDated.value.toDateString();
+  decisionDate = decisionDate.substring(4, decisionDate.length);
+  var petitionDate = isPetition.value.toDateString();
+  petitionDate = petitionDate.substring(4, petitionDate.length);
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.05);

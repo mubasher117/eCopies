@@ -12,6 +12,7 @@ export default function DateOfDecision(props){
     setShow(!show);
   };
   var decisionDate = date.toDateString().toString();
+  decisionDate = decisionDate.substring(4, decisionDate.length);
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");

@@ -56,7 +56,9 @@ export default function CopyFormCase(props) {
     });
     return (() => unsubscribe)
   }, [props.navigation]);
-  var decisionDate = date.toDateString().toString();
+  var decisionDate = date.toDateString();
+  decisionDate = decisionDate.substring(4, decisionDate.length)
+
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");

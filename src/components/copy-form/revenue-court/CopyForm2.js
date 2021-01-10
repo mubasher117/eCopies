@@ -216,14 +216,15 @@ export default function CopyForm2(props) {
                     }}
                   >
                     <Picker.Item label="Select Town" value="-1" />
-                    <Picker.Item label="Model Town" value="Model Town" />
+                    <Picker.Item label="Gulberg Town" value="Gulberg Town" />
                     <Picker.Item
                       label="Allama Iqbal Town"
                       value="Allama Iqbal Town"
                     />
                     <Picker.Item label="Ravi Town" value="Ravi Town" />
-                    <Picker.Item label="Gulberg" value="Gulberg" />
                     <Picker.Item label="Nishter Town" value="Nishter Town" />
+                    <Picker.Item label="Shalimar Town" value="Shalimar Town" />
+                    <Picker.Item label="Wahga Town" value="Wahga Town" />
                     <Picker.Item
                       label="Aziz Bhatti Town"
                       value="Aziz Bhatti Town"

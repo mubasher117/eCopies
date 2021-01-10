@@ -74,15 +74,14 @@ const paymentMethods = [
   // },
 ];
 function Payments(props) {
-  const [showLoading, setshowLoading] = useState(false);
-  const [containerOpacity, setcontainerOpacity] = useState(1);
+  const [containerOpacity, setcontainerOpacity] = useState(0.3);
   const [isModalVisible, setisModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountTitle, setAccountTitle] = useState("");
   const [totalPayment, setTotalPayment] = useState(0);
   const [isPendingPayment, setPendingPayment] = useState(false);
-
+  const [isLoading, setLoading] = useState(true);
   
 
   useEffect(() => {
@@ -92,6 +91,8 @@ function Payments(props) {
     database.ref("userData/" + user.id + "/balance").on("value", (snapshot) => {
       console.log(snapshot.val());
       setTotalPayment(snapshot.val());
+      setLoading(false);
+      setcontainerOpacity(1)
     });
   }, []);
   // Show pending payment modal
@@ -245,10 +246,9 @@ function Payments(props) {
       </ScrollView>
 
       <ActivityIndicator
-        animating={showLoading}
+        animating={isLoading}
         toast
         size="large"
-        text="Submitting..."
       />
     </SafeAreaView>
   );

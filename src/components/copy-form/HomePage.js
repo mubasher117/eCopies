@@ -114,7 +114,6 @@ export default function HomPage(props) {
         buttonOkText="OK"
         hideModal={hideModal}
         handleOkay={hideModal}
-        quitButton
       />
       <ScrollView>
         <View
@@ -160,7 +159,7 @@ export default function HomPage(props) {
           <View style={styles.optionsContainer}>
             <FormType
               title="Lower Courts"
-              titleUrdu="ضلعی عدالت"
+              titleUrdu="ماتحت عدالتیں"
               imgSource={require("../../../assets/images/static/district_court.jpg")}
               navigateTo={() => {
                 // Clear pervious form

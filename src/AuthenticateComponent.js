@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import {Secondary } from './constants/colors'
+import { Secondary } from "./constants/colors";
 import * as firebase from "firebase/app";
-import {centerScreen} from './styles/General'
+import { centerScreen } from "./styles/General";
 import "firebase/auth";
 import { makeUserActive } from "./api/firebase/authenication";
 import {
@@ -26,12 +26,11 @@ const AuthenticationComponent = (props) => {
   const auth = async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
-        console.log(user.uid)
+        console.log(user.uid);
         getUserData(user.uid);
         registerForPushNotificationsAsync(user.uid);
         makeUserActive(user.uid);
         props.navigation.navigate("main");
-        
       } else {
         props.navigation.navigate("auth");
       }
@@ -42,8 +41,8 @@ const AuthenticationComponent = (props) => {
   }, []);
   return (
     <View style={centerScreen}>
-    <ActivityIndicator size="large" color={Secondary} />
-  </View>
+      <ActivityIndicator size="large" color={Secondary} />
+    </View>
   );
 };
 export default AuthenticationComponent;

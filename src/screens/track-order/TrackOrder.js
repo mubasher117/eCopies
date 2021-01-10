@@ -1,28 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, Linking } from "react-native";
-import { Button } from "@ant-design/react-native";
+import { Button, ActivityIndicator } from "@ant-design/react-native";
 import Header from "../../components/header/Header";
-import Modal from '../../components/child-components/Modal'
+import Modal from "../../components/child-components/Modal";
 import { Secondary } from "../../constants/colors";
 import { getTrackingId } from "../../api/firebase/backend";
 import style from "react-native-modal-picker/style";
 export default function TrackOrder(props) {
   const [trackingId, setTrackingId] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [containerOpacity, setcontainerOpacity] = useState(1);
+  const [containerOpacity, setcontainerOpacity] = useState(0.3);
+  const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     getTrackingId()
-      .then((id) => setTrackingId(id))
+      .then((id) => {
+        setTrackingId(id);
+        setLoading(false);
+        setcontainerOpacity(1);
+      })
       .catch((err) => {
-        showModal()
+        showModal();
       });
     // Screen focus handler
     const unsubscribe = props.navigation.addListener("didFocus", () => {
-       getTrackingId()
-         .then((id) => setTrackingId(id))
-         .catch((err) => {
-           showModal();
-         });
+      getTrackingId()
+        .then((id) => {
+          setTrackingId(id);
+          setLoading(false);
+          setcontainerOpacity(1);
+        })
+        .catch((err) => {
+          showModal();
+        });
     });
     return () => unsubscribe;
   }, []);
@@ -40,7 +49,7 @@ export default function TrackOrder(props) {
   };
   return (
     <>
-    <Modal
+      <Modal
         visible={isModalVisible}
         text="Your order is not posted yet or you don't have any order."
         urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"
@@ -50,17 +59,22 @@ export default function TrackOrder(props) {
         quitButton
       />
       <Header title={"Track Order"} />
-      <View style={[styles.centeredView, {opacity: containerOpacity}]}>
+      <View style={[styles.centeredView, { opacity: containerOpacity }]}>
         <Text style={styles.label}>Tracking Id of your current order is:</Text>
         <Text style={styles.trackingId}>{trackingId}</Text>
         <Text style={styles.info}>
           Clicking the button below would open a website. Enter Tracking Id in
           the top right corner of the website.
         </Text>
-        <Button style={styles.btnTrackOrder} type="primary" onPress={_handleTracking}>
+        <Button
+          style={styles.btnTrackOrder}
+          type="primary"
+          onPress={_handleTracking}
+        >
           Track Order
         </Button>
       </View>
+      <ActivityIndicator animating={isLoading} toast size="large" />
     </>
   );
 }
@@ -74,7 +88,7 @@ const styles = StyleSheet.create({
   label: {
     width: "90%",
     marginBottom: 20,
-    fontSize: 16
+    fontSize: 16,
   },
   trackingId: {
     fontSize: 24,

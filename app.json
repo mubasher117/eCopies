@@ -2,7 +2,7 @@
   "expo": {
     "name": "eCopies",
     "slug": "eCopies",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/eCopies.png",
     "splash": {
@@ -25,7 +25,8 @@
     "android": {
       "package": "com.ecopies",
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "versionCode": 4
     }
   }
 }

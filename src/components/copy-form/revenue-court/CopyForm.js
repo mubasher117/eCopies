@@ -111,7 +111,7 @@ export default function CopyForm(props) {
         >
           <View style={styles.sectionContainer}>
             <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sctionTitle}>Case Information</Text>
+              <Text style={styles.sctionTitle}>Document Info</Text>
             </View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>

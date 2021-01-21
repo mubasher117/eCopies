@@ -91,9 +91,12 @@ export default function CopyFormDC(props) {
     { key: index++, label: "Faisalabad" },
     { key: index++, label: "Sheikhupura" },
   ];
+    const openDrawerFn = () => {
+      props.navigation.toggleDrawer();
+    };
   return (
     <SafeAreaView behaviour="padding" style={styles.container}>
-      <Header title="Copy Form from DC" />
+      <Header title="Copy Form from DC" openDrawerFn={openDrawerFn}/>
 
       <ScrollView scrollEnabled={scroll}>
         <ActivityIndicator

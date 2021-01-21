@@ -175,7 +175,7 @@ export default function CopyForm2(props) {
         >
           <View style={styles.sectionContainer}>
             <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sctionTitle}>Information</Text>
+              <Text style={styles.sctionTitle}>Town Info</Text>
             </View>
             <View style={styles.infoContainer}>
               <View
@@ -224,6 +224,10 @@ export default function CopyForm2(props) {
                     <Picker.Item label="Ravi Town" value="Ravi Town" />
                     <Picker.Item label="Nishter Town" value="Nishter Town" />
                     <Picker.Item label="Shalimar Town" value="Shalimar Town" />
+                    <Picker.Item
+                      label="Samanabad Town"
+                      value="Samanabad Town"
+                    />
                     <Picker.Item label="Wahga Town" value="Wahga Town" />
                     <Picker.Item
                       label="Aziz Bhatti Town"

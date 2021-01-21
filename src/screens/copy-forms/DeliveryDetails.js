@@ -53,9 +53,12 @@ export default function DeliveryDetails(props) {
   const addForm = () => {
     props.navigation.navigate("CopyFormHomePage");
   };
+    const openDrawerFn = () => {
+      props.navigation.toggleDrawer();
+    };
   return (
     <>
-      <Header title={"Copy Form"} />
+      <Header title={"Copy Form"}  openDrawerFn={openDrawerFn}/>
       <View style={styles.container}>
         <SectionTitle title="Delivery Details" />
         <View style={{ flex: 1 }}>

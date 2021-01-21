@@ -35,6 +35,9 @@ export default function TrackOrder(props) {
     });
     return () => unsubscribe;
   }, []);
+  const openDrawerFn = () => {
+    props.navigation.toggleDrawer();
+  };
   const _handleTracking = () => {
     Linking.openURL("https://ep.gov.pk/");
   };
@@ -56,9 +59,8 @@ export default function TrackOrder(props) {
         buttonOkText="OK"
         hideModal={hideModal}
         handleOkay={hideModal}
-        quitButton
       />
-      <Header title={"Track Order"} />
+      <Header title={"Track Order"} openDrawerFn={openDrawerFn} />
       <View style={[styles.centeredView, { opacity: containerOpacity }]}>
         <Text style={styles.label}>Tracking Id of your current order is:</Text>
         <Text style={styles.trackingId}>{trackingId}</Text>

@@ -33,12 +33,7 @@ import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
 const { height, width } = Dimensions.get("window");
-// Display words against db values
-// const displayDictionary = {
-//   copyForm: "Copy Form",
-//   highCourt: "High Court",
-//   revenueCourt: "Revenue Court",
-// };
+
 
 export default function HighCourtFormDetails(props) {
   return (

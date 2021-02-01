@@ -54,7 +54,7 @@ export default function OrderStatusCard(props) {
           </Text>
         </View>
         <View style={styles.orderContainer}>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>Copy Form</Text>
+          {/* <Text style={{ fontSize: 16, fontWeight: "bold" }}>Copy Form</Text> */}
           <View style={styles.orderDetails}>
             <Text>Status: </Text>
             <Text

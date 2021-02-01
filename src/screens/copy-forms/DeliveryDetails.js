@@ -15,6 +15,7 @@ import Header from "../../components/header/Header";
 import store from "../../redux/store";
 import { Button } from "@ant-design/react-native";
 import { Secondary, PrimaryText } from "../../constants/colors";
+import { ScrollView } from "react-native-gesture-handler";
 export default function DeliveryDetails(props) {
   const [isUrgent, setIsUrgent] = useState(false);
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(
@@ -39,7 +40,7 @@ export default function DeliveryDetails(props) {
     let expectedDate = date.setDate(new Date().getDate() + processTime);
     // if expected delivery day is Sunday
     if (new Date(expectedDate).getDay() == 0) {
-      console.log("IS sunday")
+      console.log("IS sunday");
       expectedDate = date.setDate(new Date().getDate() + processTime + 1);
     }
     expectedDate = new Date(expectedDate).toDateString();
@@ -53,13 +54,13 @@ export default function DeliveryDetails(props) {
   const addForm = () => {
     props.navigation.navigate("CopyFormHomePage");
   };
-    const openDrawerFn = () => {
-      props.navigation.toggleDrawer();
-    };
+  const openDrawerFn = () => {
+    props.navigation.toggleDrawer();
+  };
   return (
     <>
-      <Header title={"Copy Form"}  openDrawerFn={openDrawerFn}/>
-      <View style={styles.container}>
+      <Header title={"Copy Form"} openDrawerFn={openDrawerFn} />
+      <ScrollView style={styles.container}>
         <SectionTitle title="Delivery Details" />
         <View style={{ flex: 1 }}>
           <View style={styles.labelContainer}>
@@ -72,22 +73,16 @@ export default function DeliveryDetails(props) {
             _handleOption1={() => _handleDeliveryType(false)}
             _handleOption2={() => _handleDeliveryType(true)}
           />
-          {isUrgent ? (
-            <View style={styles.urgentMessageContainer}>
-              <Text style={styles.urgentMessage}>
-                * Your document would be delivered on the next day of order with
-                some additional charges.
-              </Text>
-            </View>
-          ) : (
-            // Changed color of text instead of hiding it. Because hiding/showing was changing positions of other components
-            <View style={styles.urgentMessageContainer}>
-              <Text style={[styles.urgentMessage, { color: "white" }]}>
-                * Your document would be delivered on the next day of order with
-                some additional charges.
-              </Text>
-            </View>
-          )}
+          <View style={styles.urgentMessageContainer}>
+            <Text
+              style={{
+                color: isUrgent ? "red" : "white",
+              }}
+            >
+              * Your document would be delivered after two days of order with
+              some additional charges.
+            </Text>
+          </View>
           <View style={styles.infoContainer}>
             <View style={[styles.labelContainer, { flexDirection: "column" }]}>
               <Text style={styles.label}>Expected Delivery Date</Text>
@@ -108,9 +103,18 @@ export default function DeliveryDetails(props) {
               icon="plus"
               mode="contained"
               onPress={addForm}
-              style={{ height: 50, justifyContent: "center" }}
+              style={styles.formOptionsButton}
             >
               Add More Copy Form
+            </PaperButton>
+            <PaperButton
+              color={Secondary}
+              icon="eye"
+              mode="contained"
+              // onPress={reviewOrder}
+              style={[styles.formOptionsButton, { borderBottomWidth: 0}]}
+            >
+              Review Order
             </PaperButton>
           </View>
         </View>
@@ -119,7 +123,7 @@ export default function DeliveryDetails(props) {
             Next
           </Button>
         </View>
-      </View>
+      </ScrollView>
     </>
   );
 }
@@ -136,7 +140,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     width: "90%",
     alignSelf: "flex-end",
-    marginBottom: 30,
+    marginTop: 30,
+    marginBottom: 10,
   },
   btnNext: {
     width: "50%",
@@ -169,7 +174,11 @@ const styles = StyleSheet.create({
   btnAddFormContainer: {
     marginTop: 40,
   },
-  urgentMessage: {
-    color: "red",
+  formOptionsButton: {
+    height: 50,
+    justifyContent: "center",
+    borderRadius: 0,
+    borderBottomColor: "black",
+    borderBottomWidth: 1,
   },
 });

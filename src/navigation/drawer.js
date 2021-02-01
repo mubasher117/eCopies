@@ -33,6 +33,7 @@ import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyF
 import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
 import DeliveryDetails from "../screens/copy-forms/DeliveryDetails";
 import TrackOrder from "../screens/track-order/TrackOrder";
+import DrawerCart from '../components/child-components/DrawerCart'
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
   return (
@@ -136,7 +137,8 @@ const CustomDrawerContentComponent = (props) => {
                 source={require("../../assets/images/static/order.png")}
               />
             </View>
-            <Text
+            <DrawerCart isActive ={isActive === "currentOrder" ? true : false}/>
+            {/* <Text
               style={
                 isActive === "currentOrder"
                   ? styles.activeLabel
@@ -144,7 +146,7 @@ const CustomDrawerContentComponent = (props) => {
               }
             >
               Cart
-            </Text>
+            </Text> */}
           </View>
         </TouchableOpacity>
 

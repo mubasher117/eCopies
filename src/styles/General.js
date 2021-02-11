@@ -25,6 +25,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
   },
   containerTopBottom: {
-    marginTop: 10,
+    marginTop: 0,
   },
 });

@@ -30,7 +30,7 @@ import {
   PrimaryText,
 } from "../../../constants/colors";
 import AsyncStorage from "@react-native-community/async-storage";
-import ModalPicker from "react-native-modal-picker";
+// import ModalPicker from "react-native-modal-picker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import store from "../../../redux/store";
@@ -196,13 +196,14 @@ export default function CopyForm2(props) {
                 ]}
               >
                 {Platform.OS === "ios" ? (
-                  <ModalPicker
-                    data={towns}
-                    initValue="Select Town"
-                    onChange={(option) => {
-                      setTown(option.value);
-                    }}
-                  />
+                  // <ModalPicker
+                  //   data={towns}
+                  //   initValue="Select Town"
+                  //   onChange={(option) => {
+                  //     setTown(option.value);
+                  //   }}
+                  // />
+                  <></>
                 ) : (
                   <Picker
                     selectedValue={town}

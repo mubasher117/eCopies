@@ -55,7 +55,7 @@ const FormValues = ({ field, value }) => {
 export default function LowerCourtsFormDetails(props) {
   return (
     <View style={styles.detailsContainer}>
-      {props.screen == "SubmitDetails" && (
+      {props.screen != "MyOrders" && (
         <TouchableOpacity
           style={{
             alignSelf: "flex-end",

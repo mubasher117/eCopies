@@ -16,6 +16,7 @@ import {
   TextInput,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+
 import {
   InputItem,
   Tag,
@@ -41,6 +42,7 @@ import firebase from "../../registration/firebase";
 import { addAdditionalDetails } from "../../../api/firebase/backend";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import OtpInputs from "../../child-components/OtpInputs";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 export default function HomPage(props) {
@@ -62,6 +64,7 @@ export default function HomPage(props) {
   const [error, setError] = useState('')
   const [verificationId, setVerificationId] = useState("");
   const recaptchaVerifier = useRef(null);
+  const [otp, setOtp] = useState()
   useEffect(() => {
     let verifId = props.navigation.getParam("verifcationId", "N/A");
     setVerificationId(verifId);  
@@ -90,7 +93,7 @@ export default function HomPage(props) {
     console.log("OTP CODE", otpCode);
     const credential = firebase.auth.PhoneAuthProvider.credential(
       verificationId,
-      otpCode
+      otp
     );
     firebase
       .auth()
@@ -156,6 +159,10 @@ export default function HomPage(props) {
     setcontainerOpacity(1);
     props.navigation.navigate("Payments");
   };
+  const getOtp = (otp) => {
+        console.log(otp);
+        setOtp(otp)
+  }
   return (
     <>
       <View style={[styles.container, { opacity: containerOpacity }]}>
@@ -204,124 +211,7 @@ export default function HomPage(props) {
             <View style={OtpStyles.textContainer}>
               <Text style={OtpStyles.text}>Enter verification code</Text>
             </View>
-            <View style={OtpStyles.codeContainer}>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin1(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key != "Backspace") {
-                      inputPin2.current.focus();
-                    }
-                  }}
-                  ref={inputPin1}
-                />
-              </View>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin2(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace") {
-                      inputPin1.current.focus();
-                    } else {
-                      inputPin3.current.focus();
-                    }
-                  }}
-                  ref={inputPin2}
-                />
-              </View>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin3(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace") {
-                      inputPin2.current.focus();
-                    } else {
-                      inputPin4.current.focus();
-                    }
-                  }}
-                  ref={inputPin3}
-                />
-              </View>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin4(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace") {
-                      inputPin3.current.focus();
-                    } else {
-                      inputPin5.current.focus();
-                    }
-                  }}
-                  ref={inputPin4}
-                />
-              </View>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin5(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace") {
-                      inputPin4.current.focus();
-                    } else {
-                      inputPin6.current.focus();
-                    }
-                  }}
-                  ref={inputPin5}
-                />
-              </View>
-              <View style={OtpStyles.inputContainer}>
-                <TextInput
-                  style={OtpStyles.input}
-                  keyboardType="numeric"
-                  maxLength={1}
-                  returnKeyType="next"
-                  onChangeText={(text) => {
-                    setPin6(text);
-                    setError("");
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace") {
-                      inputPin5.current.focus();
-                    }
-                  }}
-                  ref={inputPin6}
-                />
-              </View>
-            </View>
+            <OtpInputs getOtp={(otp) => getOtp(otp)} />
             <View style={style.containerTopBottom}>
               <Text style={style.error}>{error}</Text>
             </View>

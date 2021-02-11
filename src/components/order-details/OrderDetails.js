@@ -65,9 +65,11 @@ export default function OrderDetails(props) {
     };
   }, []);
 
-  const backAction = () => {
-    console.log("IN BACK HANDLER");
-    var previousScreen = props.navigation.getParam("screen", "Orders");
+  const backAction = async() => {
+    var previousScreen = await AsyncStorage.getItem("currentScreen");
+    if (!previousScreen){
+      previousScreen = "Orders"
+    }
     props.navigation.navigate(previousScreen);
     return true;
   };
@@ -155,7 +157,7 @@ export default function OrderDetails(props) {
       <ScrollView>
         <View style={[styles.centeredView, { opacity: containerOpacity }]}>
           {/* If navigated from Submit Order screen */}
-          {props.navigation.getParam("screen") != "SubmitDetails" && (
+          {props.navigation.getParam("screen") == "MyOrders" && (
             <View style={styles.centeredView}>
               <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
               <View style={styles.orderDetails}>
@@ -187,7 +189,7 @@ export default function OrderDetails(props) {
                 {details.forms.length}
               </Text>
             </View>
-            {props.navigation.getParam("screen") != "SubmitDetails" && (
+            {props.navigation.getParam("screen") == "MyOrders" && (
               <View
                 style={{
                   flexDirection: "row",
@@ -200,7 +202,7 @@ export default function OrderDetails(props) {
                 </Text>
               </View>
             )}
-            {props.navigation.getParam("screen") != "SubmitDetails" &&
+            {props.navigation.getParam("screen") == "MyOrders" &&
               (details.progress.postDetails ? (
                 <View style={{ marginTop: 10 }}>
                   <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
@@ -225,9 +227,7 @@ export default function OrderDetails(props) {
                   removeOrder={showModal}
                   index={index}
                   screen={
-                    props.navigation.getParam("screen") == "SubmitDetails"
-                      ? "SubmitDetails"
-                      : "other"
+                    props.navigation.getParam("screen")
                   }
                   form={form}
                   orderType={details.orderType.name}
@@ -239,9 +239,7 @@ export default function OrderDetails(props) {
                   removeOrder={showModal}
                   index={index}
                   screen={
-                    props.navigation.getParam("screen") == "SubmitDetails"
-                      ? "SubmitDetails"
-                      : "other"
+                    props.navigation.getParam("screen")
                   }
                   form={form}
                   orderType={details.orderType.name}
@@ -255,9 +253,7 @@ export default function OrderDetails(props) {
                   index={index}
                   removeOrder={showModal}
                   screen={
-                    props.navigation.getParam("screen") == "SubmitDetails"
-                      ? "SubmitDetails"
-                      : "other"
+                    props.navigation.getParam("screen") 
                   }
                 />
               );

@@ -38,7 +38,7 @@ const { height, width } = Dimensions.get("window");
 export default function HighCourtFormDetails(props) {
   return (
     <View style={styles.detailsContainer}>
-      {props.screen == "SubmitDetails" && (
+      {props.screen != "MyOrders" && (
         <TouchableOpacity
           style={{
             alignSelf: "flex-end",

@@ -35,7 +35,6 @@ import {
 import { TextInput, FAB, Button as PaperButton } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../header/Header";
-import ModalPicker from "react-native-modal-picker";
 import { NavigationActions } from "react-navigation";
 import { ImagePropTypes } from "react-native";
 import { not } from "react-native-reanimated";

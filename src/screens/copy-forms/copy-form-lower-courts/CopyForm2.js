@@ -24,7 +24,6 @@ import {
   PrimaryText,
 } from "../../../constants/colors";
 import AsyncStorage from "@react-native-community/async-storage";
-import ModalPicker from "react-native-modal-picker";
 import { TextInput, Chip, FAB } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../../components/header/Header";

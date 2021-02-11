@@ -9,6 +9,7 @@ import {
   BackHandler,
 } from "react-native";
 import { Chip, Button as PaperButton } from "react-native-paper";
+import AsyncStorage from "@react-native-community/async-storage";
 import OptionButtons from "../../components/child-components/OptionButtons";
 import SectionTitle from "../../components/child-components/SectionTitle";
 import Header from "../../components/header/Header";
@@ -16,6 +17,7 @@ import store from "../../redux/store";
 import { Button } from "@ant-design/react-native";
 import { Secondary, PrimaryText } from "../../constants/colors";
 import { ScrollView } from "react-native-gesture-handler";
+import { getFormPrices } from "../../api/firebase/backend";
 export default function DeliveryDetails(props) {
   const [isUrgent, setIsUrgent] = useState(false);
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(
@@ -57,6 +59,60 @@ export default function DeliveryDetails(props) {
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
+  const reviewOrder = () => {
+    getFormPrices().then((prices) => {
+      console.log("PRICES:   ", prices);
+      _handleRemainingReview(prices);
+    });
+  };
+  const _handleRemainingReview = async (prices) => {
+    var orderTotal = 0;
+    let forms;
+    try {
+      const formsJson = await AsyncStorage.getItem("@forms");
+      formsJson != null
+        ? (forms = JSON.parse(formsJson))
+        : console.log("Error");
+    } catch (e) {
+      console.log(forms);
+    }
+    console.log(forms);
+    // Calculating fee per form and total amount
+    if (forms) {
+      forms.map((form, index) => {
+        try {
+          if (isUrgent) {
+            console.log(prices);
+            orderTotal = orderTotal + parseInt(prices[form.court].urgent);
+            form["formFee"] = parseInt(prices[form.court].urgent);
+          } else {
+            orderTotal = orderTotal + parseInt(prices[form.court].normal);
+            form["formFee"] = parseInt(prices[form.court].normal);
+          }
+        } catch (error) {
+          if (isUrgent) {
+            console.log(prices);
+            orderTotal = orderTotal + parseInt(prices["Lower Courts"].urgent);
+            form["formFee"] = parseInt(prices["Lower Courts"].urgent);
+          } else {
+            orderTotal = orderTotal + parseInt(prices["Lower Courts"].normal);
+            form["formFee"] = parseInt(prices["Lower Courts"].normal);
+          }
+        }
+      });
+    }
+    console.log("ORDER TOTAL:   ", orderTotal);
+    let order = {
+      totalAmount: orderTotal,
+      forms: forms,
+      orderType: { name: "copyForm" },
+    };
+    await AsyncStorage.setItem("currentScreen", "DeliveryDetails");
+    props.navigation.navigate("OrderDetails", {
+      details: order,
+      screen: "DeliveryDetails",
+    });
+  };
   return (
     <>
       <Header title={"Copy Form"} openDrawerFn={openDrawerFn} />
@@ -79,7 +135,7 @@ export default function DeliveryDetails(props) {
                 color: isUrgent ? "red" : "white",
               }}
             >
-              * Your document would be delivered after two days of order with
+              * Your document would be delivered within 2 days of order with
               some additional charges.
             </Text>
           </View>
@@ -111,8 +167,8 @@ export default function DeliveryDetails(props) {
               color={Secondary}
               icon="eye"
               mode="contained"
-              // onPress={reviewOrder}
-              style={[styles.formOptionsButton, { borderBottomWidth: 0}]}
+              onPress={reviewOrder}
+              style={[styles.formOptionsButton, { borderBottomWidth: 0 }]}
             >
               Review Order
             </PaperButton>
@@ -179,6 +235,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 0,
     borderBottomColor: "black",
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.3,
   },
 });

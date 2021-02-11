@@ -33,7 +33,6 @@ import {
 } from "../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../header/Header";
-import ModalPicker from "react-native-modal-picker";
 import TotalCard from "./child-components/TotalCard";
 import PaymentMethod from "./child-components/PaymentMethod";
 import store from "../../redux/store";

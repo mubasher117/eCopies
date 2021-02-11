@@ -5,7 +5,6 @@ import Header from "../../components/header/Header";
 import Modal from "../../components/child-components/Modal";
 import { Secondary } from "../../constants/colors";
 import { getTrackingId } from "../../api/firebase/backend";
-import style from "react-native-modal-picker/style";
 export default function TrackOrder(props) {
   const [trackingId, setTrackingId] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);

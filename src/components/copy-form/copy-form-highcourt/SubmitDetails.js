@@ -260,6 +260,7 @@ export default function SubmitDetails(props) {
       forms: forms,
       orderType: { name: "copyForm" },
     };
+    await AsyncStorage.setItem("currentScreen", "SubmitDetails");
     props.navigation.navigate("OrderDetails", {
       details: order,
       screen: "SubmitDetails",

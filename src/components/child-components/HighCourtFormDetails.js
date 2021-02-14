@@ -58,6 +58,10 @@ export default function HighCourtFormDetails(props) {
         <Text style={styles.orderCourt}>{props.form.court}</Text>
       </View>
       <View style={styles.entityContainer}>
+        <Text style={styles.label}>Bench: </Text>
+        <Text style={styles.entityValue}>{props.form.bench}</Text>
+      </View>
+      <View style={styles.entityContainer}>
         <Text style={styles.label}>Case No: </Text>
         <Text style={styles.entityValue}>{props.form.caseNo}</Text>
       </View>

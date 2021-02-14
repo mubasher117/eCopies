@@ -10,7 +10,7 @@ import {
   SafeAreaView,
   Keyboard,
   Picker,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import {
   InputItem,
@@ -31,7 +31,7 @@ import { TextInput, Chip, FAB } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import store from '../../../redux/store'
+import store from "../../../redux/store";
 const { height, width } = Dimensions.get("window");
 export default function CopyFormCase(props) {
   const previousScreen = props.navigation.getParam("screen", "N/A");
@@ -39,6 +39,7 @@ export default function CopyFormCase(props) {
   const [show, setShow] = useState(false);
   const [caseNo, setcaseNo] = useState({ value: "", error: false });
   const [headerTitle, setHeaderTitle] = useState("");
+  const [bench, setBench] = useState("Lahore Bench");
   useEffect(() => {
     let state = store.getState();
     // Getting selected court name to display on header
@@ -46,18 +47,22 @@ export default function CopyFormCase(props) {
     console.log(state.ordersReducer.currentForm);
     setHeaderTitle(title);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
-    let state = store.getState();
-    let form = state.ordersReducer.currentForm;
-    let title = state.ordersReducer.currentForm.court;
-    setHeaderTitle(title);
-    console.log("FOUND FORM IN REDUCER:   ", form)
-      setcaseNo(form.caseNo ? { value: form.caseNo, error:false } : { value: "", error: false });
+      let state = store.getState();
+      let form = state.ordersReducer.currentForm;
+      let title = state.ordersReducer.currentForm.court;
+      setHeaderTitle(title);
+      console.log("FOUND FORM IN REDUCER:   ", form);
+      setcaseNo(
+        form.caseNo
+          ? { value: form.caseNo, error: false }
+          : { value: "", error: false }
+      );
       setDate(form.decisionDate ? new Date(form.decisionDate) : new Date());
     });
-    return (() => unsubscribe)
+    return () => unsubscribe;
   }, [props.navigation]);
   var decisionDate = date.toDateString();
-  decisionDate = decisionDate.substring(4, decisionDate.length)
+  decisionDate = decisionDate.substring(4, decisionDate.length);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -69,18 +74,18 @@ export default function CopyFormCase(props) {
   };
   // Function triggered on pressing next button
   const goNext = async () => {
-    if (caseNo.value != ""){
-    const details = {
-      caseNo: caseNo.value,
-      decisionDate: decisionDate,
-      court: previousScreen,
-    };
-    store.dispatch({ type: "setCurrentFormItem", payload: details });
-    props.navigation.navigate("CopyFormCase2");
-  }
-  else{
-    setcaseNo({...caseNo, error:true})
-  }
+    if (caseNo.value != "") {
+      const details = {
+        caseNo: caseNo.value,
+        decisionDate: decisionDate,
+        court: previousScreen,
+        bench: bench
+      };
+      store.dispatch({ type: "setCurrentFormItem", payload: details });
+      props.navigation.navigate("CopyFormCase2");
+    } else {
+      setcaseNo({ ...caseNo, error: true });
+    }
   };
   // Function to open drawer
   const openDrawerFn = () => {
@@ -99,6 +104,41 @@ export default function CopyFormCase(props) {
           <View style={styles.sectionContainer}>
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Case Information</Text>
+            </View>
+            <View
+              style={[
+                styles.infoContainer,
+                {
+                  marginTop: 20,
+                },
+              ]}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={styles.label}>Select Bench</Text>
+              </View>
+              <Picker
+                selectedValue={bench}
+                style={{
+                  height: 50,
+                  width: "100%",
+                }}
+                onValueChange={(itemValue, itemIndex) => {
+                  setBench(itemValue);
+                }}
+              >
+                <Picker.Item label="Lahore Bench" value="Lahore Bench" />
+                <Picker.Item
+                  label="Rawalpindi Bench"
+                  value="Rawalpindi Bench"
+                />
+                <Picker.Item label="Multan Bench" value="Multan Bench" />
+                <Picker.Item label="Bhawalpur Bench" value="Bhawalpur Bench" />
+              </Picker>
             </View>
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>

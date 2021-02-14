@@ -48,7 +48,7 @@ const FormType = (props) => {
         backgroundColor: "#E6E6E6",
         minHeight: 160,
         padding: 10,
-        margin: 5 ,
+        margin: 5,
       }}
     >
       <Image
@@ -80,7 +80,10 @@ export default function HomPage(props) {
   const navigateTo = async (screen, currentScreen = "N/A") => {
     let state = await store.getState();
     let user = state.userReducer.user;
-    store.dispatch({ type: "setCurrentFormItem", payload: { court: currentScreen } });
+    store.dispatch({
+      type: "setCurrentFormItem",
+      payload: { court: currentScreen },
+    });
     database.ref("userData/" + user.id).once("value", (snapshot) => {
       console.log(user.id);
       if (snapshot.val()) {
@@ -122,6 +125,10 @@ export default function HomPage(props) {
             { height: height - (getStatusBarHeight() + 50) },
           ]}
         >
+          {/* <View style={styles.availableTextContainer}>
+            <Text style={styles.availableText}>Only available in</Text>
+            <Text style={styles.availableTextCity}>Lahore</Text>
+          </View> */}
           <View style={styles.optionsContainer}>
             {/* {forms.map((form, index) => {return (
             <FormType
@@ -146,8 +153,8 @@ export default function HomPage(props) {
               }}
             />
             <FormType
-              title="High Court"
-              titleUrdu="ہائی کورٹ"
+              title="High Court, Lahore"
+              titleUrdu="ہائی کورٹ, لاہور"
               imgSource={require("../../../assets/images/static/highcourt.jpeg")}
               navigateTo={() => {
                 // Clear pervious form
@@ -158,8 +165,8 @@ export default function HomPage(props) {
           </View>
           <View style={styles.optionsContainer}>
             <FormType
-              title="Lower Courts"
-              titleUrdu="ماتحت عدالتیں"
+              title="Lower Courts Lahore"
+              titleUrdu=" ماتحت عدالتیں, لاہور"
               imgSource={require("../../../assets/images/static/district_court.jpg")}
               navigateTo={() => {
                 // Clear pervious form
@@ -168,8 +175,8 @@ export default function HomPage(props) {
               }}
             />
             <FormType
-              title="Revenue / Sub Registrar"
-              titleUrdu="ریونیو"
+              title="Revenue / Sub Registrar Lahore"
+              titleUrdu="ریونیو, لاہور"
               imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
               navigateTo={() => {
                 // Clear pervious form
@@ -229,5 +236,23 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     alignSelf: "flex-end",
     marginTop: 30,
+  },
+  availableTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  availableText: {
+    fontSize: 16,
+    marginLeft: 5,
+    marginBottom: 40,
+  },
+  availableTextCity: {
+    fontSize: 16,
+    marginLeft: 5,
+    marginBottom: 40,
+    color: "white",
+    backgroundColor: Secondary,
+    padding: 5,
+    borderRadius: 8,
   },
 });

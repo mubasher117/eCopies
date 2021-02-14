@@ -41,6 +41,7 @@ import { not } from "react-native-reanimated";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import store from "../../redux/store";
 import { seeNotification, getMyOrders } from "../../api/firebase/backend";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 import { database } from "../../api/firebase/authenication";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
@@ -64,6 +65,7 @@ export default function Notifications(props) {
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [isLoading, setLoading] = useState(true);
   const [documemnts, setdocumemnts] = useState([
     { key: 1 },
     { key: 2 },
@@ -75,6 +77,7 @@ export default function Notifications(props) {
   useEffect(() => {
     if (notificationsState != undefined) {
       setNotifications(notificationsState);
+      setLoading(false);
       //console.log("set Notifications", notificationsState);
     } else {
       console.log("set Notifications", notificationsState);
@@ -125,42 +128,20 @@ export default function Notifications(props) {
     }
   };
   return (
-    <SafeAreaView
-      behaviour="padding"
-      style={[
-        styles.container,
-        {
-          opacity: containerOpacity,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <Header title="Notifications" openDrawerFn={openDrawerFn} />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          // alert("Modal has been closed.");
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              Please transfer the amount equivalent to charges to account
-            </Text>
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
-          </View>
-        </View>
-      </Modal>
       <ScrollView>
-        {!notifications.length && (
-          <View style={styles.centeredView}>
+        <View
+          style={[
+            styles.centeredView,
+            {
+              height: !notifications.length
+                ? getStatusBarHeight() + 50
+                : "auto",
+            },
+          ]}
+        >
+          {isLoading ? (
             <PaperButton
               mode="contained"
               onPress={() => console.log("Pressed")}
@@ -173,38 +154,42 @@ export default function Notifications(props) {
             >
               Loading
             </PaperButton>
-          </View>
-        )}
-        {notifications.map((notification, index) => {
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => openNotification(notification)}
-            >
-              <Item
-                thumb={
-                  <Image
-                    source={require("../../../assets/images/static/app-logo.png")}
-                    style={styles.logo}
-                  />
-                }
-                // onPress={() => alert("tapped")}
-                key={index}
-                style={
-                  notification.isSeen ? null : { backgroundColor: "#E7EAE8" }
-                }
-              >
-                <Text style={styles.text}>{notification.body}</Text>
-                <Text style={styles.time}>
-                  {new Date(notification.createdOn).toDateString()}
-                </Text>
-              </Item>
-            </TouchableOpacity>
-          );
-        })}
-        <View style={{ width: width, height: 100 }} />
+          ) : notifications.length ? (
+            notifications.map((notification, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => openNotification(notification)}
+                >
+                  <Item
+                    thumb={
+                      <Image
+                        source={require("../../../assets/images/static/app-logo.png")}
+                        style={styles.logo}
+                      />
+                    }
+                    // onPress={() => alert("tapped")}
+                    key={index}
+                    style={
+                      notification.isSeen
+                        ? null
+                        : { backgroundColor: "#E7EAE8" }
+                    }
+                  >
+                    <Text style={styles.text}>{notification.body}</Text>
+                    <Text style={styles.time}>
+                      {new Date(notification.createdOn).toDateString()}
+                    </Text>
+                  </Item>
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <Text style={styles.noNotifications}>No Notifications Yet</Text>
+          )}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -213,6 +198,11 @@ const styles = StyleSheet.create({
     backgroundColor: PrimaryLight,
     width: width,
     minHeight: height,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
     width: 50,
@@ -223,10 +213,7 @@ const styles = StyleSheet.create({
   },
   text: { marginLeft: 10, fontSize: 12 },
   time: { marginLeft: 20, fontSize: 14, color: "grey" },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
+  noNotifications: {
+    color: "gray",
   },
 });

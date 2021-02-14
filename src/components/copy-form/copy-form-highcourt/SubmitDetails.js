@@ -414,7 +414,7 @@ export default function SubmitDetails(props) {
                   value={address.value}
                   numberOfLines={2}
                   multiline={true}
-                  maxLength={50}
+                  maxLength={100}
                 />
               </View>
               <Text style={styles.error}>{address.error}</Text>

@@ -126,7 +126,7 @@ export default function Profile(props) {
             error={!!address.error}
             autoCapitalize="none"
             keyboardType="default"
-            maxLength={50}
+            maxLength={100}
           />
           <Text style={styles.error}>{address.error}</Text>
 

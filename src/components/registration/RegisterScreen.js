@@ -206,7 +206,7 @@ export default function RegisterScreen(props) {
             error={!!address.error}
             autoCapitalize="none"
             keyboardType="default"
-            maxLength={50}
+            maxLength={100}
           />
           <Text style={styles.error}>{address.error}</Text>
           {/* <TextInput

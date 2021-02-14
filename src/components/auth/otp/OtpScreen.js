@@ -65,6 +65,7 @@ export default function HomPage(props) {
   const [verificationId, setVerificationId] = useState("");
   const recaptchaVerifier = useRef(null);
   const [otp, setOtp] = useState()
+  const [emptyOtpCode, setEmptyOtpCode] =useState(false)
   useEffect(() => {
     let verifId = props.navigation.getParam("verifcationId", "N/A");
     setVerificationId(verifId);  
@@ -79,6 +80,10 @@ export default function HomPage(props) {
     props.navigation.toggleDrawer();
   };
   const confirmCode = () => {
+    if (!otp){
+      setEmptyOtpCode(true);
+      return
+    }
     setshowLoading(true);
     setcontainerOpacity(0.3);
     // Get user details and verificaiton id from previous screens
@@ -211,8 +216,12 @@ export default function HomPage(props) {
             <View style={OtpStyles.textContainer}>
               <Text style={OtpStyles.text}>Enter verification code</Text>
             </View>
-            <OtpInputs getOtp={(otp) => getOtp(otp)} />
+            <OtpInputs getOtp={(otp) => getOtp(otp)} changeOtp={() => {setEmptyOtpCode(false);
+            setError('')
+
+            }} />
             <View style={style.containerTopBottom}>
+              {emptyOtpCode && <Text style={style.error}>*Enter Verification Code</Text>}
               <Text style={style.error}>{error}</Text>
             </View>
             <View style={OtpStyles.btnContainer}>

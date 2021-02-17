@@ -31,7 +31,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
-import { TextInput, Chip } from "react-native-paper";
+import { Chip, Button as PaperButton } from "react-native-paper";
 import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
 import HighCourtFormDetails from "../child-components/HighCourtFormDetails";
@@ -113,6 +113,9 @@ export default function OrderDetails(props) {
     setIsModalVisible(false);
     setcontainerOpacity(1);
     removeOrder(formIndex);
+  };
+  const addForm = () => {
+    props.navigation.navigate("CopyFormHomePage");
   };
 
   return (
@@ -220,15 +223,22 @@ export default function OrderDetails(props) {
                 <View />
               ))}
           </View>
+          <PaperButton
+            color={Secondary}
+            icon="plus"
+            mode="contained"
+            onPress={addForm}
+            style={styles.formOptionsButton}
+          >
+            Add More Copy Form
+          </PaperButton>
           {details.forms.map((form, index) => {
             if (form.court == "High Court" || form.court == "Supreme Court") {
               return (
                 <HighCourtFormDetails
                   removeOrder={showModal}
                   index={index}
-                  screen={
-                    props.navigation.getParam("screen")
-                  }
+                  screen={props.navigation.getParam("screen")}
                   form={form}
                   orderType={details.orderType.name}
                 />
@@ -238,9 +248,7 @@ export default function OrderDetails(props) {
                 <RevenueCourtFormDetails
                   removeOrder={showModal}
                   index={index}
-                  screen={
-                    props.navigation.getParam("screen")
-                  }
+                  screen={props.navigation.getParam("screen")}
                   form={form}
                   orderType={details.orderType.name}
                 />
@@ -252,9 +260,7 @@ export default function OrderDetails(props) {
                   orderType={details.orderType.name}
                   index={index}
                   removeOrder={showModal}
-                  screen={
-                    props.navigation.getParam("screen") 
-                  }
+                  screen={props.navigation.getParam("screen")}
                 />
               );
             }
@@ -415,5 +421,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#E6E6E6",
     borderWidth: 0,
     alignSelf: "flex-end",
+  },
+  formOptionsButton: {
+    height: 40,
+    justifyContent: "center",
+    borderRadius: 0,
+    marginTop: 25
   },
 });

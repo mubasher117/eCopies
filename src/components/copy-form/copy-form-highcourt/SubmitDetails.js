@@ -13,7 +13,7 @@ import {
   List,
   Modal,
   Image,
-  BackHandler
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -37,6 +37,7 @@ import {
   Switch,
   Checkbox,
   Button as PaperButton,
+  Chip,
 } from "react-native-paper";
 import {
   addForm,
@@ -54,6 +55,8 @@ const { height, width } = Dimensions.get("window");
 import { getFormPrices } from "../../../api/firebase/backend";
 import store from "../../../redux/store";
 import OptionButtons from "../../child-components/OptionButtons";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { color, not } from "react-native-reanimated";
 export default function SubmitDetails(props) {
   const [showLoading, setshowLoading] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
@@ -61,39 +64,128 @@ export default function SubmitDetails(props) {
   const [orderTotal, setOrderTotal] = useState(0);
   const [cellNo, setCellNo] = useState({ error: "", value: "" });
   const [address, setAddress] = useState({ error: "", value: "" });
+  const [totalForms, setTotalForms] = useState(0);
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(
+    new Date().toDateString()
+  );
+  const [forms, setForms] = useState();
+  const [formsPrices, setFormPrices] = useState();
+  const [showWaiting, setWaiting] = useState(false);
   useEffect(() => {
     // retrieving user data
     let state = store.getState();
     let user = state.userReducer.user;
     setAddress({ value: user.address, error: "" });
     setCellNo({ value: user.cellNo, error: "" });
+    _handleForms();
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       backAction
     );
+    let expectedDate = calculateExpectedDeliveryDate(false);
+    setExpectedDeliveryDate(expectedDate);
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let user = state.userReducer.user;
       setAddress({ value: user.address, error: "" });
       setCellNo({ value: user.cellNo, error: "" });
+      setIsUrgent(false)
+      _handleForms();
+
+      console.log(
+        "********************* IN HANDLER ISURGENT**********************"
+      );
+      console.log("isUrgent:     ", isUrgent);
       BackHandler.addEventListener("hardwareBackPress", backAction);
     });
     const onBlurScreen = props.navigation.addListener("didBlur", () => {
       console.log("UNFOCUSED");
       backHandler.remove();
     });
-    return () => {unsubscribe;
-    onBlurScreen;
-    backHandler.remove();}
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, []);
   const backAction = () => {
     console.log("IN BACK HANDLER");
     _handlePrevious();
     return true;
   };
+  const _handleForms = async () => {
+    setWaiting(true)
+    getFormPrices().then(async (priceData) => {
+      setFormPrices(priceData);
+      let loadedForms;
+      try {
+        const formsJson = await AsyncStorage.getItem("@forms");
+        formsJson != null
+          ? (loadedForms = JSON.parse(formsJson))
+          : console.log("Error");
+      } catch (e) {
+        // error reading value
+      }
+      setForms(loadedForms);
+      setTotalForms(loadedForms.length ? loadedForms.length : 0);
+      console.log('********************* IN FUNCTION ISURGENT**********************')
+      console.log("isUrgent:     ", isUrgent)
+      calculateOrderTotal(loadedForms, isUrgent, priceData);
+    });
+  };
+  const calculateOrderTotal = async (inpForms, isUrgent, prices) => {
+    setWaiting(true);
+    var totalAmount = 0;
+    if (inpForms) {
+      inpForms.map((form, index) => {
+        try {
+          if (isUrgent) {
+            totalAmount = totalAmount + parseInt(prices[form.court].urgent);
+            form["formFee"] = parseInt(prices[form.court].urgent);
+          } else {
+            totalAmount = totalAmount + parseInt(prices[form.court].normal);
+            form["formFee"] = parseInt(prices[form.court].normal);
+          }
+        } catch (error) {
+          if (isUrgent) {
+            totalAmount = totalAmount + parseInt(prices["Lower Courts"].urgent);
+            form["formFee"] = parseInt(prices["Lower Courts"].urgent);
+          } else {
+            totalAmount = totalAmount + parseInt(prices["Lower Courts"].normal);
+            form["formFee"] = parseInt(prices["Lower Courts"].normal);
+          }
+        }
+      });
+    }
+    setOrderTotal(totalAmount);
+    setWaiting(false);
+  };
+  const calculateExpectedDeliveryDate = (isUrgent) => {
+    let date = new Date();
+    // No days expected to be taken for the process
+    let processTime = 6;
+    if (isUrgent) {
+      processTime = 3;
+    }
+    let expectedDate = date.setDate(new Date().getDate() + processTime);
+    // if expected delivery day is Sunday
+    if (new Date(expectedDate).getDay() == 0) {
+      console.log("IS sunday");
+      expectedDate = date.setDate(new Date().getDate() + processTime + 1);
+    }
+    expectedDate = new Date(expectedDate).toDateString();
+    return expectedDate;
+  };
+  const _handleDeliveryType = (isUrgentOrder) => {
+    setIsUrgent(isUrgentOrder);
+    let expectedDate = calculateExpectedDeliveryDate(isUrgentOrder);
+    setExpectedDeliveryDate(expectedDate);
+    calculateOrderTotal(forms, isUrgentOrder, formsPrices);
+  };
   const _handlePrevious = () => {
-    props.navigation.navigate("DeliveryDetails");
-  }
+    props.navigation.navigate("CopyFormHomePage");
+  };
   // Callback function after adding order
   const addFormCallBack = async (error) => {
     if (error) {
@@ -113,13 +205,7 @@ export default function SubmitDetails(props) {
     return parseInt(Math.random() * (max - min) + min);
   }
   // Submits details to firebase
-  const onSubmit = () => {
-    getFormPrices().then((prices) => {
-      console.log("PRICES:   ", prices);
-      _handleRemainingSubmit(prices);
-    });
-  };
-  const _handleRemainingSubmit = async (prices) => {
+  const _handleSubmit = async (prices) => {
     var isNotValidAddress = addressValidator(address.value);
     if (isNotValidAddress) {
       setAddress({ ...address, error: isNotValidAddress });
@@ -128,49 +214,9 @@ export default function SubmitDetails(props) {
       setcontainerOpacity(0.3);
       //Geerates an order no ranging between the parameters
       var orderNo = getRandomArbitrary(1000000, 9999999);
-      // Retrieving forms from storage
-      let forms;
-      try {
-        const formsJson = await AsyncStorage.getItem("@forms");
-        formsJson != null
-          ? (forms = JSON.parse(formsJson))
-          : console.log("Error");
-      } catch (e) {
-        // error reading value
-      }
       let state = store.getState();
       // retrieving user data
       let user = state.userReducer.user;
-      let isUrgent = state.ordersReducer.isUrgent;
-      // Calculating fee per form and total amount
-      var totalAmount = 0;
-      if (forms) {
-        forms.map((form, index) => {
-          try {
-            if (isUrgent) {
-              console.log(prices);
-              totalAmount = totalAmount + parseInt(prices[form.court].urgent);
-              form["formFee"] = parseInt(prices[form.court].urgent);
-            } else {
-              totalAmount = totalAmount + parseInt(prices[form.court].normal);
-              form["formFee"] = parseInt(prices[form.court].normal);
-            }
-          } catch (error) {
-            if (isUrgent) {
-              console.log(prices);
-              totalAmount =
-                totalAmount + parseInt(prices["Lower Courts"].urgent);
-              form["formFee"] = parseInt(prices["Lower Courts"].urgent);
-            } else {
-              totalAmount =
-                totalAmount + parseInt(prices["Lower Courts"].normal);
-              form["formFee"] = parseInt(prices["Lower Courts"].normal);
-            }
-          }
-        });
-      }
-      console.log("ORDER TOTAL:   ", totalAmount);
-
       // Final details ready to be posted
       let orderDetails = {
         applicantName: user.name,
@@ -185,14 +231,12 @@ export default function SubmitDetails(props) {
         customerId: user.id,
         createdOn: Date.now(),
         orderNo: orderNo,
-        totalAmount: totalAmount,
+        totalAmount: orderTotal,
         orderType: {
           name: "copyForm",
         },
       };
-      console.log(orderDetails);
       addForm(orderDetails, addFormCallBack);
-      setOrderTotal(totalAmount);
     }
   };
   const showModal = () => {
@@ -210,51 +254,7 @@ export default function SubmitDetails(props) {
     props.navigation.toggleDrawer();
   };
   // Passes the current order details to Order Details page
-  const reviewOrder = () => {
-    getFormPrices().then((prices) => {
-      console.log("PRICES:   ", prices);
-      _handleRemainingReview(prices);
-    });
-  };
-  const _handleRemainingReview = async (prices) => {
-    var orderTotal = 0;
-    let forms;
-    let state = store.getState();
-    let isUrgent = state.ordersReducer.isUrgent;
-    try {
-      const formsJson = await AsyncStorage.getItem("@forms");
-      formsJson != null
-        ? (forms = JSON.parse(formsJson))
-        : console.log("Error");
-    } catch (e) {
-      // error reading value
-    }
-    console.log(forms);
-    // Calculating fee per form and total amount
-    if (forms) {
-      forms.map((form, index) => {
-        try {
-          if (isUrgent) {
-            console.log(prices);
-            orderTotal = orderTotal + parseInt(prices[form.court].urgent);
-            form["formFee"] = parseInt(prices[form.court].urgent);
-          } else {
-            orderTotal = orderTotal + parseInt(prices[form.court].normal);
-            form["formFee"] = parseInt(prices[form.court].normal);
-          }
-        } catch (error) {
-          if (isUrgent) {
-            console.log(prices);
-            orderTotal = orderTotal + parseInt(prices["Lower Courts"].urgent);
-            form["formFee"] = parseInt(prices["Lower Courts"].urgent);
-          } else {
-            orderTotal = orderTotal + parseInt(prices["Lower Courts"].normal);
-            form["formFee"] = parseInt(prices["Lower Courts"].normal);
-          }
-        }
-      });
-    }
-    console.log("ORDER TOTAL:   ", orderTotal);
+  const _handleReview = async () => {
     let order = {
       totalAmount: orderTotal,
       forms: forms,
@@ -276,7 +276,12 @@ export default function SubmitDetails(props) {
         }}
         keyboardShouldPersistTaps="always"
       >
-        <Header title="Copy Form" backbutton goBackFn={_handlePrevious} />
+        <Header
+          title="Delivery Details"
+          backbutton
+          goBackFn={_handlePrevious}
+        />
+
         <Modal
           animationType="slide"
           transparent={true}
@@ -317,66 +322,65 @@ export default function SubmitDetails(props) {
             </View>
           </View>
         </Modal>
-
         <ScrollView keyboardShouldPersistTaps="always">
-          <View
-            style={{
-              alignItems: "center",
-              opacity: containerOpacity,
-              marginTop: 15,
-            }}
-          >
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.sctionTitle}>Submit Details</Text>
+          <View style={styles.innerContainer}>
+            <View style={[styles.labelContainer, { marginTop: 0 }]}>
+              <Text style={styles.label}>Select One</Text>
+              {/* <Text style={styles.label}>تاریخ فیصلہ</Text> */}
+            </View>
+            <OptionButtons
+              option1="Normal"
+              option2="Urgent"
+              _handleOption1={() => _handleDeliveryType(false)}
+              _handleOption2={() => _handleDeliveryType(true)}
+              active = {isUrgent}
+            />
+            <View style={styles.urgentMessageContainer}>
+              <Text
+                style={{
+                  fontSize: 9,
+                  color: isUrgent ? "red" : "white",
+                }}
+              >
+                * Your document would be delivered within 3 days of order with
+                some additional charges.
+              </Text>
+            </View>
+            <View style={styles.infoContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>Expected Delivery Date</Text>
               </View>
-              <View style={styles.infoContainer}>
-                <View style={styles.labelContainer}>
-                  {/* <Text>
-                  Copy form would be delivered within 2 days. If you want to get
-                  it today, then please tap on the urgent button.
-                </Text>
-                <Text>
-                  نقل فارم 2 دن میں فراہم کیا جائے گا۔ اگر آپ اسے ابھی حاصل کرنا
-                  چاہتے ہیں تو برائے مہربانی نیچے بٹن دبائیں۔
-                </Text> */}
-                  {/* <Text style={styles.label}>فوری طور پر درکار</Text> */}
-                  {/* <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
+              <View style={styles.valueContainer}>
+                <Chip
+                  style={styles.expectedDeliveryDate}
+                  textStyle={styles.expectedDeliveryDateText}
                 >
-                  <Text style={styles.labelUrgent}>Urgently Required</Text>
-
-                  <Switch
-                    value={isUrgent}
-                    onChange={toggleSwitch}
-                    color={Secondary}
-                    style={{
-                      marginTop: 0,
-                      marginRight: 15,
-                      transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
-                    }}
-                  />
-                </View> */}
-
-                  {/* <Text>{forms.length} 0</Text> */}
-                </View>
+                  {expectedDeliveryDate}
+                </Chip>
               </View>
             </View>
-            <View style={{ width: 10, height: 50 }} />
+            <View style={styles.labelContainer}>
+              <Text style={[styles.label, { fontSize: 20 }]}>
+                Order Summary
+              </Text>
+              <TouchableOpacity
+                onPress={_handleReview}
+                style={styles.editContainer}
+              >
+                <Text style={styles.edit}>Edit</Text>
+              </TouchableOpacity>
+            </View>
 
-            <PaperButton
-              color={Secondary}
-              icon="eye"
-              mode="contained"
-              onPress={reviewOrder}
-            >
-              Review Order
-            </PaperButton>
+            <View style={styles.summaryContainer}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryCell}>Total Copy Forms</Text>
+                <Text style={styles.summaryCell}>{totalForms}</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryCell}>Order Total</Text>
+                <Text style={styles.summaryCell}>{orderTotal}</Text>
+              </View>
+            </View>
             <View style={styles.deliveryInfoContainer}>
               <Text style={styles.label}>Delivery Details</Text>
               <View style={styles.addressContainer}>
@@ -417,19 +421,13 @@ export default function SubmitDetails(props) {
                   maxLength={100}
                 />
               </View>
-              <Text style={styles.error}>{address.error}</Text>
             </View>
-            {/* <View style={styles.reviewContainer}>
-            
-            <Button style={styles.review} type="primary">
-              <Text style={{ fontSize: 12 }}>Review Order</Text>
-            </Button>
-          </View> */}
+            <Text style={styles.error}>{address.error}</Text>
           </View>
         </ScrollView>
 
         <View style={styles.submitContainer}>
-          <Button style={styles.submit} type="primary" onPress={onSubmit}>
+          <Button style={styles.submit} type="primary" onPress={_handleSubmit}>
             <Text>SUBMIT</Text>
           </Button>
         </View>
@@ -441,6 +439,7 @@ export default function SubmitDetails(props) {
         size="large"
         text="Submitting..."
       />
+      <ActivityIndicator animating={showWaiting} toast size="small" />
     </>
   );
 }
@@ -450,6 +449,10 @@ const styles = StyleSheet.create({
     backgroundColor: PrimaryLight,
     width: width,
     minHeight: height,
+  },
+  innerContainer: {
+    width: "90%",
+    alignSelf: "center",
   },
   sectionContainer: {
     width: "90%",
@@ -465,7 +468,9 @@ const styles = StyleSheet.create({
     color: PrimaryText,
   },
   labelContainer: {
-    marginTop: 20,
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
   },
   labelUrgent: {
     fontWeight: "bold",
@@ -473,7 +478,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "bold",
-    padding: 15,
+    padding: 5,
   },
   valueContainer: {
     marginTop: 10,
@@ -513,8 +518,9 @@ const styles = StyleSheet.create({
   },
   submitContainer: {
     flex: 1,
-    alignSelf:'flex-end',
-    alignContent:'center',justifyContent:'center',
+    alignSelf: "flex-end",
+    alignContent: "center",
+    justifyContent: "center",
     width: "100%",
     marginBottom: 20,
   },
@@ -523,7 +529,7 @@ const styles = StyleSheet.create({
     minHeight: 60,
     backgroundColor: "#f44336",
     borderWidth: 0,
-    alignSelf:'center',
+    alignSelf: "center",
   },
   reviewContainer: {
     margin: 5,
@@ -606,5 +612,43 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
     marginLeft: "10%",
+  },
+  editContainer: {
+    backgroundColor: Secondary,
+    paddingLeft: 5,
+    paddingRight: 5,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  edit: {
+    color: "white",
+    fontSize: 14,
+  },
+  summaryContainer: {
+    // backgroundColor: Secondary,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Secondary,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 5,
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
+  summaryCell: {
+    // color: "white",
+  },
+
+  expectedDeliveryDate: {
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  expectedDeliveryDateText: {
+    color: PrimaryText,
+    fontSize: 12,
   },
 });

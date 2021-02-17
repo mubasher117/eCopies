@@ -31,9 +31,9 @@ import LowerCourtsSelectCourt from "../screens/copy-forms/copy-form-lower-courts
 import LowerCourtsForm1 from "../screens/copy-forms/copy-form-lower-courts/CopyForm1";
 import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
 import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
-import DeliveryDetails from "../screens/copy-forms/DeliveryDetails";
 import TrackOrder from "../screens/track-order/TrackOrder";
 import DrawerCart from '../components/child-components/DrawerCart'
+import HelpAndSupport from '../screens/help-and-support/index'
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
   return (
@@ -115,7 +115,7 @@ const CustomDrawerContentComponent = (props) => {
               console.log(forms.length);
               if (forms.length) {
                 setisActive("currentOrder");
-                props.navigation.navigate("DeliveryDetails");
+                props.navigation.navigate("SubmitDetails");
               } else {
                 alert("You don't have any form in cart.");
               }
@@ -137,7 +137,7 @@ const CustomDrawerContentComponent = (props) => {
                 source={require("../../assets/images/static/order.png")}
               />
             </View>
-            <DrawerCart isActive ={isActive === "currentOrder" ? true : false}/>
+            <DrawerCart isActive={isActive === "currentOrder" ? true : false} />
             {/* <Text
               style={
                 isActive === "currentOrder"
@@ -350,7 +350,30 @@ const CustomDrawerContentComponent = (props) => {
             </Text>
           </View>
         </TouchableOpacity> */}
-
+        <TouchableOpacity
+          onPress={() => {
+            setisActive("helpAndSupport");
+            props.navigation.navigate("HelpAndSupport");
+          }}
+        >
+          <View
+            style={
+              isActive === "helpAndSupport"
+                ? styles.pageLowerActiveContainer
+                : styles.pageLowerContainer
+            }
+          >
+            <Text
+              style={
+                isActive === "helpAndSupport"
+                  ? styles.pageLowerActiveLabel
+                  : styles.pageLowerLabel
+              }
+            >
+              Help and Support
+            </Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             setisActive("logout");
@@ -428,8 +451,8 @@ const Drawer = createDrawerNavigator(
     LowerCourtsForm1: LowerCourtsForm1,
     LowerCourtsForm2: LowerCourtsForm2,
     LowerCourtsForm3: LowerCourtsForm3,
-    DeliveryDetails: DeliveryDetails,
     TrackOrder: TrackOrder,
+    HelpAndSupport: HelpAndSupport
   },
   {
     initialRouteName: "CopyFormHomePage",

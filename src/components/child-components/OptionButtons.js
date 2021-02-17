@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,9 @@ import {
 } from "@ant-design/react-native";
 export default function OptionButtons(props) {
   const [active1, setActive1] = useState(true);
+  useEffect(() => {
+    props.active ? setActive1(false) : setActive1(true);
+  }, [props.active]);
   const _handleOption1 = () => {
     if (!active1) {
       setActive1(true);

@@ -115,12 +115,11 @@ export default function DeliveryDetails(props) {
   };
   return (
     <>
-      <Header title={"Copy Form"} openDrawerFn={openDrawerFn} />
+      <Header title="Delivery Details" openDrawerFn={openDrawerFn} />
       <ScrollView style={styles.container}>
-        <SectionTitle title="Delivery Details" />
         <View style={{ flex: 1 }}>
           <View style={styles.labelContainer}>
-            <Text style={styles.label}>Type</Text>
+            <Text style={styles.label}>Select One</Text>
             {/* <Text style={styles.label}>تاریخ فیصلہ</Text> */}
           </View>
           <OptionButtons
@@ -142,7 +141,7 @@ export default function DeliveryDetails(props) {
           <View style={styles.infoContainer}>
             <View style={[styles.labelContainer, { flexDirection: "column" }]}>
               <Text style={styles.label}>Expected Delivery Date</Text>
-              <Text style={styles.label}>ترسیل کی متوقع تاریخ</Text>
+              {/* <Text style={styles.label}>ترسیل کی متوقع تاریخ</Text> */}
             </View>
             <View style={styles.valueContainer}>
               <Chip
@@ -151,6 +150,14 @@ export default function DeliveryDetails(props) {
               >
                 {expectedDeliveryDate}
               </Chip>
+            </View>
+          </View>
+          <View style={styles.infoContainer}>
+            <View style={[styles.labelContainer, { flexDirection: "column" }]}>
+              <Text style={styles.label}>Order Summary</Text>
+              <View style={styles.summaryContainer}>
+              </View>
+
             </View>
           </View>
           <View style={styles.btnAddFormContainer}>

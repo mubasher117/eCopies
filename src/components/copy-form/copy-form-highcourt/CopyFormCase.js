@@ -79,7 +79,7 @@ export default function CopyFormCase(props) {
         caseNo: caseNo.value,
         decisionDate: decisionDate,
         court: previousScreen,
-        bench: bench
+        bench: bench,
       };
       store.dispatch({ type: "setCurrentFormItem", payload: details });
       props.navigation.navigate("CopyFormCase2");
@@ -105,6 +105,7 @@ export default function CopyFormCase(props) {
             <View style={styles.sectionTitleContainer}>
               <Text style={styles.sctionTitle}>Case Information</Text>
             </View>
+            {headerTitle == "High Court"  &&
             <View
               style={[
                 styles.infoContainer,
@@ -140,6 +141,7 @@ export default function CopyFormCase(props) {
                 <Picker.Item label="Bhawalpur Bench" value="Bhawalpur Bench" />
               </Picker>
             </View>
+            }
             <View style={styles.infoContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>کیس نمبر</Text>

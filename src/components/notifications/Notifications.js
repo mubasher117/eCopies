@@ -78,7 +78,7 @@ export default function Notifications(props) {
     if (notificationsState != undefined) {
       setNotifications(notificationsState);
       setLoading(false);
-      //console.log("set Notifications", notificationsState);
+      console.log("set Notifications", notificationsState);
     } else {
       console.log("set Notifications", notificationsState);
     }
@@ -137,7 +137,7 @@ export default function Notifications(props) {
             {
               height: !notifications.length
                 ? getStatusBarHeight() + 50
-                : "auto",
+                : 'auto',
             },
           ]}
         >
@@ -157,31 +157,32 @@ export default function Notifications(props) {
           ) : notifications.length ? (
             notifications.map((notification, index) => {
               return (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => openNotification(notification)}
-                >
-                  <Item
-                    thumb={
-                      <Image
-                        source={require("../../../assets/images/static/app-logo.png")}
-                        style={styles.logo}
-                      />
-                    }
-                    // onPress={() => alert("tapped")}
+                <View style={{ width: '100%' }}>
+                  <TouchableOpacity
                     key={index}
-                    style={
-                      notification.isSeen
-                        ? null
-                        : { backgroundColor: "#E7EAE8" }
-                    }
+                    onPress={() => openNotification(notification)}
                   >
-                    <Text style={styles.text}>{notification.body}</Text>
-                    <Text style={styles.time}>
-                      {new Date(notification.createdOn).toDateString()}
-                    </Text>
-                  </Item>
-                </TouchableOpacity>
+                    <Item
+                      thumb={
+                        <Image
+                          source={require("../../../assets/images/static/app-logo.png")}
+                          style={styles.logo}
+                        />
+                      }
+                      key={index}
+                      style={
+                        notification.isSeen
+                          ? null
+                          : { backgroundColor: "#E7EAE8" }
+                      }
+                    >
+                      <Text style={styles.text}>{notification.body}</Text>
+                      <Text style={styles.time}>
+                        {new Date(notification.createdOn).toDateString()}
+                      </Text>
+                    </Item>
+                  </TouchableOpacity>
+                </View>
               );
             })
           ) : (

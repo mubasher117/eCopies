@@ -52,7 +52,7 @@ export const addAdditionalDetails = (userDetails) => {
 // })
 export const getFormPrice = (court, type) => {
   database.ref(`prices/copyForm/${court}/${type}`).once("value", (snapshot) => {
-    console.log("PRICE IS:   ", snapshot.val());
+    // console.log("PRICE IS:   ", snapshot.val());
     return snapshot.val();
   });
 };

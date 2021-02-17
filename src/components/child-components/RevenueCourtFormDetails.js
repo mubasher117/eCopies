@@ -48,7 +48,6 @@ export default function RevenueCourtFormDetails(props) {
           style={{
             alignSelf: "flex-end",
             margin: 0,
-            marginBottom: 10,
           }}
           onPress={() => props.removeOrder(props.index)}
         >

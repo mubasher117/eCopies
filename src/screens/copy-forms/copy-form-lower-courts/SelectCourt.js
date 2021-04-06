@@ -12,7 +12,7 @@ import {
   Picker,
   TouchableOpacity,
   Image,
-  Modal,
+  Modal,BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -64,6 +64,27 @@ export default function SelectCourt(props) {
   const [courtError, setCourtError] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
   const [showLoading, setshowLoading] = useState(false);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+    });
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
+  }, []);
+  const backAction = () => {
+    props.navigation.navigate("CopyFormHomePage");
+    return true;
+  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const _handleNext = () => {
     if (court == "-1") {

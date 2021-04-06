@@ -90,7 +90,7 @@ export default function SubmitDetails(props) {
       let user = state.userReducer.user;
       setAddress({ value: user.address, error: "" });
       setCellNo({ value: user.cellNo, error: "" });
-      setIsUrgent(false)
+      setIsUrgent(false);
       _handleForms();
 
       console.log(
@@ -115,7 +115,7 @@ export default function SubmitDetails(props) {
     return true;
   };
   const _handleForms = async () => {
-    setWaiting(true)
+    setWaiting(true);
     getFormPrices().then(async (priceData) => {
       setFormPrices(priceData);
       let loadedForms;
@@ -129,8 +129,10 @@ export default function SubmitDetails(props) {
       }
       setForms(loadedForms);
       setTotalForms(loadedForms.length ? loadedForms.length : 0);
-      console.log('********************* IN FUNCTION ISURGENT**********************')
-      console.log("isUrgent:     ", isUrgent)
+      console.log(
+        "********************* IN FUNCTION ISURGENT**********************"
+      );
+      console.log("isUrgent:     ", isUrgent);
       calculateOrderTotal(loadedForms, isUrgent, priceData);
     });
   };
@@ -205,13 +207,24 @@ export default function SubmitDetails(props) {
     return parseInt(Math.random() * (max - min) + min);
   }
   // Submits details to firebase
-  const _handleSubmit = async (prices) => {
+  let timerId;
+  const _submit_throttle = (func, delay) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => {
+      func();
+    }, delay);
+  };
+  const onSubmit = () => {
+    setshowLoading(true);
+    setcontainerOpacity(0.3);
+    _submit_throttle(_handleSubmit, 5000);
+  };
+  const _handleSubmit = async () => {
+    console.log("submitted");
     var isNotValidAddress = addressValidator(address.value);
     if (isNotValidAddress) {
       setAddress({ ...address, error: isNotValidAddress });
     } else {
-      setshowLoading(true);
-      setcontainerOpacity(0.3);
       //Geerates an order no ranging between the parameters
       var orderNo = getRandomArbitrary(1000000, 9999999);
       let state = store.getState();
@@ -333,7 +346,7 @@ export default function SubmitDetails(props) {
               option2="Urgent"
               _handleOption1={() => _handleDeliveryType(false)}
               _handleOption2={() => _handleDeliveryType(true)}
-              active = {isUrgent}
+              active={isUrgent}
             />
             <View style={styles.urgentMessageContainer}>
               <Text
@@ -427,7 +440,7 @@ export default function SubmitDetails(props) {
         </ScrollView>
 
         <View style={styles.submitContainer}>
-          <Button style={styles.submit} type="primary" onPress={_handleSubmit}>
+          <Button style={styles.submit} type="primary" onPress={onSubmit}>
             <Text>SUBMIT</Text>
           </Button>
         </View>

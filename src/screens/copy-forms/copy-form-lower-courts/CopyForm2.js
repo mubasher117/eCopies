@@ -110,10 +110,7 @@ export default function CopyForm1(props) {
       <View style={styles.container}>
         <SectionTitle title="Case Details" /> 
         <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={styles.innerContainer}
         >
           <Parties
             plaintiff={plaintiff}
@@ -132,5 +129,9 @@ const styles = StyleSheet.create({
   container: {
     width: "90%",
     alignSelf: "center",
+  },
+  innerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

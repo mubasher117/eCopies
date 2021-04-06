@@ -128,6 +128,9 @@ export default function LoginScreen(props) {
           <FirebaseRecaptchaVerifierModal
             ref={recaptchaVerifier}
             firebaseConfig={firebase.app().options}
+            attemptInvisibleVerification={true}
+            title="Tap on the box below"
+            cancelLabel="Close"
           />
           {/* <TextInput keyboardType="numeric" onChangeText={(text) => setOtpCode(text)} />
           <Button onPress={confirmCode}>Verify</Button> */}
@@ -138,7 +141,7 @@ export default function LoginScreen(props) {
             error={!!cellNo.error}
             autoCapitalize="none"
             keyboardType="phone-pad"
-            placeholder="03012456871"
+            placeholder="e.g 03012456871"
             maxLength={15}
           />
           <Text style={styles.error}>{cellNo.error}</Text>

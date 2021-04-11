@@ -40,6 +40,15 @@ export const nameValidator2 = (name) => {
   return "";
 };
 
+
+function yearValidation(year) {
+  console.log(year)
+  var text = /^[0-9]+$/;
+  if (year.length == 4 && text.test(year)) {
+    return true;
+  }
+  return false;
+}
 export const caseNumberValidator = (caseNumber) => {
   if (caseNumber == ""){
     return "* Enter case number"
@@ -49,6 +58,10 @@ export const caseNumberValidator = (caseNumber) => {
   }
   if (caseNumber.includes(" ")){
     return "* Case number cannot have space"
+  }
+  const caseYear = (caseNumber.split("/")).slice(-1)[0]
+  if (!yearValidation(caseYear)){
+    return "* Enter a valid year after slash"
   }
 }
 

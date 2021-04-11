@@ -171,7 +171,7 @@ export default function CopyFormDocs(props) {
     });
   };
   const _handlePrevious = () => {
-    props.navigation.navigate("LowerCourtsForm2");
+    props.navigation.navigate("LowerCourtsFormDate");
   };
   // Converts date to string to display on screen
   var decisionDate = isOrderDated.value.toDateString();

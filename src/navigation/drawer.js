@@ -39,6 +39,7 @@ import LowerCourtsSelectCourt from "../screens/copy-forms/copy-form-lower-courts
 import LowerCourtsForm1 from "../screens/copy-forms/copy-form-lower-courts/CopyForm1";
 import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
 import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
+import LowerCourtsFormDate from "../screens/copy-forms/copy-form-lower-courts/CopyFormDate";
 import TrackOrder from "../screens/track-order/TrackOrder";
 import DrawerCart from "../components/child-components/DrawerCart";
 import HelpAndSupport from "../screens/help-and-support/index";
@@ -497,6 +498,7 @@ const Drawer = createDrawerNavigator(
     LowerCourtsForm1: LowerCourtsForm1,
     LowerCourtsForm2: LowerCourtsForm2,
     LowerCourtsForm3: LowerCourtsForm3,
+    LowerCourtsFormDate: LowerCourtsFormDate,
     TrackOrder: TrackOrder,
     HelpAndSupport: HelpAndSupport,
   },

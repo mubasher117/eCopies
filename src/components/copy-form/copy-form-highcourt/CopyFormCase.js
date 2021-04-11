@@ -57,14 +57,18 @@ export default function CopyFormCase(props) {
     );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       setCaseStatus("Running");
-      setCaseNumberPrefix("WP")
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
       let title = state.ordersReducer.currentForm.court;
       setHeaderTitle(title);
+      setCaseNumberPrefix(
+        form.caseNo ? form.caseNo.substring(0, form.caseNo.indexOf("No. ") - 1)
+        : "WP"
+      );
       setcaseNo(
         form.caseNo
-          ? { value: form.caseNo, error: false }
+          ? { value: form.caseNo.slice([form.caseNo.indexOf("No. ") + 4])
+            , error: false }
           : { value: "", error: false }
       );
       setDate(form.decisionDate ? new Date(form.decisionDate) : new Date());
@@ -99,7 +103,8 @@ export default function CopyFormCase(props) {
   const goNext = async () => {
     const caseNumberError = caseNumberValidator(caseNo.value);
     if (caseNumberError) {
-      setcaseNo({ value: caseNo.value + "/", error: caseNumberError });
+      const caseNoWithSlash = caseNo.value != "" && !caseNo.value.includes("/") ? caseNo.value + "/" : caseNo.value
+      setcaseNo({ value: caseNoWithSlash, error: caseNumberError });
     } else {
       const details = {
         caseNo: caseNumberPrefix + " No. "+ caseNo.value,

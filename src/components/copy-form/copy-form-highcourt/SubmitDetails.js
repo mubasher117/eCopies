@@ -249,6 +249,8 @@ export default function SubmitDetails(props) {
           name: "copyForm",
         },
       };
+      console.log("******************* FINAL FORM **********************")
+      console.log(orderDetails)
       addForm(orderDetails, addFormCallBack);
     }
   };

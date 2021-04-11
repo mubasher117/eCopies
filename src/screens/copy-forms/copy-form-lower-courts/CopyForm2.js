@@ -95,10 +95,9 @@ export default function CopyForm1(props) {
       var details = {
         plaintiff: plaintiff.value,
         defendant: defendant.value,
-        decisionDate: dateOfDecision,
       };
       store.dispatch({ type: "setCurrentFormItem", payload: details });
-      props.navigation.navigate("LowerCourtsForm3");
+      props.navigation.navigate("LowerCourtsFormDate");
     }
   };
   const _handlePrevious = () => {
@@ -118,7 +117,6 @@ export default function CopyForm1(props) {
             defendant={defendant}
             setDefendant={(d) => setDefendant(d)}
           />
-          <DateOfDecision setDate={(date) => setDateOfDecision(date)} />
         </View>
         <BottomButtonsNav next={_handleNext} previous={_handlePrevious} />
       </View>

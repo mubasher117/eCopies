@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
 import {
   Primary,
@@ -19,21 +19,29 @@ import OrderOptions from "../components/copy-form/OrderOptions";
 import SubmitDetails from "../components/copy-form/copy-form-highcourt/SubmitDetails";
 import Payments from "../components/payments/Payments";
 import Notifications from "../components/notifications/Notifications";
-import { logout, getNotifications } from "../api/firebase/authenication";
+import { getNotifications } from "../api/firebase/authenication";
+import { logout } from "../services/auth/AuthService";
 import MyOrders from "../components/my-orders/MyOrders";
-import { getMyOrders } from "../api/firebase/backend";
+import { getMyOrders, getTrackingId } from "../api/firebase/backend";
 import OrderDetails from "../components/order-details/OrderDetails";
 import Profile from "../components/profile/Profile";
 import RevenueCopyForm from "../components/copy-form/revenue-court/CopyForm";
 import RevenueCopyForm2 from "../components/copy-form/revenue-court/CopyForm2";
+import LowerCourtsSelectCourt from "../screens/copy-forms/copy-form-lower-courts/SelectCourt";
+import LowerCourtsForm1 from "../screens/copy-forms/copy-form-lower-courts/CopyForm1";
+import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
+import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
+import TrackOrder from "../screens/track-order/TrackOrder";
+import DrawerCart from '../components/child-components/DrawerCart'
+import HelpAndSupport from '../screens/help-and-support/index'
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
   return (
-    <View>
+    <ScrollView>
       <View style={styles.drawerHeader}>
         <Image
           style={styles.logoImage}
-          source={require("../../assets/images/static/app-logo.png")}
+          source={require("../../assets/images/static/logo-white.png")}
         />
       </View>
       <View>
@@ -98,21 +106,21 @@ const CustomDrawerContentComponent = (props) => {
             let forms;
             try {
               forms = await AsyncStorage.getItem("@forms");
-              forms = JSON.parse(forms)
+              forms = JSON.parse(forms);
             } catch (error) {
               console.log(error);
             }
             console.log("FORMS:  ", forms);
             if (forms) {
-              console.log(forms.length)
+              console.log(forms.length);
               if (forms.length) {
                 setisActive("currentOrder");
                 props.navigation.navigate("SubmitDetails");
               } else {
-                alert("You don't have any unsubmitted form.");
+                alert("You don't have any form in cart.");
               }
             } else {
-              alert("You don't have any unsubmitted form.");
+              alert("You don't have any form in cart.");
             }
           }}
         >
@@ -129,15 +137,16 @@ const CustomDrawerContentComponent = (props) => {
                 source={require("../../assets/images/static/order.png")}
               />
             </View>
-            <Text
+            <DrawerCart isActive={isActive === "currentOrder" ? true : false} />
+            {/* <Text
               style={
                 isActive === "currentOrder"
                   ? styles.activeLabel
                   : styles.pageLabel
               }
             >
-              Unsubmitted Forms
-            </Text>
+              Cart
+            </Text> */}
           </View>
         </TouchableOpacity>
 
@@ -167,6 +176,37 @@ const CustomDrawerContentComponent = (props) => {
               }
             >
               My Orders
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setisActive("trackOrder");
+            getTrackingId();
+            props.navigation.navigate("TrackOrder");
+          }}
+        >
+          <View
+            style={
+              isActive === "trackOrder"
+                ? styles.activeContainer
+                : styles.pageContainer
+            }
+          >
+            <View style={[styles.pageLogoContainer, { paddingLeft: 4 }]}>
+              <Image
+                style={styles.pageLogo}
+                source={require("../../assets/images/static/track-order.png")}
+              />
+            </View>
+            <Text
+              style={
+                isActive === "trackOrder"
+                  ? styles.activeLabel
+                  : styles.pageLabel
+              }
+            >
+              Track Order
             </Text>
           </View>
         </TouchableOpacity>
@@ -310,7 +350,30 @@ const CustomDrawerContentComponent = (props) => {
             </Text>
           </View>
         </TouchableOpacity> */}
-
+        <TouchableOpacity
+          onPress={() => {
+            setisActive("helpAndSupport");
+            props.navigation.navigate("HelpAndSupport");
+          }}
+        >
+          <View
+            style={
+              isActive === "helpAndSupport"
+                ? styles.pageLowerActiveContainer
+                : styles.pageLowerContainer
+            }
+          >
+            <Text
+              style={
+                isActive === "helpAndSupport"
+                  ? styles.pageLowerActiveLabel
+                  : styles.pageLowerLabel
+              }
+            >
+              Help and Support
+            </Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             setisActive("logout");
@@ -337,7 +400,7 @@ const CustomDrawerContentComponent = (props) => {
           </View>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -384,6 +447,12 @@ const Drawer = createDrawerNavigator(
     },
     RevenueCopyForm: RevenueCopyForm,
     RevenueCopyForm2: RevenueCopyForm2,
+    LowerCourtsSelectCourt: LowerCourtsSelectCourt,
+    LowerCourtsForm1: LowerCourtsForm1,
+    LowerCourtsForm2: LowerCourtsForm2,
+    LowerCourtsForm3: LowerCourtsForm3,
+    TrackOrder: TrackOrder,
+    HelpAndSupport: HelpAndSupport
   },
   {
     initialRouteName: "CopyFormHomePage",
@@ -419,14 +488,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginTop: 20,
   },
-  pageLogoContainer: {
-    backgroundColor: SecondaryLight,
-    borderRadius: 50,
-    height: 33,
-    width: 33,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  pageLogoContainer: {},
   pageLogo: {
     height: 25,
     width: 25,

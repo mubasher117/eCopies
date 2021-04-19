@@ -7,6 +7,7 @@ import * as Permissions from "expo-permissions";
 import store from "../../redux/store";
 import AsyncStorage from "@react-native-community/async-storage";
 import User from "../../models/User";
+import { db } from "../../services/auth/AuthService";
 const firebaseConfig = {
   apiKey: "AIzaSyDa5BINSpVo4SasALNaZ8CbmXmMJOQZORI",
   authDomain: "services-72908.firebaseapp.com",
@@ -53,7 +54,7 @@ export const getNotifications = async () => {
       objArray.sort(getAscending);
       store.dispatch({
         type: "setNotifications",
-        payload: objArray,
+        payload: objArray.reverse(),
       });
     } else {
       store.dispatch({
@@ -63,6 +64,12 @@ export const getNotifications = async () => {
     }
   });
 };
+
+export const makeUserActive = (userId) => {
+  const ref = database.ref(`onlineUsers/${userId}`);
+  ref.set(true).then(() => console.log('Online presenvce set '))
+  ref.onDisconnect().remove().then(() => console.log("Disconnected"))
+}
 
 // export const login = async (email, password, isDirect, callBackFn) => {
 //   console.log("IN LOGIN");
@@ -99,12 +106,15 @@ export const getNotifications = async () => {
 //     });
 // };
 
-export const login = (cellNo, password) => new Promise((resolve, reject) => {
-  console.log("IN LOGIN");
+export const login = (cellNo, password) =>
+  new Promise((resolve, reject) => {
+    console.log("IN LOGIN");
 
-  firebase.auth().signInWithPhoneNumber(cellNo, password)
-  .then(res => console.log(res))
-})
+    firebase
+      .auth()
+      .signInWithPhoneNumber(cellNo, password)
+      .then((res) => console.log(res));
+  });
 // Get additional userData
 export const getUserData = (userId) => {
   // console.log(user);
@@ -112,21 +122,17 @@ export const getUserData = (userId) => {
   dbRef.once("value", (snapshot) => {
     if (snapshot.val()) {
       let data = snapshot.val();
-      // user = { user, ...data };
-      // user = User(user.user.uid, )
-      console.log("*****  USER ADDITIONAL DATA ***** ");
-      var user = new User(
-        data.id,
-        data.name,
-        data.address,
-        data.cellNo,
-        data.expoToken,
-        data.balance
-      );
-      console.log("***********TILL HERE **************");
-        store.dispatch({ type: "setUser", payload: user.getUser() });
+      var user = {
+        id: data.id,
+        name: data.name,
+        address: data.address,
+        cellNo: data.cellNo,
+        expoToken: data.expoToken,
+        balance: data.balance,
+      };
+      store.dispatch({ type: "setUser", payload: user });
     } else {
-      console.log("user data not found");
+      alert("user data not found");
     }
   });
 };
@@ -182,7 +188,6 @@ export const addAddtionalUserDetails = (
       // login(email, password, true, callBackFn);
     });
 };
-
 export const checkSignedIn = async () => {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
@@ -301,9 +306,9 @@ export const addUserBalance = (userId, balance, callBackFn) => {
 };
 export function addForm(json, callbackfn) {
   console.log(json);
-  var date = Date.now()
-  var newId = date + "-" +uuidv4();
-  database.ref("pendingOrders/" + newId).set(json, (res) => {
+  var date = Date.now();
+  var newId = date + "-" + uuidv4();
+  database.ref("orders/" + newId).set(json, (res) => {
     console.log(res);
     addUserBalance(json.customerId, json.totalAmount, callbackfn);
   });

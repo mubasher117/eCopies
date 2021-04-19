@@ -1828,6 +1828,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/eases@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/eases/-/eases-1.0.1.tgz#ce46e90de326ad77285050be60a2b36a43287a53"
+  integrity sha512-aTMjBiQeYkDj5eidAlp/wlXDvocSUxjIX44AYaS7YXAd7898n2HgN+gDzrSAXLnd6FKY6djOmTuC/M4bc5mrVw==
+
 "@types/fs-extra@^8.0.1":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-8.1.1.tgz#1e49f22d09aa46e19b51c0b013cb63d0d923a068"
@@ -3963,12 +3968,6 @@ expo-linking@~1.0.3:
     qs "^6.5.0"
     url-parse "^1.4.4"
 
-expo-location@~8.2.1:
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/expo-location/-/expo-location-8.2.1.tgz#5ea6bfd3d211939117416da151f1384caa15e0db"
-  integrity sha512-MixKapt3nijAxyjIISscBzdKi8bwh0H/dWYsL2mCofrjguFHOh2gP07h95902lekb7NVqybl5AIQRW5cvrG4rQ==
-  dependencies:
-    invariant "^2.2.4"
 
 expo-notifications@~0.3.3:
   version "0.3.3"
@@ -4025,7 +4024,6 @@ expo@~38.0.8:
     expo-keep-awake "~8.2.1"
     expo-linear-gradient "~8.2.1"
     expo-linking "~1.0.3"
-    expo-location "~8.2.1"
     expo-permissions "~9.0.1"
     expo-splash-screen "^0.3.1"
     expo-sqlite "~8.2.1"
@@ -7632,6 +7630,13 @@ react-is@^16.12.0, react-is@^16.13.0, react-is@^16.7.0, react-is@^16.8.1, react-
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
+react-native-animated-counter@^0.2.7:
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/react-native-animated-counter/-/react-native-animated-counter-0.2.7.tgz#9a6fd152405e9ee4b5ce2591077f9bb259638537"
+  integrity sha512-ebeWoYM0G64vK6+iZjkR3qIvSNz5p88U/7zEZRigjelbZplmUYgjj2cvILTTdJDfFb6FoCxrExTx27S393YB8w==
+  dependencies:
+    "@types/eases" "^1.0.1"
+
 react-native-appearance@~0.3.3:
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/react-native-appearance/-/react-native-appearance-0.3.4.tgz#2cbcbc5142cdc1898c116684f519b16c879cbec2"
@@ -7647,6 +7652,11 @@ react-native-collapsible@^1.5.2:
   integrity sha512-pmETueIStEhKY93yO/nh+G9jyMZaZta9xyUO51KP+p/tefXDtDG8Ok9QELld0Fk/kiDOldvG5Tjy+JcdS8Sdxw==
   dependencies:
     prop-types "^15.6.2"
+
+react-native-date-picker@^3.2.5:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/react-native-date-picker/-/react-native-date-picker-3.2.5.tgz#351836282fc909e5c4de3d490846fcae16794c20"
+  integrity sha512-OKIqx3ZSUsp7XWcfuiWouIfIyW+CK48kG8HC2ZzLm8bSrsruSo/+McIybZ7NYuIAgDB9z5omK18EA1oOZgITxA==
 
 react-native-gesture-handler@~1.6.0:
   version "1.6.1"

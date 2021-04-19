@@ -16,9 +16,9 @@ export const passwordValidator = (password) => {
 };
 export const cellNoValidator = (cellNo) => {
   if (!cellNo || cellNo.length <= 0) return "* Cell Number cannot be empty."; 
-  // cellNo[0] != "0" || cellNo[1] != "3" || 
-  if (cellNo.length < 11){
-  return "* Format should be +923XXXXXXXXX"
+   
+  if (cellNo.length != 11 || cellNo[0] != "0" || cellNo[1] != "3"){
+  return "* Format should be 03XXXXXXXXX"
   }
   return "";
 };
@@ -33,6 +33,7 @@ export const nameValidator = name => {
   return '';
 };
 export const nameValidator2 = (name) => {
+  name = name.trim()
   if (!name || name.length <= 0) return "* Name cannot be empty.";
   else if (/^[a-zA-Z .]*$/.test(name) == false)
          return "* Name shlould be alphabets only";

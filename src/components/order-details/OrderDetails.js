@@ -11,7 +11,9 @@ import {
   Keyboard,
   Picker,
   TouchableOpacity,
-  Image,Modal
+  Image,
+  Modal,
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -29,11 +31,12 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
-import { TextInput, Chip } from "react-native-paper";
+import { Chip, Button as PaperButton } from "react-native-paper";
 import Header from "../header/Header";
 import AsyncStorage from "@react-native-community/async-storage";
-import HighCourtFormDetails from '../child-components/HighCourtFormDetails'
+import HighCourtFormDetails from "../child-components/HighCourtFormDetails";
 import RevenueCourtFormDetails from "../child-components/RevenueCourtFormDetails";
+import LowerCourtsFormDetails from "../child-components/LowerCourtsFormDetails";
 const { height, width } = Dimensions.get("window");
 export default function OrderDetails(props) {
   const details = props.navigation.getParam("details", "N/A");
@@ -41,7 +44,35 @@ export default function OrderDetails(props) {
   const [refresh, setRefresh] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
-  const [formIndex, setFormIndex] = useState(0)
+  const [formIndex, setFormIndex] = useState(0);
+  useEffect(() => {
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+    });
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
+  }, []);
+
+  const backAction = async() => {
+    var previousScreen = await AsyncStorage.getItem("currentScreen");
+    if (!previousScreen){
+      previousScreen = "Orders"
+    }
+    props.navigation.navigate(previousScreen);
+    return true;
+  };
   // Function to be passed to Header
   const goBackFn = () => {
     props.navigation.navigate(previousScreen);
@@ -59,12 +90,11 @@ export default function OrderDetails(props) {
     console.log(totalAfterFormDelete);
     details.forms.splice(index, 1);
     details.totalAmount = totalAfterFormDelete;
-    props.navigation.setParams("details", {details});
+    props.navigation.setParams("details", { details });
     removeFormFromStorage().then(() => {
-      if (details.forms.length == 0){
+      if (details.forms.length == 0) {
         props.navigation.navigate("CopyFormHomePage");
-      }
-      else{
+      } else {
         setRefresh(1);
       }
     });
@@ -75,7 +105,7 @@ export default function OrderDetails(props) {
   };
 
   const showModal = (index) => {
-    setFormIndex(index)
+    setFormIndex(index);
     setIsModalVisible(true);
     setcontainerOpacity(0.2);
   };
@@ -83,7 +113,10 @@ export default function OrderDetails(props) {
     setIsModalVisible(false);
     setcontainerOpacity(1);
     removeOrder(formIndex);
-  }
+  };
+  const addForm = () => {
+    props.navigation.navigate("CopyFormHomePage");
+  };
 
   return (
     <View style={styles.container}>
@@ -127,7 +160,7 @@ export default function OrderDetails(props) {
       <ScrollView>
         <View style={[styles.centeredView, { opacity: containerOpacity }]}>
           {/* If navigated from Submit Order screen */}
-          {props.navigation.getParam("screen") != "SubmitDetails" && (
+          {props.navigation.getParam("screen") == "MyOrders" && (
             <View style={styles.centeredView}>
               <Text style={styles.orderNo}>Order# {details.orderNo}</Text>
               <View style={styles.orderDetails}>
@@ -159,7 +192,7 @@ export default function OrderDetails(props) {
                 {details.forms.length}
               </Text>
             </View>
-            {props.navigation.getParam("screen") != "SubmitDetails" && (
+            {props.navigation.getParam("screen") == "MyOrders" && (
               <View
                 style={{
                   flexDirection: "row",
@@ -172,7 +205,7 @@ export default function OrderDetails(props) {
                 </Text>
               </View>
             )}
-            {props.navigation.getParam("screen") != "SubmitDetails" &&
+            {props.navigation.getParam("screen") == "MyOrders" &&
               (details.progress.postDetails ? (
                 <View style={{ marginTop: 10 }}>
                   <Text style={{ fontSize: 16 }}>Tracking Id:</Text>
@@ -190,33 +223,44 @@ export default function OrderDetails(props) {
                 <View />
               ))}
           </View>
+          <PaperButton
+            color={Secondary}
+            icon="plus"
+            mode="contained"
+            onPress={addForm}
+            style={styles.formOptionsButton}
+          >
+            Add More Copy Form
+          </PaperButton>
           {details.forms.map((form, index) => {
-            if (form.court == "highCourt") {
+            if (form.court == "High Court" || form.court == "Supreme Court") {
               return (
                 <HighCourtFormDetails
                   removeOrder={showModal}
                   index={index}
-                  screen={
-                    props.navigation.getParam("screen") == "SubmitDetails"
-                      ? "SubmitDetails"
-                      : "other"
-                  }
+                  screen={props.navigation.getParam("screen")}
+                  form={form}
+                  orderType={details.orderType.name}
+                />
+              );
+            } else if (form.court == "revenueCourt") {
+              return (
+                <RevenueCourtFormDetails
+                  removeOrder={showModal}
+                  index={index}
+                  screen={props.navigation.getParam("screen")}
                   form={form}
                   orderType={details.orderType.name}
                 />
               );
             } else {
               return (
-                <RevenueCourtFormDetails
-                  removeOrder={showModal}
-                  index={index}
-                  screen={
-                    props.navigation.getParam("screen") == "SubmitDetails"
-                      ? "SubmitDetails"
-                      : "other"
-                  }
+                <LowerCourtsFormDetails
                   form={form}
                   orderType={details.orderType.name}
+                  index={index}
+                  removeOrder={showModal}
+                  screen={props.navigation.getParam("screen")}
                 />
               );
             }
@@ -239,7 +283,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   centeredViewModal: {
-    flex:1,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -377,5 +421,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#E6E6E6",
     borderWidth: 0,
     alignSelf: "flex-end",
+  },
+  formOptionsButton: {
+    height: 40,
+    justifyContent: "center",
+    borderRadius: 0,
+    marginTop: 25
   },
 });

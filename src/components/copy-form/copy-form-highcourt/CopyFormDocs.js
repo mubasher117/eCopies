@@ -12,7 +12,7 @@ import {
   Keyboard,
   Picker,
   Image,
-  Modal,
+  BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -44,6 +44,8 @@ import Header from "../../header/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
+import { getFormPrice } from "../../../api/firebase/backend";
+import Modal from '../../child-components/Modal'
 const { height, width } = Dimensions.get("window");
 
 export default function CopyFormDocs(props) {
@@ -63,7 +65,46 @@ export default function CopyFormDocs(props) {
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
   const [showLoading, setshowLoading] = useState(false);
-  useEffect(() => {});
+
+  const [headerTitle, setHeaderTitle] = useState("");
+
+  useEffect(() => {
+    let state = store.getState();
+    // Getting selected court name to display on header
+    let title = state.ordersReducer.currentForm.court;
+    console.log(state.ordersReducer.currentForm);
+    setHeaderTitle(title);
+
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    const unsubscribe = props.navigation.addListener("didFocus", () => {
+      let state = store.getState();
+      let title = state.ordersReducer.currentForm.court;
+      setHeaderTitle(title);
+
+      console.log(state.ordersReducer.currentForm);
+
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+    });
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
+  }, []);
+
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    goBackFn();
+    return true;
+  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const saveDetails = () =>
     new Promise(async (resolve, reject) => {
@@ -90,10 +131,11 @@ export default function CopyFormDocs(props) {
       }
       let state = store.getState();
       let formDetails = state.ordersReducer.currentForm;
+      let formFee = await getFormPrice(formDetails.court, "urgent");
       let copyFormDetails = {
         ...formDetails,
         documentDetails,
-        court: "highCourt",
+        formFee: formFee,
       };
       console.log("form : ", copyFormDetails);
       let forms;
@@ -140,8 +182,10 @@ export default function CopyFormDocs(props) {
     props.navigation.navigate("CopyFormCase2");
   };
   // Converts date to string to display on screen
-  var decisionDate = isOrderDated.value.toDateString().toString();
-  var petitionDate = isPetition.value.toDateString().toString();
+  var decisionDate = isOrderDated.value.toDateString();
+  decisionDate = decisionDate.substring(4, decisionDate.length);
+  var petitionDate = isPetition.value.toDateString();
+  petitionDate = petitionDate.substring(4, petitionDate.length);
   const showModal = () => {
     setIsModalVisible(true);
     setcontainerOpacity(0.05);
@@ -185,8 +229,8 @@ export default function CopyFormDocs(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="High Court" backbutton goBackFn={goBackFn} />
-      <Modal
+      <Header title={headerTitle} backbutton goBackFn={goBackFn} />
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
@@ -229,9 +273,28 @@ export default function CopyFormDocs(props) {
             </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
+      <Modal
+        visible={isModalVisible}
+        text="Do you want to submit another copy form?"
+        urduText=" کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟"
+        hideModal={hideModal}
+        optionsYes
+        quitButton
+        handleYes={submitAnotherForm}
+        handleNo={onNext}
+      />
       {/* Modal if form is clean */}
       <Modal
+        visible={checkModal}
+        text="Select at least one document"
+        urduText="کم از کم ایک دستاویز کا انتخاب کریں"
+        hideModal={hideModal}
+        quitButton
+        buttonOkText="OK"
+        handleOkay={hideModal}
+      />
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={checkModal}
@@ -264,7 +327,7 @@ export default function CopyFormDocs(props) {
             </Button>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
@@ -362,30 +425,6 @@ export default function CopyFormDocs(props) {
 
               <View style={styles.documemntsContainer}>
                 <Checkbox
-                  status={isSOW.mode ? "checked" : "unchecked"}
-                  onPress={() => {
-                    setSOW({ ...isSOW, mode: !isSOW.mode });
-                  }}
-                  color={Secondary}
-                />
-                <Text>Statement of Witness</Text>
-              </View>
-              <TextInput
-                style={{
-                  marginLeft: "10%",
-                  height: 40,
-                  width: "80%",
-                  borderColor: "gray",
-                  opacity: isSOW.mode ? 1 : 0.3,
-                }}
-                placeholder="Enter PWs or DWs"
-                editable={isSOW.mode}
-                onChangeText={(text) => setSOW({ ...isSOW, value: text })}
-                value={isSOW.value}
-              />
-
-              <View style={styles.documemntsContainer}>
-                <Checkbox
                   status={isOrderDated.mode ? "checked" : "unchecked"}
                   onPress={() => {
                     setOrderDated({
@@ -428,6 +467,30 @@ export default function CopyFormDocs(props) {
                   />
                 )}
               </TouchableOpacity>
+
+              <View style={styles.documemntsContainer}>
+                <Checkbox
+                  status={isSOW.mode ? "checked" : "unchecked"}
+                  onPress={() => {
+                    setSOW({ ...isSOW, mode: !isSOW.mode });
+                  }}
+                  color={Secondary}
+                />
+                <Text>Other</Text>
+              </View>
+              <TextInput
+                style={{
+                  marginLeft: "10%",
+                  height: 40,
+                  width: "80%",
+                  borderColor: "gray",
+                  opacity: isSOW.mode ? 1 : 0.3,
+                }}
+                placeholder="Document Name"
+                editable={isSOW.mode}
+                onChangeText={(text) => setSOW({ ...isSOW, value: text })}
+                value={isSOW.value}
+              />
             </View>
           </View>
 

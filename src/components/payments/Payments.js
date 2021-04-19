@@ -13,7 +13,6 @@ import {
   Alert,
   TouchableHighlight,
   Image,
-  Modal,
 } from "react-native";
 import { Button, ActivityIndicator, Steps } from "@ant-design/react-native";
 import {
@@ -34,27 +33,34 @@ import {
 } from "../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../header/Header";
-import ModalPicker from "react-native-modal-picker";
 import TotalCard from "./child-components/TotalCard";
 import PaymentMethod from "./child-components/PaymentMethod";
 import store from "../../redux/store";
 import AsyncStorage from "@react-native-community/async-storage";
+
+import Modal from "../child-components/Modal";
 //import Modal, { SlideAnimation, ModalContent } from "react-native-modals";
 import { database } from "../../api/firebase/authenication";
 const Step = Steps.Step;
 const { height, width } = Dimensions.get("window");
 const paymentMethods = [
   {
-    source: require("../../../assets/images/static/easypaisa-icon.png"),
-    methodName: "Easypaisa",
-    accNo: "03134243117",
+    source: require("../../../assets/images/static/cash-on-delivery.png"),
+    methodName: "Cash on Delivery",
+    accNo: "Pay at delivery time",
+    modalMessage: "Please pay charges to delivery guy when documents are delivered.",
   },
-  {
-    source: require("../../../assets/images/static/abl.jpg"),
-    methodName: "Allied Bank Limited",
-    accNo: "148953134243117",
-    accTitle: "eCopies",
-  },
+  // {
+  //   source: require("../../../assets/images/static/easypaisa-icon.png"),
+  //   methodName: "Easypaisa",
+  //   accNo: "03134243117",
+  // },
+  // {
+  //   source: require("../../../assets/images/static/abl.jpg"),
+  //   methodName: "Allied Bank Limited",
+  //   accNo: "148953134243117",
+  //   accTitle: "eCopies",
+  // },
   // {
   //   source: require("../../../assets/images/static/hbl.png"),
   //   methodName: "HBL",
@@ -74,16 +80,15 @@ const paymentMethods = [
   // },
 ];
 function Payments(props) {
-  const [showLoading, setshowLoading] = useState(false);
-  const [containerOpacity, setcontainerOpacity] = useState(1);
+  const [containerOpacity, setcontainerOpacity] = useState(0.3);
   const [isModalVisible, setisModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountTitle, setAccountTitle] = useState("");
   const [totalPayment, setTotalPayment] = useState(0);
   const [isPendingPayment, setPendingPayment] = useState(false);
-
-  
+  const [modalMessage, setModalMessage] = useState("");
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     // retrieving user data
@@ -92,6 +97,8 @@ function Payments(props) {
     database.ref("userData/" + user.id + "/balance").on("value", (snapshot) => {
       console.log(snapshot.val());
       setTotalPayment(snapshot.val());
+      setLoading(false);
+      setcontainerOpacity(1);
     });
   }, []);
   // Show pending payment modal
@@ -125,78 +132,14 @@ function Payments(props) {
   return (
     <SafeAreaView style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Payments" openDrawerFn={openDrawerFn} />
-      {/* Pendinding Payment Modal */}
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isPendingPayment}
-        onRequestClose={() => {
-          //alert("Modal has been closed.");
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              Please make a payment of Rs.
-              <Text style={{ fontWeight: "bold" }}>{totalPayment}</Text> through
-              Easypaisa to account No.{" "}
-              <Text style={{ fontWeight: "bold" }}>03134243117</Text>.
-            </Text>
-
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
-          </View>
-        </View>
-      </Modal>
-      {/*Modal Start*/}
-      <Modal animationType="slide" transparent={true} visible={isModalVisible}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              Please transfer amount equivalent to Rs.{" "}
-              <Text
-                style={{
-                  fontWeight: "bold",
-                }}
-              >
-                {totalPayment}
-              </Text>{" "}
-              to{" "}
-              <Text
-                style={{
-                  fontWeight: "bold",
-                }}
-              >
-                {paymentMethod}
-              </Text>{" "}
-              account with following details.
-            </Text>
-            {accountTitle ? (
-              <View>
-                <Text>Account Title:</Text>
-
-                <Text style={styles.modalAccNo}>{accountTitle}</Text>
-              </View>
-            ) : (
-              <View />
-            )}
-            <Text>Account Number:</Text>
-            <Text style={styles.modalAccNo}>{accountNo}</Text>
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
-          </View>
-        </View>
-      </Modal>
+        visible={isModalVisible}
+        text={modalMessage}
+        // urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"
+        buttonOkText="OK"
+        hideModal={hideModal}
+        handleOkay={hideModal}
+      />
 
       <ScrollView>
         <View
@@ -208,6 +151,13 @@ function Payments(props) {
           }}
         >
           <TotalCard total={totalPayment} width={"85%"} />
+          {/* <View style={styles.patmentNoteContainer}>
+            <Text style={styles.paymentNoteHeader}>How to pay?</Text>
+            <Text style={styles.paymentNote}>
+              Please pay the pending amount at delivery time to the delivery
+              guy.
+            </Text>
+          </View> */}
           <View style={styles.paymentLabelContainer}>
             <Image
               style={styles.paymentLabelImage}
@@ -217,6 +167,7 @@ function Payments(props) {
           </View>
 
           <View style={styles.divider} />
+
           {paymentMethods.map((method, index) => {
             return (
               <PaymentMethod
@@ -225,13 +176,14 @@ function Payments(props) {
                 source={method.source}
                 methodName={method.methodName}
                 accNo={method.accNo}
-                onPressMethod={() =>
+                onPressMethod={() => {
                   onPressMethod(
                     method.methodName,
                     method.accNo,
                     method.accTitle
-                  )
-                }
+                  );
+                  setModalMessage(method.modalMessage);
+                }}
               />
             );
           })}
@@ -244,12 +196,7 @@ function Payments(props) {
         />
       </ScrollView>
 
-      <ActivityIndicator
-        animating={showLoading}
-        toast
-        size="large"
-        text="Submitting..."
-      />
+      <ActivityIndicator animating={isLoading} toast size="large" />
     </SafeAreaView>
   );
 }
@@ -259,6 +206,19 @@ const styles = StyleSheet.create({
     backgroundColor: PrimaryLight,
     width: width,
     minHeight: height,
+  },
+  patmentNoteContainer: {
+    width: "85%",
+    marginTop: 20,
+  },
+  paymentNoteHeader: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginTop: 20,
+    marginBottom: 5,
+  },
+  paymentNote: {
+    fontSize: 14,
   },
   home: {
     width: "100%",

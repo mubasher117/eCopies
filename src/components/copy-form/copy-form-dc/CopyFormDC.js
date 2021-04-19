@@ -30,7 +30,7 @@ import { addForm } from "../../../api/firebase/authenication";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Header from "../../header/Header";
 const { height, width } = Dimensions.get("window");
-import ModalPicker from "react-native-modal-picker";
+// import ModalPicker from "react-native-modal-picker";
 export default function CopyFormDC(props) {
   var val = "";
   const [date, setDate] = useState(new Date());
@@ -91,9 +91,12 @@ export default function CopyFormDC(props) {
     { key: index++, label: "Faisalabad" },
     { key: index++, label: "Sheikhupura" },
   ];
+    const openDrawerFn = () => {
+      props.navigation.toggleDrawer();
+    };
   return (
     <SafeAreaView behaviour="padding" style={styles.container}>
-      <Header title="Copy Form from DC" />
+      <Header title="Copy Form from DC" openDrawerFn={openDrawerFn}/>
 
       <ScrollView scrollEnabled={scroll}>
         <ActivityIndicator
@@ -219,13 +222,14 @@ export default function CopyFormDC(props) {
                 ]}
               >
                 {Platform.OS === "ios" ? (
-                  <ModalPicker
-                    data={districts}
-                    initValue="Select District"
-                    onChange={(option) => {
-                      setDistrict(option);
-                    }}
-                  />
+                  // <ModalPicker
+                  //   data={districts}
+                  //   initValue="Select District"
+                  //   onChange={(option) => {
+                  //     setDistrict(option);
+                  //   }}
+                  // />
+                  <View/>
                 ) : (
                   <Picker
                     selectedValue={district}

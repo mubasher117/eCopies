@@ -12,7 +12,6 @@ import {
   Picker,
   TouchableOpacity,
   Image,
-  Modal,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -34,9 +33,10 @@ import {
 import { TextInput, Chip } from "react-native-paper";
 import Header from "../header/Header";
 import { database } from "../../api/firebase/authenication";
-import { getUserId } from "../core/utils";
 import store from "../../redux/store";
-const Step = Steps.Step;
+import Modal from "../child-components/Modal";
+
+import { getStatusBarHeight } from "react-native-status-bar-height";
 const { height, width } = Dimensions.get("window");
 const FormType = (props) => {
   return (
@@ -44,11 +44,11 @@ const FormType = (props) => {
       onPress={() => props.navigateTo()}
       style={{
         borderRadius: 5,
-        width: "45%",
+        width: "47.3%",
         backgroundColor: "#E6E6E6",
         minHeight: 160,
         padding: 10,
-        margin: 10,
+        margin: 5,
       }}
     >
       <Image
@@ -61,6 +61,15 @@ const FormType = (props) => {
   );
 };
 
+const forms = [
+  {
+    title: "High Court",
+    titleUrdu: "ہائی کورٹ",
+    imgSource: require("../../../assets/images/static/highcourt.jpeg"),
+    navigateTo: "CopyFormCase",
+  },
+];
+
 export default function HomPage(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [containerOpacity, setcontainerOpacity] = useState(1);
@@ -68,15 +77,24 @@ export default function HomPage(props) {
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
-  const navigateTo = (screen) => {
-    let state = store.getState();
+  const navigateTo = async (screen, currentScreen = "N/A") => {
+    let state = await store.getState();
     let user = state.userReducer.user;
-    database.ref("/userData/" + user.id).once("value", (snapshot) => {
-      if (snapshot.val().balance == 0) {
-        console.log(snapshot.val());
-        props.navigation.navigate(screen);
+    store.dispatch({
+      type: "setCurrentFormItem",
+      payload: { court: currentScreen },
+    });
+    database.ref("userData/" + user.id).once("value", (snapshot) => {
+      console.log(user.id);
+      if (snapshot.val()) {
+        if (snapshot.val().balance == 0) {
+          console.log(snapshot.val());
+          props.navigation.navigate(screen, { screen: currentScreen });
+        } else {
+          showModal();
+        }
       } else {
-        showModal();
+        navigateTo(screen, currentScreen);
       }
     });
   };
@@ -93,87 +111,81 @@ export default function HomPage(props) {
     <View style={[styles.container, { opacity: containerOpacity }]}>
       <Header title="Copy Form" openDrawerFn={openDrawerFn} />
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => {
-          alert("Modal has been closed.");
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity
-              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
-              onPress={hideModal}
-            >
-              <Image
-                style={styles.modalQuit}
-                source={require("../../../assets/images/static/quit.png")}
-              />
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              Please pay the remaining dues before submitting another form.
-            </Text>
-            <Text style={styles.modalText}>
-              براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔
-            </Text>
-            <Button
-              style={styles.buttonModalClose}
-              type="primary"
-              onPress={hideModal}
-            >
-              OK
-            </Button>
+        text="Please pay the remaining dues before submitting another form."
+        urduText="براۓ مہربانی مزید نقل فارم کے لیے اپنے واجبات ادا کریں۔"
+        buttonOkText="OK"
+        hideModal={hideModal}
+        handleOkay={hideModal}
+      />
+      <ScrollView>
+        <View
+          style={[
+            styles.centeredView,
+            { height: height - (getStatusBarHeight() + 50) },
+          ]}
+        >
+          {/* <View style={styles.availableTextContainer}>
+            <Text style={styles.availableText}>Only available in</Text>
+            <Text style={styles.availableTextCity}>Lahore</Text>
+          </View> */}
+          <View style={styles.optionsContainer}>
+            {/* {forms.map((form, index) => {return (
+            <FormType
+              title={form.title}
+              titleUrdu={form.titleUrdu}
+              imgSource={form.imgSource}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase");
+              }}
+            />
+          );})} */}
+            <FormType
+              title="Supreme Court"
+              titleUrdu="سپریم کورٹ"
+              imgSource={require("../../../assets/images/static/supremeCourt.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase", "Supreme Court");
+              }}
+            />
+            <FormType
+              title="High Court, Lahore"
+              titleUrdu="ہائی کورٹ, لاہور"
+              imgSource={require("../../../assets/images/static/highcourt.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("CopyFormCase", "High Court");
+              }}
+            />
+          </View>
+          <View style={styles.optionsContainer}>
+            <FormType
+              title="Lower Courts Lahore"
+              titleUrdu=" ماتحت عدالتیں, لاہور"
+              imgSource={require("../../../assets/images/static/district_court.jpg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("LowerCourtsSelectCourt");
+              }}
+            />
+            <FormType
+              title="Revenue / Sub Registrar Lahore"
+              titleUrdu="ریونیو, لاہور"
+              imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
+              navigateTo={() => {
+                // Clear pervious form
+                store.dispatch({ type: "clearForm" });
+                navigateTo("RevenueCopyForm");
+              }}
+            />
           </View>
         </View>
-      </Modal>
-      <ScrollView>
-        <View style={styles.optionsContainer}>
-          <FormType
-            title="High Court"
-            titleUrdu="ہائی کورٹ"
-            imgSource={require("../../../assets/images/static/highcourt.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
-            }}
-          />
-          <FormType
-            title="District Court"
-            titleUrdu="ضلعی عدالت"
-            imgSource={require("../../../assets/images/static/district_court.jpg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
-            }}
-          />
-        </View>
-        <View style={styles.optionsContainer}>
-          <FormType
-            title="Revenue Court"
-            titleUrdu="ریونیو کورٹ"
-            imgSource={require("../../../assets/images/static/revenue_court.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("RevenueCopyForm");
-            }}
-          />
-
-          <FormType
-            title="DC Office"
-            titleUrdu="ڈی سی آفس"
-            imgSource={require("../../../assets/images/static/dcoffice.jpeg")}
-            navigateTo={() => {
-              // Clear pervious form
-              store.dispatch({ type: "clearForm" });
-              navigateTo("CopyFormCase");
-            }}
-          />
-        </View>
-        <View style={{ width: "100%", height: 150 }} />
       </ScrollView>
     </View>
   );
@@ -192,7 +204,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     flexDirection: "row",
-    margin: "7%",
     marginBottom: 0,
   },
   modalView: {
@@ -225,5 +236,23 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     alignSelf: "flex-end",
     marginTop: 30,
+  },
+  availableTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  availableText: {
+    fontSize: 16,
+    marginLeft: 5,
+    marginBottom: 40,
+  },
+  availableTextCity: {
+    fontSize: 16,
+    marginLeft: 5,
+    marginBottom: 40,
+    color: "white",
+    backgroundColor: Secondary,
+    padding: 5,
+    borderRadius: 8,
   },
 });

@@ -2,13 +2,13 @@
   "expo": {
     "name": "eCopies",
     "slug": "eCopies",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/eCopies.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#21B06C"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -20,12 +20,13 @@
       "supportsTablet": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/eCopies.png"
     },
     "android": {
-      "package": "com.example.services",
+      "package": "com.ecopies",
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "versionCode": 2
     }
   }
 }

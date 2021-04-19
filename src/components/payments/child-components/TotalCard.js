@@ -58,7 +58,7 @@ export default function TotalCard(props) {
         <Text style={styles.totalLabel}>Pending Payment</Text>
       </View>
       <View style={styles.totalAmountContainer}>
-        <Text style={styles.totalAmount}>Rs. {props.total}</Text>
+        <Text style={styles.totalAmount}>Rs. {props.total ? props.total : 0}</Text>
       </View>
     </View>
   );

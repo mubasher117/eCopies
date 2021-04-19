@@ -26,6 +26,7 @@ import {
   InputBackground,
   PrimaryText,
 } from "../../constants/colors";
+import { checkAlreadyUser } from "../../services/auth/AuthService";
 import {
   InputItem,
   Tag,
@@ -51,14 +52,47 @@ export default function RegisterScreen(props) {
   const [verificationId, setVerificationId] = useState(null);
   const [otpCode, setOtpCode] = useState(0);
   const sendVerification = () => {
+    setshowLoading(true);
+    setcontainerOpacity(0.3);
     console.log("cell nmber", cellNo);
-    const phoneProvider = new firebase.auth.PhoneAuthProvider();
-    console.log("phoneprovider", phoneProvider);
-    phoneProvider
-      .verifyPhoneNumber(cellNo.value, recaptchaVerifier.current)
-      .then(setVerificationId)
-      .catch((error) => {
-        console.log(error);
+    // Refining cell number for firebase
+    var cellNoWithoutZero = cellNo.value.substring(1);
+    var cellNoRefined = "+92" + cellNoWithoutZero;
+    checkAlreadyUser(cellNoRefined)
+      .then((val) => {
+        setshowLoading(false);
+        setcontainerOpacity(1);
+        setCellNo({
+          ...cellNo,
+          error: "User already exists with this phone number",
+        });
+      })
+      .catch((err) => {
+        const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        console.log("phoneprovider", phoneProvider);
+        phoneProvider
+          .verifyPhoneNumber(cellNoRefined, recaptchaVerifier.current)
+          .then((verificationId) => {
+            setshowLoading(false);
+            setcontainerOpacity(1);
+            var additionalDetails = {
+              name: name.value,
+              cellNo: cellNoRefined,
+              address: address.value,
+              balance: 0,
+            };
+            props.navigation.navigate("OtpScreen", {
+              verifcationId: verificationId,
+              additionalDetails: additionalDetails,
+              cellNo: cellNoRefined,
+              screen: "Register",
+            });
+          })
+          .catch((error) => {
+            setshowLoading(false);
+            setcontainerOpacity(1);
+            console.log(error);
+          });
       });
   };
   const confirmCode = () => {
@@ -114,7 +148,6 @@ export default function RegisterScreen(props) {
       // setPassword({ ...password, error: passwordError });
       setCellNo({ ...cellNo, error: cellNoError });
       setAddress({ ...address, error: addressError });
-
       return;
     } else {
       //setshowLoading(true);
@@ -134,8 +167,6 @@ export default function RegisterScreen(props) {
             ref={recaptchaVerifier}
             firebaseConfig={firebase.app().options}
           />
-          <TextInput onChangeText={(text) => setOtpCode(text)} />
-          <Button onPress={confirmCode}>Verify</Button>
           <TextInput
             label="Name"
             returnKeyType="next"
@@ -175,7 +206,7 @@ export default function RegisterScreen(props) {
             error={!!address.error}
             autoCapitalize="none"
             keyboardType="default"
-            maxLength={50}
+            maxLength={100}
           />
           <Text style={styles.error}>{address.error}</Text>
           {/* <TextInput

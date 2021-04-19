@@ -11,6 +11,8 @@ import Header from "../child-components/Header";
 import { TextInput, Chip } from "react-native-paper";
 import BackButton from "../child-components/BackButton";
 import firebase from "../../api/firebase/login";
+import { database } from "../../api/firebase/authenication";
+import { getMyOrders } from "../../api/firebase/backend";
 import {
   Primary,
   Secondary,
@@ -36,6 +38,7 @@ import {
   addressValidator,
 } from "../core/utils";
 import { login } from "../../api/firebase/authenication";
+import { checkAlreadyUser } from "../../services/auth/AuthService";
 const { height, width } = Dimensions.get("window");
 export default function LoginScreen(props) {
   const recaptchaVerifier = useRef(null);
@@ -57,36 +60,41 @@ export default function LoginScreen(props) {
     }
   };
   const sendVerification = () => {
+    setshowLoading(true);
+    setcontainerOpacity(0.3);
     console.log("cell nmber", cellNo);
-    const phoneProvider = new firebase.auth.PhoneAuthProvider();
-    console.log("phoneprovider", phoneProvider);
-    phoneProvider
-      .verifyPhoneNumber(cellNo.value, recaptchaVerifier.current)
-      .then(setVerificationId)
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  const confirmCode = () => {
-    if (verificationId != otpCode) {
-      console.log(verificationId, otpCode);
-      alert("WORNG CODE");
-    } else {
-      const credential = firebase.auth.PhoneAuthProvider.credential(
-        verificationId,
-        otpCode
-      );
-      firebase
-        .auth()
-        .signInWithCredential(credential)
-        .then((result) => {
-          // Do something with the results here
-          console.warn(result);
-        })
-        .catch((error) => {
-          alert("wrong code");
+    // Refining cell number for firebase
+    var cellNoWithoutZero = cellNo.value.substring(1);
+    var cellNoRefined = "+92" + cellNoWithoutZero;
+    console.log("lion", cellNoRefined);
+    checkAlreadyUser(cellNoRefined)
+      .then((val) => {
+        const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        console.log("phoneprovider", phoneProvider);
+
+        phoneProvider
+          .verifyPhoneNumber(cellNoRefined, recaptchaVerifier.current)
+          .then((verificationId) => {
+            setshowLoading(false);
+            setcontainerOpacity(1);
+            props.navigation.navigate("OtpScreen", {
+              verifcationId: verificationId,
+              cellNo: cellNoRefined,
+              screen: "Login",
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((err) => {
+        setshowLoading(false);
+        setcontainerOpacity(1);
+        setCellNo({
+          ...cellNo,
+          error: "User does not exist with this phone number",
         });
-    }
+      });
   };
   const loginPressed = () => {
     const cellNoError = cellNoValidator(cellNo.value);
@@ -121,8 +129,8 @@ export default function LoginScreen(props) {
             ref={recaptchaVerifier}
             firebaseConfig={firebase.app().options}
           />
-          <TextInput onChangeText={(text) => setOtpCode(text)} />
-          <Button onPress={confirmCode}>Verify</Button>
+          {/* <TextInput keyboardType="numeric" onChangeText={(text) => setOtpCode(text)} />
+          <Button onPress={confirmCode}>Verify</Button> */}
           <TextInput
             label="Cell No"
             returnKeyType="next"
@@ -130,6 +138,7 @@ export default function LoginScreen(props) {
             error={!!cellNo.error}
             autoCapitalize="none"
             keyboardType="phone-pad"
+            placeholder="03012456871"
             maxLength={15}
           />
           <Text style={styles.error}>{cellNo.error}</Text>

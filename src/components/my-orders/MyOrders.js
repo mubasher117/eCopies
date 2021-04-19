@@ -13,6 +13,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+
+
+import { getStatusBarHeight } from "react-native-status-bar-height";
 import {
   InputItem,
   Tag,
@@ -31,7 +34,8 @@ import {
 import { TextInput, Chip, Button } from "react-native-paper";
 import Header from "../header/Header";
 import OrderStatusCard from "../child-components/OrderStatusCard";
-import store from '../../redux/store'
+import store from "../../redux/store";
+import AsyncStorage from "@react-native-community/async-storage";
 const { height, width } = Dimensions.get("window");
 
 export default function MyOrders(props) {
@@ -39,10 +43,10 @@ export default function MyOrders(props) {
   let tempMyOrders = useSelector((state) => state.ordersReducer.myOrders);
   const [myOrders, setMyOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [noOrders, setNoOrders] = useState(false);
   useEffect(() => {
     if (tempMyOrders != undefined) {
       setMyOrders(tempMyOrders);
+      console.log(tempMyOrders);
       setIsLoading(false);
     }
   }, [tempMyOrders]);
@@ -50,16 +54,19 @@ export default function MyOrders(props) {
   const openDrawerFn = () => {
     props.navigation.toggleDrawer();
   };
-  // If user has no orders
-  setTimeout(() => {
-    setNoOrders(true);
-  }, 2000);
   return (
     <View style={styles.container}>
       <Header title="My Orders" openDrawerFn={openDrawerFn} />
       <ScrollView>
-        {!myOrders.length && !noOrders ? (
-          <View style={styles.centeredView}>
+        <View
+          style={[
+            styles.centeredView,
+            {
+              height: !myOrders.length ? height - (getStatusBarHeight() + 50) : 'auto',
+            },
+          ]}
+        >
+          {isLoading ? (
             <Button
               mode="contained"
               onPress={() => console.log("Pressed")}
@@ -72,39 +79,26 @@ export default function MyOrders(props) {
             >
               Loading
             </Button>
-          </View>
-        ) : (
-          <View></View>
-        )}
-        <View style={styles.centeredView}>
-          {myOrders.map((order, index) => {
-            return (
-              <OrderStatusCard
-                key={index}
-                order={order}
-                seeDetails={() =>
-                  props.navigation.navigate("OrderDetails", {
-                    details: order,
-                    screen: "MyOrders",
-                  })
-                }
-                updateStatus={() => {
-                  props.navigation.navigate("OrderStatus", {
-                    details: order,
-                    screen: "MyOrders",
-                  });
-                }}
-              />
-            );
-          })}
+          ) : myOrders.length ? (
+            myOrders.map((order, index) => {
+              return (
+                <OrderStatusCard
+                  key={index}
+                  order={order}
+                  seeDetails={async () => {
+                    await AsyncStorage.setItem("currentScreen", "MyOrders");
+                    props.navigation.navigate("OrderDetails", {
+                      details: order,
+                      screen: "MyOrders",
+                    });
+                  }}
+                />
+              );
+            })
+          ) : (
+            <Text style={styles.noOrders}>No Orders Yet</Text>
+          )}
         </View>
-
-        <View
-          style={{
-            width: "100%",
-            height: 150,
-          }}
-        />
       </ScrollView>
     </View>
   );
@@ -112,11 +106,12 @@ export default function MyOrders(props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: PrimaryLight,
+    backgroundColor: Primary,
     width: width,
     minHeight: height,
   },
   centeredView: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -130,5 +125,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  noOrders: {
+    color: 'gray'
   },
 });

@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import {
+  BackHandler,
   StyleSheet,
   Text,
   View,
@@ -38,11 +39,25 @@ export default function CopyFormCase2(props) {
   const [defendant, setDefendant] = useState({ value: "", error: "" });
   const [judges, setJudges] = useState([{ value: "", error: "" }]);
   const [isVisibleFab, setIsVisibleFab] = useState(true);
+  const [headerTitle, setHeaderTitle] = useState("");
 
   useEffect(() => {
+    let state = store.getState();
+    // Getting selected court name to display on header
+    let title = state.ordersReducer.currentForm.court;
+    console.log(state.ordersReducer.currentForm);
+    setHeaderTitle(title);
+
+    //Back Handler
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
+      let title = state.ordersReducer.currentForm.court;
+      setHeaderTitle(title);
       console.log("FOCUSED ON");
       console.log(form);
       setPlaintiff(
@@ -59,9 +74,23 @@ export default function CopyFormCase2(props) {
         setJudges([{ value: "", error: "" }]);
         setIsVisibleFab(true);
       }
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, [props.navigation]);
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    goBackFn();
+    return true;
+  };
   const addJudge = () => {
     if (judges.length < 2) {
       // Deep Copy of documents
@@ -118,7 +147,7 @@ export default function CopyFormCase2(props) {
   };
   return (
     <KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-      <Header title="High Court" backbutton goBackFn={goBackFn} />
+      <Header title={headerTitle} backbutton goBackFn={goBackFn} />
       <ScrollView keyboardShouldPersistTaps="always">
         <View
           style={{
@@ -299,7 +328,6 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     backgroundColor: Secondary,
-    marginRight: 16,
     right: 0,
     bottom: 0,
   },

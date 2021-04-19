@@ -43,12 +43,11 @@ const displayDictionary = {
 export default function RevenueCourtFormDetails(props) {
   return (
     <View style={styles.detailsContainer}>
-      {props.screen == "SubmitDetails" && (
+      {props.screen != "MyOrders" && (
         <TouchableOpacity
           style={{
             alignSelf: "flex-end",
             margin: 0,
-            marginBottom: 10,
           }}
           onPress={() => props.removeOrder(props.index)}
         >
@@ -59,9 +58,7 @@ export default function RevenueCourtFormDetails(props) {
         </TouchableOpacity>
       )}
       <View style={styles.orderInformation}>
-        <Text style={styles.orderType}>
-          {displayDictionary[props.orderType]} {props.index + 1}
-        </Text>
+        <Text style={styles.orderType}>Form {props.index + 1}</Text>
         <Text style={styles.orderCourt}>
           {displayDictionary[props.form.court]}
         </Text>
@@ -85,6 +82,10 @@ export default function RevenueCourtFormDetails(props) {
       <View style={styles.entityContainer}>
         <Text style={styles.label}>Date of register: </Text>
         <Text style={styles.entityValue}>{props.form.registerDate}</Text>
+      </View>
+      <View style={styles.entityContainer}>
+        <Text style={styles.label}>Form Fee: </Text>
+        <Text style={styles.entityValue}>Rs. {props.form.formFee}</Text>
       </View>
     </View>
   );

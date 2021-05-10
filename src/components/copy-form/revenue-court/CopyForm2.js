@@ -149,7 +149,7 @@ export default function CopyForm2(props) {
     saveDetails().then(() => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("RevenueCopyForm");
+      props.navigation.navigate("CopyFormHomePage");
     });
   };
   return (
@@ -161,7 +161,6 @@ export default function CopyForm2(props) {
         urduText=" کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟"
         hideModal={hideModal}
         optionsYes
-        quitButton
         handleYes={submitAnotherForm}
         handleNo={onNext}
       />

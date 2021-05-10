@@ -12,7 +12,7 @@ import {
   Keyboard,
   Picker,
   Image,
-  BackHandler
+  BackHandler,
 } from "react-native";
 import {
   InputItem,
@@ -45,7 +45,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { database } from "../../../api/firebase/authenication";
 import store from "../../../redux/store";
 import { getFormPrice } from "../../../api/firebase/backend";
-import Modal from '../../child-components/Modal'
+import Modal from "../../child-components/Modal";
 const { height, width } = Dimensions.get("window");
 
 export default function CopyFormDocs(props) {
@@ -65,9 +65,8 @@ export default function CopyFormDocs(props) {
   const [showDate, setShowDate] = useState(false);
   const [showPetitionDate, setPetitionDate] = useState(false);
   const [showLoading, setshowLoading] = useState(false);
-
   const [headerTitle, setHeaderTitle] = useState("");
-
+  const dispatch = useDispatch();
   useEffect(() => {
     let state = store.getState();
     // Getting selected court name to display on header
@@ -196,7 +195,8 @@ export default function CopyFormDocs(props) {
     saveDetails().then(() => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("CopyFormCase");
+      dispatch({ type: "SET_CURRENT_SCREEN", payload: "CopyFormHomePage" });
+      props.navigation.navigate("CopyFormHomePage");
     });
   };
   const onChangeDate = (event, selectedDate) => {
@@ -280,7 +280,6 @@ export default function CopyFormDocs(props) {
         urduText=" کیا آپ ایک اور نقل فارم لینا چاہتے ہیں؟"
         hideModal={hideModal}
         optionsYes
-        quitButton
         handleYes={submitAnotherForm}
         handleNo={onNext}
       />

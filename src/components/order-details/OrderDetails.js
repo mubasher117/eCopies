@@ -223,6 +223,7 @@ export default function OrderDetails(props) {
                 <View />
               ))}
           </View>
+          {props.navigation.getParam("screen") != "MyOrders" &&
           <PaperButton
             color={Secondary}
             icon="plus"
@@ -232,6 +233,7 @@ export default function OrderDetails(props) {
           >
             Add More Copy Form
           </PaperButton>
+}
           {details.forms.map((form, index) => {
             if (form.court == "High Court" || form.court == "Supreme Court") {
               return (

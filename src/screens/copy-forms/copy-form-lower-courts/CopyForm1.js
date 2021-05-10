@@ -5,7 +5,8 @@ import {
   Text,
   View,
   Platform,
-  Dimensions, BackHandler,
+  Dimensions,
+  BackHandler,
   ScrollView,
   SafeAreaView,
   Keyboard,
@@ -13,7 +14,6 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-
 } from "react-native";
 import {
   InputItem,
@@ -63,12 +63,11 @@ export default function CopyForm1(props) {
     let title = state.ordersReducer.currentForm.court;
     setHeaderTitle(title);
 
-
     //Back Handler
-     const backHandler = BackHandler.addEventListener(
-       "hardwareBackPress",
-       backAction
-     );
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
@@ -86,7 +85,7 @@ export default function CopyForm1(props) {
         form.firNo ? { value: form.firNo, error: "" } : { value: "", error: "" }
       );
       setHeaderTitle(title);
-      BackHandler.addEventListener("hardwareBackPress",  backAction );
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
     const onBlurScreen = props.navigation.addListener("didBlur", () => {
       console.log("UNFOCUSED");
@@ -96,14 +95,14 @@ export default function CopyForm1(props) {
       unsubscribe;
       onBlurScreen;
       backHandler.remove();
-      };
+    };
   }, []);
 
-const backAction = () => {
-  console.log("IN BACK HANDLER");
-  _handlePrevious();
-  return true;
-}
+  const backAction = () => {
+    console.log("IN BACK HANDLER");
+    _handlePrevious();
+    return true;
+  };
   // Retreives previous parts of forms, merge it with this part and saves it.
   const _handleNext = () => {
     var judgeError = nameValidator2(judge.value);
@@ -147,12 +146,17 @@ const backAction = () => {
       <Header title={headerTitle} backbutton goBackFn={_handlePrevious} />
       <View style={styles.container}>
         <SectionTitle title="Category Details" />
-        <OptionButtons
-          option1="Civil"
-          option2="Criminal"
-          _handleOption1={() => setCategory("Civil")}
-          _handleOption2={() => setCategory("Criminal")}
-        />
+        <View style={styles.infoContainer}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>Select Category</Text>
+          </View>
+          <OptionButtons
+            option1="Civil"
+            option2="Criminal"
+            _handleOption1={() => setCategory("Civil")}
+            _handleOption2={() => setCategory("Criminal")}
+          />
+        </View>
         {category != "Civil" && (
           <View>
             <View style={styles.infoContainer}>
@@ -233,15 +237,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   labelContainer: {
-    marginTop: 20,
+    marginTop: 10,
   },
   label: {
+    marginBottom: 10,
     fontSize: 16,
     fontWeight: "bold",
   },
-  valueContainer: {
-    marginTop: 10,
-  },
+  valueContainer: {},
   value: {
     marginLeft: "-5%",
     padding: 10,

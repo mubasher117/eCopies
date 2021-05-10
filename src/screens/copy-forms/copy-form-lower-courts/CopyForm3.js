@@ -171,7 +171,7 @@ export default function CopyFormDocs(props) {
     });
   };
   const _handlePrevious = () => {
-    props.navigation.navigate("LowerCourtsForm2");
+    props.navigation.navigate("LowerCourtsFormDate");
   };
   // Converts date to string to display on screen
   var decisionDate = isOrderDated.value.toDateString();
@@ -188,7 +188,7 @@ export default function CopyFormDocs(props) {
     saveDetails().then(() => {
       setcontainerOpacity(1);
       setshowLoading(false);
-      props.navigation.navigate("LowerCourtsSelectCourt");
+      props.navigation.navigate("CopyFormHomePage");
     });
   };
   const onChangeDate = (event, selectedDate) => {
@@ -237,15 +237,6 @@ export default function CopyFormDocs(props) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <TouchableOpacity
-              style={{ alignSelf: "flex-end", margin: -15, marginBottom: 10 }}
-              onPress={hideModal}
-            >
-              <Image
-                style={styles.modalQuit}
-                source={require("../../../../assets/images/static/quit.png")}
-              />
-            </TouchableOpacity>
             <Text style={styles.modalText}>
               Do you want to submit another copy form?
             </Text>

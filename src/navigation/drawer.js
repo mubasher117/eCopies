@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Image, StyleSheet, View, Text, TouchableOpacity, ScrollView } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Primary,
   Secondary,
@@ -31,11 +39,16 @@ import LowerCourtsSelectCourt from "../screens/copy-forms/copy-form-lower-courts
 import LowerCourtsForm1 from "../screens/copy-forms/copy-form-lower-courts/CopyForm1";
 import LowerCourtsForm2 from "../screens/copy-forms/copy-form-lower-courts/CopyForm2";
 import LowerCourtsForm3 from "../screens/copy-forms/copy-form-lower-courts/CopyForm3";
+import LowerCourtsFormDate from "../screens/copy-forms/copy-form-lower-courts/CopyFormDate";
 import TrackOrder from "../screens/track-order/TrackOrder";
-import DrawerCart from '../components/child-components/DrawerCart'
-import HelpAndSupport from '../screens/help-and-support/index'
+import DrawerCart from "../components/child-components/DrawerCart";
+import HelpAndSupport from "../screens/help-and-support/index";
 const CustomDrawerContentComponent = (props) => {
   const [isActive, setisActive] = useState("home");
+  const dispatch = useDispatch();
+  const currentScreen = useSelector(
+    (state) => state.navigationReducer.currentScreen
+  );
   return (
     <ScrollView>
       <View style={styles.drawerHeader}>
@@ -47,13 +60,16 @@ const CustomDrawerContentComponent = (props) => {
       <View>
         <TouchableOpacity
           onPress={() => {
-            setisActive("profile");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "Profile",
+            });
             props.navigation.navigate("Profile");
           }}
         >
           <View
             style={
-              isActive === "profile"
+              currentScreen === "Profile"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -66,7 +82,9 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "profile" ? styles.activeLabel : styles.pageLabel
+                currentScreen === "Profile"
+                  ? styles.activeLabel
+                  : styles.pageLabel
               }
             >
               My Profile
@@ -75,13 +93,16 @@ const CustomDrawerContentComponent = (props) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            setisActive("home");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "CopyFormHomePage",
+            });
             props.navigation.navigate("CopyFormHomePage");
           }}
         >
           <View
             style={
-              isActive === "home"
+              currentScreen === "CopyFormHomePage"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -94,7 +115,9 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "home" ? styles.activeLabel : styles.pageLabel
+                currentScreen === "CopyFormHomePage"
+                  ? styles.activeLabel
+                  : styles.pageLabel
               }
             >
               Home
@@ -114,7 +137,10 @@ const CustomDrawerContentComponent = (props) => {
             if (forms) {
               console.log(forms.length);
               if (forms.length) {
-                setisActive("currentOrder");
+                dispatch({
+                  type: "SET_CURRENT_SCREEN",
+                  payload: "SubmitDetails",
+                });
                 props.navigation.navigate("SubmitDetails");
               } else {
                 alert("You don't have any form in cart.");
@@ -126,7 +152,7 @@ const CustomDrawerContentComponent = (props) => {
         >
           <View
             style={
-              isActive === "currentOrder"
+              currentScreen === "SubmitDetails"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -137,7 +163,9 @@ const CustomDrawerContentComponent = (props) => {
                 source={require("../../assets/images/static/order.png")}
               />
             </View>
-            <DrawerCart isActive={isActive === "currentOrder" ? true : false} />
+            <DrawerCart
+              isActive={currentScreen === "SubmitDetails" ? true : false}
+            />
             {/* <Text
               style={
                 isActive === "currentOrder"
@@ -152,14 +180,17 @@ const CustomDrawerContentComponent = (props) => {
 
         <TouchableOpacity
           onPress={() => {
-            setisActive("orders");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "MyOrders",
+            });
             getMyOrders();
             props.navigation.navigate("MyOrders");
           }}
         >
           <View
             style={
-              isActive === "orders"
+              currentScreen === "MyOrders"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -172,7 +203,9 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "orders" ? styles.activeLabel : styles.pageLabel
+                currentScreen === "MyOrders"
+                  ? styles.activeLabel
+                  : styles.pageLabel
               }
             >
               My Orders
@@ -181,14 +214,17 @@ const CustomDrawerContentComponent = (props) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            setisActive("trackOrder");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "TrackOrder",
+            });
             getTrackingId();
             props.navigation.navigate("TrackOrder");
           }}
         >
           <View
             style={
-              isActive === "trackOrder"
+              currentScreen === "TrackOrder"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -201,7 +237,7 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "trackOrder"
+                currentScreen === "TrackOrder"
                   ? styles.activeLabel
                   : styles.pageLabel
               }
@@ -239,13 +275,16 @@ const CustomDrawerContentComponent = (props) => {
         </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() => {
-            setisActive("payments");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "Payments",
+            });
             props.navigation.navigate("Payments");
           }}
         >
           <View
             style={
-              isActive === "payments"
+              currentScreen === "Payments"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -258,7 +297,9 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "payments" ? styles.activeLabel : styles.pageLabel
+                currentScreen === "Payments"
+                  ? styles.activeLabel
+                  : styles.pageLabel
               }
             >
               Payments
@@ -268,14 +309,17 @@ const CustomDrawerContentComponent = (props) => {
 
         <TouchableOpacity
           onPress={() => {
-            setisActive("notifications");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "Notifications",
+            });
             getNotifications();
             props.navigation.navigate("Notifications");
           }}
         >
           <View
             style={
-              isActive === "notifications"
+              currentScreen === "Notifications"
                 ? styles.activeContainer
                 : styles.pageContainer
             }
@@ -288,7 +332,7 @@ const CustomDrawerContentComponent = (props) => {
             </View>
             <Text
               style={
-                isActive === "notifications"
+                currentScreen === "Notifications"
                   ? styles.activeLabel
                   : styles.pageLabel
               }
@@ -350,7 +394,7 @@ const CustomDrawerContentComponent = (props) => {
             </Text>
           </View>
         </TouchableOpacity> */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
             setisActive("helpAndSupport");
             props.navigation.navigate("HelpAndSupport");
@@ -373,24 +417,27 @@ const CustomDrawerContentComponent = (props) => {
               Help and Support
             </Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() => {
-            setisActive("logout");
+            dispatch({
+              type: "SET_CURRENT_SCREEN",
+              payload: "auth",
+            });
             logout();
             props.navigation.navigate("auth");
           }}
         >
           <View
             style={
-              isActive === "logout"
+              currentScreen === "auth"
                 ? styles.pageLowerActiveContainer
                 : styles.pageLowerContainer
             }
           >
             <Text
               style={
-                isActive === "logout"
+                currentScreen === "auth"
                   ? styles.pageLowerActiveLabel
                   : styles.pageLowerLabel
               }
@@ -451,8 +498,9 @@ const Drawer = createDrawerNavigator(
     LowerCourtsForm1: LowerCourtsForm1,
     LowerCourtsForm2: LowerCourtsForm2,
     LowerCourtsForm3: LowerCourtsForm3,
+    LowerCourtsFormDate: LowerCourtsFormDate,
     TrackOrder: TrackOrder,
-    HelpAndSupport: HelpAndSupport
+    HelpAndSupport: HelpAndSupport,
   },
   {
     initialRouteName: "CopyFormHomePage",

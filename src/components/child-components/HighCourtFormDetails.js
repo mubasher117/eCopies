@@ -66,6 +66,10 @@ export default function HighCourtFormDetails(props) {
         <Text style={styles.entityValue}>{props.form.caseNo}</Text>
       </View>
       <View style={styles.entityContainer}>
+        <Text style={styles.label}>Case Status: </Text>
+        <Text style={styles.entityValue}>{props.form.caseStatus}</Text>
+      </View>
+      <View style={styles.entityContainer}>
         <Text style={styles.label}>Date of decision: </Text>
         <Text style={styles.entityValue}>{props.form.decisionDate}</Text>
       </View>

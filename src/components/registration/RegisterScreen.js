@@ -166,6 +166,9 @@ export default function RegisterScreen(props) {
           <FirebaseRecaptchaVerifierModal
             ref={recaptchaVerifier}
             firebaseConfig={firebase.app().options}
+            attemptInvisibleVerification={true}
+            title="Tap on the box below"
+            cancelLabel="Close"
           />
           <TextInput
             label="Name"
@@ -183,6 +186,7 @@ export default function RegisterScreen(props) {
             error={!!cellNo.error}
             autoCapitalize="none"
             keyboardType="phone-pad"
+            placeholder="e.g 03012456871"
             maxLength={15}
           />
           <Text style={styles.error}>{cellNo.error}</Text>

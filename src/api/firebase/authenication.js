@@ -25,87 +25,6 @@ if (!firebase.apps.length) {
 
 export var database = firebase.database();
 
-// Helper function to get notifications in ascending order
-function getAscending(a, b) {
-  if (a.createdOn > b.createdOn) {
-    return 0;
-  } else {
-    return -1;
-  }
-}
-
-// Get user's notification on login
-export const getNotifications = async () => {
-  // retrieving user data
-  let state = store.getState();
-  let user = state.userReducer.user;
-  var dbRef = database
-    .ref("notifications")
-    .orderByChild("userId")
-    .equalTo(user.id);
-  dbRef.on("value", (snapshot) => {
-    if (snapshot.val()) {
-      let objArray = [];
-      let data = snapshot.val();
-      let keys = Object.keys(data);
-      for (var key of keys) {
-        objArray.push({ id: key, ...data[key] });
-      }
-      objArray.sort(getAscending);
-      store.dispatch({
-        type: "setNotifications",
-        payload: objArray.reverse(),
-      });
-    } else {
-      store.dispatch({
-        type: "setNotifications",
-        payload: [],
-      });
-    }
-  });
-};
-
-export const makeUserActive = (userId) => {
-  const ref = database.ref(`onlineUsers/${userId}`);
-  ref.set(true).then(() => console.log('Online presenvce set '))
-  ref.onDisconnect().remove().then(() => console.log("Disconnected"))
-}
-
-// export const login = async (email, password, isDirect, callBackFn) => {
-//   console.log("IN LOGIN");
-//   firebase
-//     .auth()
-//     .signInWithEmailAndPassword(email, password)
-//     .then(async (user) => {
-//       // Getting addtional user data
-//       try {
-//         const jsonValue = JSON.stringify(user);
-//         await AsyncStorage.setItem("@loggedUser", jsonValue);
-//       } catch (e) {
-//         console.log("Error in storing id: ", e);
-//       }
-//       getUserData(user.user);
-//       if (callBackFn) {
-//         callBackFn("success", user.user.uid);
-//       }
-//     })
-//     .catch(function (error) {
-//       var errorCode = error.code;
-//       var errorMessage = error.message;
-//       if (callBackFn) {
-//         if (errorMessage.includes("no user record")) {
-//           errorMessage = "No user exists with this email";
-//           callBackFn("error", errorMessage);
-//         } else if (errorMessage.includes("password is invalid")) {
-//           errorMessage = "Password is incorrect";
-//           callBackFn("error", errorMessage);
-//         } else {
-//           callBackFn("error", errorMessage);
-//         }
-//       }
-//     });
-// };
-
 export const login = (cellNo, password) =>
   new Promise((resolve, reject) => {
     console.log("IN LOGIN");
@@ -115,27 +34,6 @@ export const login = (cellNo, password) =>
       .signInWithPhoneNumber(cellNo, password)
       .then((res) => console.log(res));
   });
-// Get additional userData
-export const getUserData = (userId) => {
-  // console.log(user);
-  var dbRef = database.ref("/userData/" + userId);
-  dbRef.once("value", (snapshot) => {
-    if (snapshot.val()) {
-      let data = snapshot.val();
-      var user = {
-        id: data.id,
-        name: data.name,
-        address: data.address,
-        cellNo: data.cellNo,
-        expoToken: data.expoToken,
-        balance: data.balance,
-      };
-      store.dispatch({ type: "setUser", payload: user });
-    } else {
-      alert("user data not found");
-    }
-  });
-};
 
 export const register = async (userInputDetails, callBackFn) => {
   // firebase
@@ -174,20 +72,6 @@ export const register = async (userInputDetails, callBackFn) => {
   //     // ...
   //   });
 };
-
-export const addAddtionalUserDetails = (
-  userDetails,
-  email,
-  password,
-  callBackFn
-) => {
-  database
-    .ref("userData/" + userDetails.id)
-    .set({ ...userDetails, email: email }, (response) => {
-      console.log(response);
-      // login(email, password, true, callBackFn);
-    });
-};
 export const checkSignedIn = async () => {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
@@ -212,28 +96,6 @@ export const logout = async () => {
       console.log(error);
     });
 };
-// Sets extra details of user in db
-const registerUserInDb = async (userDetails, callBackFn) => {
-  let token = await Notifications.getExpoPushTokenAsync();
-  console.log(token);
-  database.ref("userData/" + userDetails.id).set(
-    {
-      name: userDetails.name,
-      cellNo: userDetails.cellNo,
-      address: userDetails.address,
-      // ExpoToken: token,
-      balance: 0,
-    },
-    (error) => {
-      if (error) {
-        callBackFn("failure", "user did not added");
-      } else {
-        callBackFn("success", "user added successfully");
-      }
-    }
-  );
-};
-
 export const registerForPushNotificationsAsync = async (userID) => {
   const { existingStatus } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
@@ -269,63 +131,3 @@ export const registerForPushNotificationsAsync = async (userID) => {
 
   //call the push notification
 };
-
-// const registerPushNotifications = async (user) => {
-//   console.log(user.user.uid);
-//   let token = await Notifications.getExpoPushTokenAsync();
-//   console.log(token);
-//   var updates = {};
-//   updates["/ExpoToken"] = token;
-//   database
-//     .ref("userData/")
-//     .child(user.user.uid)
-//     .update(updates, (data) => {
-//       console.log(data);
-//     });
-// };
-// Generates universally unique id
-function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-// Add User balance
-export const addUserBalance = (userId, balance, callBackFn) => {
-  var updates = {};
-  updates["/balance"] = balance;
-  database
-    .ref("userData/")
-    .child(userId)
-    .update(updates, (data) => {
-      console.log("IN USER DATA");
-      console.log(data);
-      callBackFn(null);
-    });
-};
-export function addForm(json, callbackfn) {
-  console.log(json);
-  var date = Date.now();
-  var newId = date + "-" + uuidv4();
-  database.ref("orders/" + newId).set(json, (res) => {
-    console.log(res);
-    addUserBalance(json.customerId, json.totalAmount, callbackfn);
-  });
-}
-export function updateUserDetails(user, callBackFn) {
-  let updates = {};
-  updates["/name"] = user.name;
-  updates["/id"] = user.id;
-  updates["/address"] = user.address;
-  updates["/cellNo"] = user.cellNo;
-  database
-    .ref("userData/")
-    .child(user.id)
-    .update(updates, async (data) => {
-      console.log("IN USER DATA");
-      console.log(data);
-      callBackFn();
-      await getUserData(user.id);
-    });
-}

@@ -27,8 +27,12 @@ export default function DateOfDecision(props){
             { flexDirection: "row", justifyContent: "space-between" },
           ]}
         >
-          <Text style={styles.label}>Date of Decision</Text>
-          <Text style={styles.label}>تاریخ فیصلہ</Text>
+          <Text style={styles.label}>
+            Date of {props.isRunning && "Last "}Decision
+          </Text>
+          <Text style={styles.label}>
+            {props.isRunning ? "آخری فیصلے کی تاریخ" : "فیصلے کی تاریخ"}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.valueContainer}

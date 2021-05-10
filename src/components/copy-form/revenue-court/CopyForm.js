@@ -11,6 +11,7 @@ import {
   Keyboard,
   Picker,
   TouchableOpacity,
+  BackHandler
 } from "react-native";
 import {
   InputItem,
@@ -40,6 +41,10 @@ export default function CopyForm(props) {
   const [bahiNo, setBahiNo] = useState({ value: "", error: false });
   const [volume, setVolume] = useState({ value: "", error: false });
   useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     const unsubscribe = props.navigation.addListener("didFocus", () => {
       let state = store.getState();
       let form = state.ordersReducer.currentForm;
@@ -59,9 +64,24 @@ export default function CopyForm(props) {
           : { value: "", error: false }
       );
       setDate(form.registerDate ? new Date(form.registerDate) : new Date());
+
+      BackHandler.addEventListener("hardwareBackPress", backAction);
     });
-    return () => unsubscribe;
+
+    const onBlurScreen = props.navigation.addListener("didBlur", () => {
+      console.log("UNFOCUSED");
+      backHandler.remove();
+    });
+    return () => {
+      unsubscribe;
+      onBlurScreen;
+      backHandler.remove();
+    };
   }, [props.navigation]);
+  const backAction = () => {
+    props.navigation.navigate("CopyFormHomePage");
+    return true;
+  };
   var registerDate = date.toDateString().toString();
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -78,7 +98,7 @@ export default function CopyForm(props) {
         documentNo: documentNo.value,
         bahiNo: bahiNo.value,
         volume: volume.value,
-        registerDate: registerDate
+        registerDate: registerDate,
       };
       store.dispatch({ type: "setCurrentFormItem", payload: details });
       props.navigation.navigate("RevenueCopyForm2");

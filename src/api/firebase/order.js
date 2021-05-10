@@ -1,6 +1,6 @@
-import { database, getUserId } from "./authenication";
+import { database } from "./authenication";
 import store from "../../redux/store";
-import { registerForPushNotificationsAsync } from "./authenication";
+
 export const getMyOrders = () =>
   new Promise((resolve, reject) => {
     // retrieving user data
@@ -28,28 +28,25 @@ export const getMyOrders = () =>
       }
     });
   });
-export async function seeNotification(notification) {
-  let seenNotification = { ...notification, isSeen: true };
-  database.ref("notifications/" + notification.id).set(seenNotification);
+
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
-// Adds user's extra details to userData collction
-export const addAdditionalDetails = (userDetails) => {
-  console.log("IN Add details", userDetails.id);
-  database
-    .ref("userData/" + userDetails.id)
-    .set(userDetails, async (response) => {
-      console.log(response);
-      await registerForPushNotificationsAsync(userDetails.id);
-    });
-};
+export function addForm(json, callbackfn) {
+  console.log(json);
+  var date = Date.now();
+  var newId = date + "-" + uuidv4();
+  database.ref("orders/" + newId).set(json, (res) => {
+    console.log(res);
+    addUserBalance(json.customerId, json.totalAmount, callbackfn);
+  });
+}
 
-// export const getFormPrice = (court, type) => new Promise((resolve, reject) => {
-//   database.ref(`prices/copyForm/${court}/${type}`).once('value', (snapshot) => {
-//     console.log("PRICE IS:   ", snapshot.val())
-//     resolve(snapshot.val())
-//   })
-// })
 export const getFormPrice = (court, type) => {
   database.ref(`prices/copyForm/${court}/${type}`).once("value", (snapshot) => {
     // console.log("PRICE IS:   ", snapshot.val());

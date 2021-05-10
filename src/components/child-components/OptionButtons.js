@@ -34,28 +34,35 @@ export default function OptionButtons(props) {
   };
   return (
     <View style={styles.container}>
-      <Button
-        onPress={_handleOption1}
-        style={active1 ? styles.btnActive : styles.btnInactive}
-      >
-        <Text style={active1 ? styles.txtActive : styles.txtInactive}>
-          {props.option1}
-        </Text>
-      </Button>
-      <Button
-        onPress={_handleOption2}
-        style={!active1 ? styles.btnActive : styles.btnInactive}
-      >
-        <Text style={!active1 ? styles.txtActive : styles.txtInactive}>
-          {props.option2}
-        </Text>
-      </Button>
+      {props.label && (
+        <View style={styles.labelContainerWithTranslation}>
+          <Text style={styles.label}>{props.label}</Text>
+        </View>
+      )}
+      <View style={styles.buttonsContainer}>
+        <Button
+          onPress={_handleOption1}
+          style={active1 ? styles.btnActive : styles.btnInactive}
+        >
+          <Text style={active1 ? styles.txtActive : styles.txtInactive}>
+            {props.option1}
+          </Text>
+        </Button>
+        <Button
+          onPress={_handleOption2}
+          style={!active1 ? styles.btnActive : styles.btnInactive}
+        >
+          <Text style={!active1 ? styles.txtActive : styles.txtInactive}>
+            {props.option2}
+          </Text>
+        </Button>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -77,5 +84,13 @@ const styles = StyleSheet.create({
   },
   txtInactive: {
     color: Secondary,
+  },
+  labelContainerWithTranslation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

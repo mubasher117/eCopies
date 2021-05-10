@@ -30,6 +30,7 @@ const formDetailsFields = [
   { field: "firNo", displayName: "Fir No" },
   { field: "plaintiff", displayName: "Plaintiff" },
   { field: "defendant", displayName: "Defendant" },
+  { field: "caseStatus", displayName: "Case Status" },
   { field: "decisionDate", displayName: "Decision Date" },
   { field: "formFee", displayName: "Form Fee" },
 ];
